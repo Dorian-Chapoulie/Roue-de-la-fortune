@@ -4,6 +4,9 @@
 #include <QTableWidgetItem>
 #include "event/eventmanager.h"
 
+#include <QMessageBox>
+#include <iostream>
+
 ServerNavigator::ServerNavigator(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ServerNavigator)
@@ -26,17 +29,28 @@ ServerNavigator::ServerNavigator(QWidget *parent) :
     ui->tableWidget->setHorizontalHeaderLabels(this->headerList);
     ui->tableWidget->horizontalHeader()->setStretchLastSection(true);
 
-    for(int i = 0; i < 10; i++) {
-        Sleep(100);
-        LocalPlayer::getInstance()->sendMessage("P-partie de dorian n" + std::to_string(i));
-    }
-    Sleep(1000);
-    LocalPlayer::getInstance()->sendMessage("G");
+    ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+
+
+
+    LocalPlayer::getInstance()->sendMessage("P-partie de dorian");
 }
 
 ServerNavigator::~ServerNavigator()
 {
     delete ui;
+}
+
+void ServerNavigator::showEvent(QShowEvent *)
+{
+    std::thread threadGetServerGames([&](){
+        while(this->isVisible()) {
+            LocalPlayer::getInstance()->sendMessage("G"); //TODO: No duplicates
+            std::this_thread::sleep_for (std::chrono::seconds(1));
+        }
+    });
+    threadGetServerGames.detach();
 }
 
 void ServerNavigator::addServerInList(QString msg)
@@ -57,20 +71,63 @@ void ServerNavigator::addServerInList(QString msg)
     std::string ip = temp.substr(pos[3] + 1, pos[4] - pos[3] - 1);
     std::string port = temp.substr(pos[4] + 1);
     std::vector<std::string> list = {name, nbPlayer, nbSpec, ip, port};
-    ui->tableWidget->setColumnWidth(0, name.length() * 9);
 
-    ui->tableWidget->insertRow(ui->tableWidget->rowCount());
-    for(int i = 0; i < headerList.size(); i++) {
-        QTableWidgetItem item(QString::fromStdString(list.at(i)));
-        item.setFlags(item.flags() & ~(Qt::ItemIsEditable));
-        ui->tableWidget->setItem(ui->tableWidget->rowCount()-1, i, new QTableWidgetItem(item));
+
+    bool addGame = true;
+    for (int i = 0; i < ui->tableWidget->rowCount() ; ++i) {
+        std::string tmpIP = ui->tableWidget->model()->index(i, 3).data().toString().toStdString();
+        int tmpPort = ui->tableWidget->model()->index(i, 4).data().toInt();
+        if(tmpIP == ip && tmpPort == std::stoi(port)) {
+            addGame = false;
+        }
+    }
+
+    if(addGame) {
+        ui->tableWidget->setColumnWidth(0, name.length() * 9);
+
+        ui->tableWidget->insertRow(ui->tableWidget->rowCount());
+        for(int i = 0; i < headerList.size(); i++) {
+            QTableWidgetItem item(QString::fromStdString(list.at(i)));
+            item.setFlags(item.flags() & ~(Qt::ItemIsEditable));
+            ui->tableWidget->setItem(ui->tableWidget->rowCount()-1, i, new QTableWidgetItem(item));
+        }
     }
 
 
 }
-#include <iostream>
+
 void ServerNavigator::on_rejoindreButton_clicked()
-{
-    bool b = LocalPlayer::getInstance()->connectToServer("localhost", 25566);
-    std::cout << b << std::endl;
+{    
+    if(ui->tableWidget->selectionModel()->selectedRows().size() > 0) {
+
+        int row = ui->tableWidget->selectionModel()->selectedRows().at(0).row();
+
+        std::string ip =  ui->tableWidget->model()->index(row, 3).data().toString().toStdString();
+        int port =  ui->tableWidget->model()->index(row, 4).data().toInt();
+
+        if(LocalPlayer::getInstance()->connectToServer(ip, port)) {
+
+           std::cout << "Connected to the game server" << std::endl;
+
+        }else {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle("Navigateur de serveurs");
+            msgBox.setText("Erreur");
+            msgBox.setInformativeText("Impossible de rejoindre la partie");
+            msgBox.setDefaultButton(QMessageBox::Ok);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.exec();
+        }
+
+    }else {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Navigateur de serveurs");
+        msgBox.setText("Erreur");
+        msgBox.setInformativeText("Veuillez sélectionner une partie");
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.exec();
+    }
+
+
 }

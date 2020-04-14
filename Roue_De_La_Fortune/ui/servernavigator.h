@@ -17,6 +17,7 @@ public:
 
 private:
     Ui::ServerNavigator *ui;
+    void showEvent(QShowEvent *) override;
 
     QStringList headerList;
 
