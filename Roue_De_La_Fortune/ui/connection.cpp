@@ -13,11 +13,11 @@ Connection::Connection(QWidget *parent)
 {
     ui->setupUi(this);
 
-    EventManager::getInstance()->addListener(EventManager::EVENT::CONNEXION_SUCCESS, [&](void*){        
+    EventManager::getInstance()->addListener(EventManager::EVENT::CONNEXION_SUCCESS, [&](void*){
         emit showServerNavigator();
     });
 
-    EventManager::getInstance()->addListener(EventManager::EVENT::CONNEXION_FAILURE, [&](void* msg){        
+    EventManager::getInstance()->addListener(EventManager::EVENT::CONNEXION_FAILURE, [&](void* msg){
         emit displayError(QString::fromStdString(*static_cast<std::string*>(msg)));
     });
 
