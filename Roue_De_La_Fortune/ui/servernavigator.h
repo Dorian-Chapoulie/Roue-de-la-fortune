@@ -26,6 +26,8 @@ private slots:
 
     void on_rejoindreButton_clicked();
 
+    void on_createGameButton_clicked();
+
 signals:
     void updateList(QString);
 };

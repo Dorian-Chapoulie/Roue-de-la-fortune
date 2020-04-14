@@ -3,8 +3,6 @@
 
 ProtocolHandler::ProtocolHandler()
 {
-    protocoles.insert_or_assign(PROTOCOL_NAME::CONNEXION, "C-");
-    protocoles.insert_or_assign(PROTOCOL_NAME::INSCRIPTION, "I-");
 }
 
 void ProtocolHandler::callEventFromProtocol(std::string msg)
@@ -37,4 +35,10 @@ std::string ProtocolHandler::getInscriptionProtocol(std::string &pseudo, std::st
 {
     protocoles.insert_or_assign(PROTOCOL_NAME::INSCRIPTION, "I-" + pseudo + "-" + password);
     return protocoles.at(PROTOCOL_NAME::INSCRIPTION);
+}
+
+std::string ProtocolHandler::getCreateGameProtocol(std::string &gameName)
+{
+    protocoles.insert_or_assign(PROTOCOL_NAME::CREATE_GAME, "P-" + gameName);
+    return protocoles[PROTOCOL_NAME::CREATE_GAME];
 }

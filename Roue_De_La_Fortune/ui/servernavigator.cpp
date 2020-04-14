@@ -3,6 +3,7 @@
 #include "entity/localplayer.h"
 #include <QTableWidgetItem>
 #include "event/eventmanager.h"
+#include "protocol/protocolhandler.h"
 
 #include <QMessageBox>
 #include <iostream>
@@ -32,9 +33,6 @@ ServerNavigator::ServerNavigator(QWidget *parent) :
     ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
 
-
-
-    LocalPlayer::getInstance()->sendMessage("P-partie de dorian");
 }
 
 ServerNavigator::~ServerNavigator()
@@ -93,7 +91,6 @@ void ServerNavigator::addServerInList(QString msg)
         }
     }
 
-
 }
 
 void ServerNavigator::on_rejoindreButton_clicked()
@@ -130,4 +127,11 @@ void ServerNavigator::on_rejoindreButton_clicked()
     }
 
 
+}
+
+void ServerNavigator::on_createGameButton_clicked()
+{
+    ProtocolHandler protoclolHandler;
+    std::string gameName = ui->lineEdit->text().toStdString();
+    LocalPlayer::getInstance()->sendMessage(protoclolHandler.getCreateGameProtocol(gameName));
 }

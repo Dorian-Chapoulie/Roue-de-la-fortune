@@ -9,12 +9,14 @@ public:
     enum PROTOCOL_NAME {
         CONNEXION,
         INSCRIPTION,
+        CREATE_GAME,
     };
 
     ProtocolHandler();
 
     std::string getLoginProtocol(std::string& pseudo, std::string& password);
     std::string getInscriptionProtocol(std::string& pseudo, std::string& password);
+    std::string getCreateGameProtocol(std::string& gameName);
 
     void callEventFromProtocol(std::string msg);
 
