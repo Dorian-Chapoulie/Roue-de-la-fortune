@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Fichiers sources">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Fichiers de ressources">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="network">
+      <UniqueIdentifier>{c163620c-1dcf-4a04-9f81-5c56c56f8dc8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="event">
+      <UniqueIdentifier>{fedf8ad9-8343-434e-806d-b2ab32132702}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="protocol">
+      <UniqueIdentifier>{dbc0fd4c-41a6-4e0c-909d-ca37ca73245c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game">
+      <UniqueIdentifier>{f00bbb4a-6f12-41e8-8e05-a4639bdaf73e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="config">
+      <UniqueIdentifier>{6a939dd8-58fc-421d-a6af-5154b156146c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="entity">
+      <UniqueIdentifier>{3df00cb4-82e3-483b-ae42-987b272902f3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="server.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="tcp_server.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+    <ClCompile Include="eventmanager.cpp">
+      <Filter>event</Filter>
+    </ClCompile>
+    <ClCompile Include="protocolhandler.cpp">
+      <Filter>protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
+    <ClCompile Include="Config.cpp">
+      <Filter>config</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>entity</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="tcp_server.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="eventmanager.h">
+      <Filter>event</Filter>
+    </ClInclude>
+    <ClInclude Include="protocolhandler.h">
+      <Filter>protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>game</Filter>
+    </ClInclude>
+    <ClInclude Include="Config.h">
+      <Filter>config</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>entity</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
