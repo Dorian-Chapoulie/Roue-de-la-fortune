@@ -28,13 +28,13 @@ void TCPServer::sendMessage(std::string msg, SOCKET& client)
     std::cout << "Send: " << msg << std::endl;
     if (send(client, msg.c_str(), msg.length(), 0) < 0) {
 
-        for (int i = 0; i < clientsNumber; i++) { //user vector
-            if (m_socketClients[i] == client) {
-                std::cout << "Client n°" << i <<  " disconnected" << std::endl;
-                //sort array
-            }
-        }        
-        clientsNumber--;
+        auto it = std::find(m_socketClients.begin(), m_socketClients.end(), client);
+        if (it != m_socketClients.end()) {
+            m_socketClients.erase(it);
+        }
+        else {
+            std::cout << "Erreur lors de la supression du client" << std::endl;
+        }
         //TODO erreur
     }
 }
@@ -59,6 +59,11 @@ unsigned int TCPServer::getPort() const
     return m_port;
 }
 
+std::vector<SOCKET> TCPServer::getClients()
+{
+    return m_socketClients;
+}
+
 void TCPServer::fn_threadReceiver(SOCKET* client)
 {
     ProtocolHandler protocolHandler;
@@ -80,23 +85,24 @@ void TCPServer::fn_threadAcceptNewClient()
     SOCKADDR clientSockAddr; // list ?
     int size = sizeof(clientSockAddr);    
     std::cout << "Server " << m_ip << ":" << m_port << " listening" << std::endl;
-    while (waitForPlayers) {        
+    while (waitForPlayers) {     
+
         #ifdef _WIN32
-            m_socketClients[clientsNumber++] = accept(m_socketfd, (SOCKADDR*)&clientSockAddr, &size);
+            m_socketClients.push_back(accept(m_socketfd, (SOCKADDR*)&clientSockAddr, &size));
         #else
-            m_socketClients[clientsNumber++] = accept(m_socketfd, (SOCKADDR*)&clientSockAddr, (socklen_t*)&size);
+            m_socketClients.push_back(accept(m_socketfd, (SOCKADDR*)&clientSockAddr, (socklen_t*)&size));
         #endif
 
-        if (clientsNumber == MAX_CLIENT)
+        if (m_socketClients.size() == MAX_CLIENT)
             waitForPlayers = false;
         
-        if (m_socketClients[clientsNumber - 1] < 0) {
+        if (m_socketClients.back() < 0) {
             printf("server acccept failed...\n");
             exit(0);
         }
         else {               
             std::cout << "Server: " << m_port << ", new client ! " << std::endl;
-            m_threadReceiver = new std::thread(&TCPServer::fn_threadReceiver, this, &m_socketClients[clientsNumber - 1]);
+            m_threadReceiver = new std::thread(&TCPServer::fn_threadReceiver, this, &m_socketClients.back());
             m_threadReceiver->detach();
         }
     }
@@ -114,6 +120,7 @@ void TCPServer::init()
     }
 #endif
 
+    m_socketClients.reserve(MAX_CLIENT);
     m_socketfd = socket(AF_INET, SOCK_STREAM, 0);
     if (m_socketfd == INVALID_SOCKET) {
         perror("socket()");

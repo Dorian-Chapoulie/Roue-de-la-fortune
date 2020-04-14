@@ -3,6 +3,7 @@
 #include <string>
 #include <thread>
 #include <mutex>
+#include <vector>
 
 #ifdef _WIN32
     #include <winsock2.h>
@@ -31,21 +32,23 @@ public:
     ~TCPServer();
 
     void    sendMessage(std::string msg, SOCKET& client);
-    void    disconnect();    
+    void    disconnect();   
+
     std::string getIp() const;
     unsigned int getPort() const;
 
-//private:    
+    std::vector<SOCKET> getClients();
+
+private:    
     const unsigned int MAX_CLIENT = 40;
 
     unsigned int m_port;
-    unsigned int clientsNumber = 0;
     unsigned int m_socketFd;
 
     std::string m_ip;    
 
-    SOCKET*     m_socketClients = new SOCKET[MAX_CLIENT];
-    SOCKET      m_socketfd;    
+    std::vector<SOCKET> m_socketClients;
+    SOCKET m_socketfd;    
 
     std::thread* m_threadReceiver = nullptr;
     std::thread* m_threadAccept = nullptr;

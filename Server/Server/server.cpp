@@ -43,8 +43,11 @@ int main()
 
 
     while(true) { //replace by join
-        if(mainServer.clientsNumber > 0) // for
-            mainServer.sendMessage("ping", mainServer.m_socketClients[0]);     
+        if (mainServer.getClients().size() > 0) {
+            for (auto& client : mainServer.getClients()) {
+                mainServer.sendMessage("ping", client);
+            }
+        }                
         Sleep(1000);
     }
 } 
