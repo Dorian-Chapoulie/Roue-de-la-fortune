@@ -9,15 +9,16 @@
 #include <chrono>
 
 int main() 
-{ 
-    TCPServer mainServer;  
-    ProtocolHandler protoclHandler;
+{      
+    EventManager eventManger;
+    ProtocolHandler protoclHandler(&eventManger);
+    TCPServer mainServer(&protoclHandler);
 
-    EventManager::getInstance()->addListener(EventManager::EVENT::CREATE_GAME, [&](void* msg) {        
+    eventManger.addListener(EventManager::EVENT::CREATE_GAME, [&](void* msg) {
         Game * g = new Game(*reinterpret_cast<std::string*>(msg));        
     });
 
-    EventManager::getInstance()->addListener(EventManager::EVENT::GET_ALL_GAMES, [&](void* sock) {
+    eventManger.addListener(EventManager::EVENT::GET_ALL_GAMES, [&](void* sock) {
         for (const auto& g : Game::games) {
             std::string msg = "G-" + g->getInfos();            
             mainServer.sendMessage(msg, *reinterpret_cast<SOCKET*>(sock));
@@ -25,19 +26,20 @@ int main()
     });
 
 
-    EventManager::getInstance()->addListener(EventManager::EVENT::PLAYER_CONNECT_OK, [&](void* sock) {                    ;
-        mainServer.sendMessage(protoclHandler.getProcotol(ProtocolHandler::PLAYER_CONNECT_OK), *reinterpret_cast<SOCKET*>(sock));       
+    eventManger.addListener(EventManager::EVENT::PLAYER_CONNECT_OK, [&](void* sock) {
+        std::string msg = protoclHandler.getProcotol(ProtocolHandler::PLAYER_CONNECT_OK) + std::to_string(*reinterpret_cast<SOCKET*>(sock));
+        mainServer.sendMessage(msg, *reinterpret_cast<SOCKET*>(sock));
     });
 
-    EventManager::getInstance()->addListener(EventManager::EVENT::PLAYER_CONNECT_FAIL, [&](void* sock) {;
+    eventManger.addListener(EventManager::EVENT::PLAYER_CONNECT_FAIL, [&](void* sock) {
         mainServer.sendMessage(protoclHandler.getProcotol(ProtocolHandler::PLAYER_CONNECT_FAIL), *reinterpret_cast<SOCKET*>(sock));
     });
 
-    EventManager::getInstance()->addListener(EventManager::EVENT::PLAYER_INSCRIPTION_OK, [&](void* sock) {;
+    eventManger.addListener(EventManager::EVENT::PLAYER_INSCRIPTION_OK, [&](void* sock) {
         mainServer.sendMessage(protoclHandler.getProcotol(ProtocolHandler::PLAYER_INSCRIPTION_OK), *reinterpret_cast<SOCKET*>(sock));
     });
 
-    EventManager::getInstance()->addListener(EventManager::EVENT::PLAYER_INSCRIPTION_FAIL, [&](void* sock) {;
+    eventManger.addListener(EventManager::EVENT::PLAYER_INSCRIPTION_FAIL, [&](void* sock) {
         mainServer.sendMessage(protoclHandler.getProcotol(ProtocolHandler::PLAYER_INSCRIPTION_FAIL), *reinterpret_cast<SOCKET*>(sock));
     });
 
@@ -45,7 +47,7 @@ int main()
     while(true) { //replace by join
         if (mainServer.getClients().size() > 0) {
             for (auto& client : mainServer.getClients()) {
-                mainServer.sendMessage("ping", client);
+                //mainServer.sendMessage("ping", client);
             }
         }                
         Sleep(1000);

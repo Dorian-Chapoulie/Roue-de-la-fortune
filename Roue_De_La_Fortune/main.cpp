@@ -4,8 +4,8 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    Connection w;
-    w.show();
+    Connection* w = new Connection();
+    w->show();
 
     return a.exec();
 }

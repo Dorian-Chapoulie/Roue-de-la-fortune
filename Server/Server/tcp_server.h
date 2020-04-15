@@ -4,6 +4,7 @@
 #include <thread>
 #include <mutex>
 #include <vector>
+#include "protocolhandler.h"
 
 #ifdef _WIN32
     #include <winsock2.h>
@@ -27,8 +28,8 @@
 class TCPServer
 {
 public:
-    TCPServer();
-    TCPServer(std::string ip, unsigned int port);
+    TCPServer(ProtocolHandler* protocolHandler);
+    TCPServer(std::string ip, unsigned int port, ProtocolHandler* protocolHandler);
     ~TCPServer();
 
     void    sendMessage(std::string msg, SOCKET& client);
@@ -60,6 +61,8 @@ private:
     void    init();
     void    fn_threadReceiver(SOCKET* client);    
     void    fn_threadAcceptNewClient();
+
+    ProtocolHandler* protocolHandler;    
 };
 
 #endif // CLIENT_H

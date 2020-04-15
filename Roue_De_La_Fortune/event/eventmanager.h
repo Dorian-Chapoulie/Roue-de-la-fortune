@@ -14,6 +14,8 @@ public:
         INSCRIPTION_SUCCESS,
         INSCRIPTION_FAILURE,
         GAMES_LIST,
+        ASK_PSEUDO,
+        NEW_PLAYER,
     };
 
     static EventManager* getInstance();
@@ -21,6 +23,7 @@ public:
     void addListener(EVENT eventName, std::function<void(void*)>&& handler);
     void triggerEvent(EVENT eventName);
     void triggerEvent(EVENT eventName, std::string msg);
+    void unSubsribeEvent(EVENT eventName);
 
 private:
     EventManager();

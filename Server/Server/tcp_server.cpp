@@ -3,17 +3,19 @@
 #include "protocolhandler.h"
 #include <iostream>
 
-TCPServer::TCPServer()
+TCPServer::TCPServer(ProtocolHandler* protocolHandler)
 {
     m_ip = Config::getInstance()->baseIp;
     m_port = Config::getInstance()->basePort;
+    this->protocolHandler = protocolHandler;
     init();
 }
 
-TCPServer::TCPServer(std::string ip, unsigned int port)
+TCPServer::TCPServer(std::string ip, unsigned int port, ProtocolHandler* protocolHandler)
 {
     m_ip = ip;
     m_port = port;
+    this->protocolHandler = protocolHandler;
     init();
 }
 
@@ -25,12 +27,13 @@ TCPServer::~TCPServer()
 
 void TCPServer::sendMessage(std::string msg, SOCKET& client)
 {
-    std::cout << "Send: " << msg << std::endl;
+    //std::cout << "Send: " << msg << std::endl;
     if (send(client, msg.c_str(), msg.length(), 0) < 0) {
 
         auto it = std::find(m_socketClients.begin(), m_socketClients.end(), client);
         if (it != m_socketClients.end()) {
             m_socketClients.erase(it);
+            std::cout << m_port << ": client disconnected: " << client <<  std::endl;
         }
         else {
             std::cout << "Erreur lors de la supression du client" << std::endl;
@@ -66,15 +69,13 @@ std::vector<SOCKET> TCPServer::getClients()
 
 void TCPServer::fn_threadReceiver(SOCKET* client)
 {
-    ProtocolHandler protocolHandler;
-
     char buffer[255];
     int bytesReceived = 0;
     while (doListen) {
         bytesReceived = recv(*client, buffer, 255 - 1, 0);
         if (bytesReceived > 0) {
             //std::cout << "Client: " << std::string(buffer, bytesReceived) << std::endl;
-            protocolHandler.callEventFromProtocol(std::string(buffer, bytesReceived), client);
+            protocolHandler->callEventFromProtocol(std::string(buffer, bytesReceived), client);
             bytesReceived = 0;
         }
     }
@@ -101,7 +102,7 @@ void TCPServer::fn_threadAcceptNewClient()
             exit(0);
         }
         else {               
-            std::cout << "Server: " << m_port << ", new client ! " << std::endl;
+            std::cout << "Server: " << m_port << ", new client: " << m_socketClients.back() << std::endl;
             m_threadReceiver = new std::thread(&TCPServer::fn_threadReceiver, this, &m_socketClients.back());
             m_threadReceiver->detach();
         }

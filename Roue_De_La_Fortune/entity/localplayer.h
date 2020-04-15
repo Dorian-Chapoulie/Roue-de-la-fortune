@@ -8,6 +8,7 @@ class LocalPlayer : public Player, public TCPClient {
 public:
     static LocalPlayer* getInstance();
     static void setName(std::string&& name);
+    static void setId(int id);
 
     void login();
     void setPassword(std::string&& password);
@@ -16,14 +17,15 @@ public:
     ~LocalPlayer();
 
 private:
-    LocalPlayer(std::string& name);
+    LocalPlayer(std::string& name, int id);
 
     bool isConnected = false;
     std::string password;
 
 private:
     static LocalPlayer* instance;
-    static std::string name;   
+    static std::string name;
+    static int id;
 };
 
 #endif // LOCALPLAYER_H

@@ -3,18 +3,20 @@
 #include <fstream>
 #include <string>
 
-ProtocolHandler::ProtocolHandler()
-{
-    protocoles.insert_or_assign(PROTOCOL_NAME::CREATED_GAME, "CG-");   
-    protocoles.insert_or_assign(PROTOCOL_NAME::PLAYER_CONNECT_OK, "C-1");
+ProtocolHandler::ProtocolHandler(EventManager* eventManager)
+{ 
+    protocoles.insert_or_assign(PROTOCOL_NAME::PLAYER_CONNECT_OK, "C-1-");
     protocoles.insert_or_assign(PROTOCOL_NAME::PLAYER_CONNECT_FAIL, "C-0");
     protocoles.insert_or_assign(PROTOCOL_NAME::PLAYER_INSCRIPTION_OK, "I-1");
     protocoles.insert_or_assign(PROTOCOL_NAME::PLAYER_INSCRIPTION_FAIL, "I-0");
+    protocoles.insert_or_assign(PROTOCOL_NAME::ASK_PSEUDO, "N");
+    protocoles.insert_or_assign(PROTOCOL_NAME::NOTIFY_NEW_PLAYER, "NJ");    
+    this->eventManager = eventManager;
 }
+
 #include <iostream>
 void ProtocolHandler::callEventFromProtocol(std::string msg, SOCKET* socket)
 {
-    EventManager* eventManager = EventManager::getInstance();
 
     if (msg.at(0) == 'C') {
         std::string line;
@@ -91,6 +93,11 @@ void ProtocolHandler::callEventFromProtocol(std::string msg, SOCKET* socket)
     }
     else if (msg.at(0) == 'G') {
         eventManager->triggerEvent(EventManager::EVENT::GET_ALL_GAMES, socket);
+    }
+    else if (msg.at(0) == 'N') {
+        std::string pseudo = msg.substr(2);
+        pseudo += "-" + std::to_string(*reinterpret_cast<SOCKET*>(socket));
+        eventManager->triggerEvent(EventManager::EVENT::ASK_PSEUDO, &pseudo);
     }
 }
 

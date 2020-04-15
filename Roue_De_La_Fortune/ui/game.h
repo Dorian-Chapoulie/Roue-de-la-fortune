@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include <QWidget>
+#include "entity/player.h"
 
 namespace Ui {
 class Game;
@@ -15,8 +16,16 @@ public:
     explicit Game(QWidget *parent = nullptr);
     ~Game();
 
+private slots:
+    void addNewPlayer(QString);
+
+signals:
+    void notifyNewPlayer(QString);
+
 private:
     Ui::Game *ui;
+
+    std::vector<Player*> players;
 };
 
 #endif // GAME_H

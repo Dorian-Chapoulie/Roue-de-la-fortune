@@ -10,6 +10,7 @@ public:
         CONNEXION,
         INSCRIPTION,
         CREATE_GAME,
+        ASK_PSEUDO,
     };
 
     ProtocolHandler();
@@ -17,6 +18,7 @@ public:
     std::string getLoginProtocol(std::string& pseudo, std::string& password);
     std::string getInscriptionProtocol(std::string& pseudo, std::string& password);
     std::string getCreateGameProtocol(std::string& gameName);
+    std::string getPseudoProtocol(std::string& pseudo);
 
     void callEventFromProtocol(std::string msg);
 

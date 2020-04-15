@@ -14,6 +14,7 @@ ServerNavigator::ServerNavigator(QWidget *parent) :
     ui(new Ui::ServerNavigator)
 {
     ui->setupUi(this);
+    this->setAttribute(Qt::WA_DeleteOnClose);
 
     connect(this, SIGNAL(updateList(QString)), this, SLOT(addServerInList(QString)));
 
@@ -37,7 +38,8 @@ ServerNavigator::ServerNavigator(QWidget *parent) :
 }
 
 ServerNavigator::~ServerNavigator()
-{
+{     
+    Sleep(1200);
     delete ui;
 }
 

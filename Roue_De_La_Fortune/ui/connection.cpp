@@ -12,6 +12,7 @@ Connection::Connection(QWidget *parent)
     , ui(new Ui::Connection)
 {
     ui->setupUi(this);
+    this->setAttribute(Qt::WA_DeleteOnClose);
 
     EventManager::getInstance()->addListener(EventManager::EVENT::CONNEXION_SUCCESS, [&](void*){
         emit showServerNavigator();
@@ -26,7 +27,9 @@ Connection::Connection(QWidget *parent)
 }
 
 Connection::~Connection()
-{
+{    
+    EventManager::getInstance()->unSubsribeEvent(EventManager::EVENT::CONNEXION_SUCCESS);
+    EventManager::getInstance()->unSubsribeEvent(EventManager::EVENT::CONNEXION_FAILURE);
     delete ui;
 }
 

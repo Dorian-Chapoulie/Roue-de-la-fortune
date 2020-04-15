@@ -31,7 +31,7 @@ void TCPClient::sendMessage(std::string msg)
 }
 
 void TCPClient::disconnect()
-{
+{    
     listen = false;
     isConnected = false;
 

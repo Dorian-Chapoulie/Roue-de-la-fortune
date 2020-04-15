@@ -15,22 +15,18 @@ public:
         PLAYER_INSCRIPTION_FAIL,
         CREATE_GAME, 
         GET_ALL_GAMES,
+        ASK_PSEUDO,
     };
-
-    static EventManager* getInstance();
 
     void addListener(EVENT eventName, std::function<void(void*)>&& handler);
     void triggerEvent(EVENT eventName);
     void triggerEvent(EVENT eventName, void* msg);
 
-private:
     EventManager();
     ~EventManager();
 
+private:
     std::unordered_map<EVENT, std::function<void(void*)> > events;
-
-    static EventManager* instance;
-
 };
 
 #endif // EVENTMANAGER_H

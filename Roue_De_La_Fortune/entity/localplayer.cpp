@@ -4,19 +4,26 @@
 
 LocalPlayer* LocalPlayer::instance = nullptr;
 std::string LocalPlayer::name;
+int LocalPlayer::id = -1;
 
 void LocalPlayer::setName(std::string &&name) {
     LocalPlayer::name = name;
 }
 
+void LocalPlayer::setId(int id)
+{
+    LocalPlayer::id = id;
+    instance->id = id;
+}
+
 LocalPlayer* LocalPlayer::getInstance() {
     if(LocalPlayer::instance == nullptr)
-        LocalPlayer::instance = new LocalPlayer(LocalPlayer::name);
+        LocalPlayer::instance = new LocalPlayer(LocalPlayer::name, LocalPlayer::id);
     return LocalPlayer::instance;
 }
 
-LocalPlayer::LocalPlayer(std::string &name)
-    : Player(name), TCPClient(Config::getInstance()->baseServerIP, Config::getInstance()->baseServerPort)
+LocalPlayer::LocalPlayer(std::string &name, int id)
+    : Player(name, id), TCPClient(Config::getInstance()->baseServerIP, Config::getInstance()->baseServerPort)
 {
 }
 
