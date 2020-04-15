@@ -4,6 +4,7 @@
 #include <QTableWidgetItem>
 #include "event/eventmanager.h"
 #include "protocol/protocolhandler.h"
+#include "ui/game.h"
 
 #include <QMessageBox>
 #include <iostream>
@@ -104,7 +105,9 @@ void ServerNavigator::on_rejoindreButton_clicked()
 
         if(LocalPlayer::getInstance()->connectToServer(ip, port)) {
 
-           std::cout << "Connected to the game server" << std::endl;
+           Game* game = new Game();
+           game->show();
+           this->close();
 
         }else {
             QMessageBox msgBox;

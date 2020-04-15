@@ -20,6 +20,7 @@ SOURCES += \
     entity/localplayer.cpp \
     entity/player.cpp \
     event/eventmanager.cpp \
+    ui/game.cpp \
     ui/inscription.cpp \
     ui/servernavigator.cpp \
     main.cpp \
@@ -33,6 +34,7 @@ HEADERS += \
     entity/localplayer.h \
     entity/player.h \
     event/eventmanager.h \
+    ui/game.h \
     ui/inscription.h \
     ui/servernavigator.h \
     network/tcpclient.h \
@@ -41,6 +43,7 @@ HEADERS += \
 
 FORMS += \
     ui/connection.ui \
+    ui/game.ui \
     ui/inscription.ui \
     ui/servernavigator.ui \
 
