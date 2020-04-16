@@ -25,7 +25,7 @@
    <property name="title">
     <string>Chat</string>
    </property>
-   <widget class="QTextBrowser" name="textBrowser">
+   <widget class="QTextBrowser" name="textBrowserChat">
     <property name="geometry">
      <rect>
       <x>10</x>

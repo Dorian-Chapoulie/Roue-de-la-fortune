@@ -23,6 +23,15 @@ Game::Game(std::string& name)
 		this->server->sendMessage(protocol->getProcotol(protocol->ASK_PSEUDO), *reinterpret_cast<SOCKET*>(sock));
 	});
 
+	eventManager.addListener(EventManager::EVENT::TCHAT, [&](void* data) {
+		std::string msg = *reinterpret_cast<std::string*>(data);
+		for (Player* p : players) {
+			SOCKET id = p->getId();
+			server->sendMessage(msg, id);
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		}
+	});
+
 	eventManager.addListener(EventManager::EVENT::ASK_PSEUDO, [&](void* pseudoAndSocket) {
 		std::string msg = *reinterpret_cast<std::string*>(pseudoAndSocket);
 		std::string pseudo = msg.substr(0, msg.find('-'));

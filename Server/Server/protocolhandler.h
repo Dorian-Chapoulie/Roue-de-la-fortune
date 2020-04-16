@@ -20,6 +20,7 @@ public:
         PLAYER_INSCRIPTION_FAIL,
         ASK_PSEUDO,
         NOTIFY_NEW_PLAYER,
+        TCHAT,
     };
 
     ProtocolHandler(EventManager* eventManager);    

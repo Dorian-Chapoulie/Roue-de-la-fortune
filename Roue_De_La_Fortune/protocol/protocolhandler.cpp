@@ -31,6 +31,9 @@ void ProtocolHandler::callEventFromProtocol(std::string msg)
         }else {
             eventManager->triggerEvent(eventManager->ASK_PSEUDO);
         }
+    }else if(msg.at(0) == 'T') {
+        std::string data = msg.substr(2);
+        eventManager->triggerEvent(eventManager->TCHAT, data);
     }
 }
 
@@ -56,4 +59,10 @@ std::string ProtocolHandler::getPseudoProtocol(std::string &pseudo)
 {
     protocoles.insert_or_assign(PROTOCOL_NAME::ASK_PSEUDO, "N-" + pseudo);
     return protocoles[PROTOCOL_NAME::ASK_PSEUDO];
+}
+
+std::string ProtocolHandler::getTchatProtocol(std::string& pseudo, std::string &message)
+{
+    protocoles.insert_or_assign(PROTOCOL_NAME::TCHAT, "T-" + pseudo + "-" + message);
+    return protocoles[PROTOCOL_NAME::TCHAT];
 }

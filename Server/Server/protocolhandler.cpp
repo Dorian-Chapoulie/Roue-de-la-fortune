@@ -47,7 +47,8 @@ void ProtocolHandler::callEventFromProtocol(std::string msg, SOCKET* socket)
         }
 
 
-    } else if(msg.at(0) == 'I') {
+    }
+    else if(msg.at(0) == 'I') {
 
         std::string line;
         std::ifstream myfile("players.txt");
@@ -99,6 +100,12 @@ void ProtocolHandler::callEventFromProtocol(std::string msg, SOCKET* socket)
         pseudo += "-" + std::to_string(*reinterpret_cast<SOCKET*>(socket));
         eventManager->triggerEvent(EventManager::EVENT::ASK_PSEUDO, &pseudo);
     }
+    else if (msg.at(0) == 'T') {
+        eventManager->triggerEvent(EventManager::EVENT::TCHAT, &std::string(msg));
+    }
+    
+
+
 }
 
 std::string ProtocolHandler::getProcotol(ProtocolHandler::PROTOCOL_NAME name) const

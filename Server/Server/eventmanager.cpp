@@ -16,11 +16,13 @@ void EventManager::addListener(EventManager::EVENT eventName, std::function<void
 
 void EventManager::triggerEvent(EventManager::EVENT eventName)
 {
+    //if(events[eventName] != nullptr)
     events[eventName](nullptr);
 }
 
 
 void EventManager::triggerEvent(EventManager::EVENT eventName, void* arg)
-{        
+{      
+    //if(events[eventName] != nullptr)
     events[eventName](arg);
 }

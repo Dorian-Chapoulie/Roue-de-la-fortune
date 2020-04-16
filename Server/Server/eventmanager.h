@@ -16,6 +16,7 @@ public:
         CREATE_GAME, 
         GET_ALL_GAMES,
         ASK_PSEUDO,
+        TCHAT,
     };
 
     void addListener(EVENT eventName, std::function<void(void*)>&& handler);

@@ -11,6 +11,7 @@ public:
         INSCRIPTION,
         CREATE_GAME,
         ASK_PSEUDO,
+        TCHAT,
     };
 
     ProtocolHandler();
@@ -19,6 +20,7 @@ public:
     std::string getInscriptionProtocol(std::string& pseudo, std::string& password);
     std::string getCreateGameProtocol(std::string& gameName);
     std::string getPseudoProtocol(std::string& pseudo);
+    std::string getTchatProtocol(std::string& pseudo, std::string& message);
 
     void callEventFromProtocol(std::string msg);
 

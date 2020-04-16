@@ -13,6 +13,7 @@ Game::Game(QWidget *parent) :
     ui->setupUi(this);
 
     connect(this, SIGNAL(notifyNewPlayer(QString)), this, SLOT(addNewPlayer(QString)));
+    connect(this, SIGNAL(notifyNewMessage(QString)), this, SLOT(addMessageToChat(QString)));
 
     const char consonnes[19] = {'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'x', 'z'};
     const char voyelles[6] = {'a', 'e', 'i','o', 'u', 'y'};
@@ -37,7 +38,12 @@ Game::Game(QWidget *parent) :
 
     EventManager::getInstance()->addListener(EventManager::EVENT::NEW_PLAYER, [&](void* pseudoAndId){
         std::string newPlayerNameAndId = *reinterpret_cast<std::string*>(pseudoAndId);
-        emit notifyNewPlayer(QString::fromStdString(newPlayerNameAndId));
+        emit notifyNewPlayer(QString::fromStdString(newPlayerNameAndId)); //direct cast to QString
+    });
+
+    EventManager::getInstance()->addListener(EventManager::EVENT::TCHAT, [&](void* data){
+        std::string tchatData = *reinterpret_cast<std::string*>(data); //player-message
+        emit notifyNewMessage(QString::fromStdString(tchatData));
     });
 
 }
@@ -77,4 +83,25 @@ void Game::addNewPlayer(QString data)
         break;
     }
 
+    ui->textBrowserChat->append("<font color=\"Red\"><b>" + QString::fromStdString(name) + "</b> à rejoint la partie !");
+
+}
+
+void Game::addMessageToChat(QString msg)
+{
+    std::string pseudo = msg.toStdString();
+    size_t pos = pseudo.find("-");
+    pseudo = pseudo.substr(0, pos);
+    std::string message = msg.toStdString().substr(pos + 1, msg.length() - pos);
+
+    ui->textBrowserChat->append("<font color=\"Grey\"><b>" + QString::fromStdString(pseudo) + ":</b> "
+                                 + "<font color=\"Black\">" + QString::fromStdString(message));
+}
+
+void Game::on_pushButtonChat_clicked()
+{
+    ProtocolHandler protocolHandler;
+    std::string msg = ui->lineEditChat->text().toStdString();
+    LocalPlayer::getInstance()->sendMessage(protocolHandler.getTchatProtocol(LocalPlayer::getInstance()->getName(), msg));
+    ui->lineEditChat->clear();
 }

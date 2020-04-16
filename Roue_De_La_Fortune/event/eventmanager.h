@@ -16,6 +16,7 @@ public:
         GAMES_LIST,
         ASK_PSEUDO,
         NEW_PLAYER,
+        TCHAT,
     };
 
     static EventManager* getInstance();
