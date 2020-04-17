@@ -3,6 +3,7 @@
 
 ProtocolHandler::ProtocolHandler()
 {
+    protocoles.insert_or_assign(PROTOCOL_NAME::GET_ALL_GAMES, "G");
 }
 
 #include <iostream>
@@ -65,4 +66,9 @@ std::string ProtocolHandler::getTchatProtocol(std::string& pseudo, std::string &
 {
     protocoles.insert_or_assign(PROTOCOL_NAME::TCHAT, "T-" + pseudo + "-" + message);
     return protocoles[PROTOCOL_NAME::TCHAT];
+}
+
+std::string ProtocolHandler::getAllGamesProtocol() const
+{
+    return protocoles.at(PROTOCOL_NAME::GET_ALL_GAMES);
 }

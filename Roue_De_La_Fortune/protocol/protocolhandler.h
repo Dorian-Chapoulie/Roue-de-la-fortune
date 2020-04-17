@@ -12,6 +12,7 @@ public:
         CREATE_GAME,
         ASK_PSEUDO,
         TCHAT,
+        GET_ALL_GAMES,
     };
 
     ProtocolHandler();
@@ -21,6 +22,7 @@ public:
     std::string getCreateGameProtocol(std::string& gameName);
     std::string getPseudoProtocol(std::string& pseudo);
     std::string getTchatProtocol(std::string& pseudo, std::string& message);
+    std::string getAllGamesProtocol() const;
 
     void callEventFromProtocol(std::string msg);
 

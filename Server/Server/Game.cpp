@@ -41,7 +41,6 @@ Game::Game(std::string& name)
 
 		for (Player* p : players) {
 			if (p->getId() == std::stoi(id)) {
-				std::cout << "setting '" << pseudo << "' to " << p->getId() << std::endl;
 				p->setName(pseudo);
 				break;
 			}
@@ -52,7 +51,7 @@ Game::Game(std::string& name)
 				SOCKET tempId = p->getId();
 				
 				this->server->sendMessage(protocol->getProcotol(protocol->NOTIFY_NEW_PLAYER) + "-" + p2->getName() + "-" + std::to_string(p2->getId()), tempId);
-				std::this_thread::sleep_for(std::chrono::milliseconds(300));
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			}			
 		}
 	});

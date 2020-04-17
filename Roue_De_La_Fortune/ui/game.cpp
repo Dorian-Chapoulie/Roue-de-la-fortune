@@ -4,6 +4,7 @@
 #include "protocol/protocolhandler.h"
 #include "entity/localplayer.h"
 
+#include <QMessageBox>
 #include <iostream>
 
 Game::Game(QWidget *parent) :
@@ -14,6 +15,8 @@ Game::Game(QWidget *parent) :
 
     connect(this, SIGNAL(notifyNewPlayer(QString)), this, SLOT(addNewPlayer(QString)));
     connect(this, SIGNAL(notifyNewMessage(QString)), this, SLOT(addMessageToChat(QString)));
+
+    ui->lineEditChat->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,50}"), this));
 
     const char consonnes[19] = {'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'x', 'z'};
     const char voyelles[6] = {'a', 'e', 'i','o', 'u', 'y'};
@@ -100,8 +103,19 @@ void Game::addMessageToChat(QString msg)
 
 void Game::on_pushButtonChat_clicked()
 {
-    ProtocolHandler protocolHandler;
-    std::string msg = ui->lineEditChat->text().toStdString();
-    LocalPlayer::getInstance()->sendMessage(protocolHandler.getTchatProtocol(LocalPlayer::getInstance()->getName(), msg));
-    ui->lineEditChat->clear();
+    if(ui->lineEditChat->text().length() > 0) {
+        ProtocolHandler protocolHandler;
+        std::string msg = ui->lineEditChat->text().toStdString();
+        LocalPlayer::getInstance()->sendMessage(protocolHandler.getTchatProtocol(LocalPlayer::getInstance()->getName(), msg));
+        ui->lineEditChat->clear();
+    }else {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Partie");
+        msgBox.setText("Erreur");
+        msgBox.setInformativeText("Vous ne pouvez pas envoyer un message vide !");
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        msgBox.setIcon(QMessageBox::Icon::Warning);
+        msgBox.exec();
+    }
+
 }

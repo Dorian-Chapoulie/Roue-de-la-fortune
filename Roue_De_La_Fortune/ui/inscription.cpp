@@ -5,6 +5,7 @@
 #include "event/eventmanager.h"
 #include "ui/connection.h"
 #include <QMessageBox>
+#include <QRegExpValidator>
 
 Inscription::Inscription(QWidget *parent) :
     QWidget(parent),
@@ -23,6 +24,9 @@ Inscription::Inscription(QWidget *parent) :
 
     connect(this, SIGNAL(displayInscriptionError(QString)), this, SLOT(inscriptionError(QString)));
     connect(this, SIGNAL(showConnectionForm()), this, SLOT(inscriptionSuccessful()));
+
+    ui->pseudoLine->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,20}"), this));
+    ui->passwordLine->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,20}"), this));
 }
 
 Inscription::~Inscription()

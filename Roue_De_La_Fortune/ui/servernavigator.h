@@ -1,6 +1,7 @@
 #ifndef SERVERNAVIGATOR_H
 #define SERVERNAVIGATOR_H
 
+#include <QTableWidgetItem>
 #include <QWidget>
 
 namespace Ui {
@@ -19,6 +20,8 @@ private:
     Ui::ServerNavigator *ui;
     void showEvent(QShowEvent *) override;
 
+    void joinGame(std::string& ip, int port);
+
     QStringList headerList;
 
 private slots:
@@ -27,6 +30,8 @@ private slots:
     void on_rejoindreButton_clicked();
 
     void on_createGameButton_clicked();
+
+    void on_tableWidget_itemDoubleClicked(QTableWidgetItem *item);
 
 signals:
     void updateList(QString);

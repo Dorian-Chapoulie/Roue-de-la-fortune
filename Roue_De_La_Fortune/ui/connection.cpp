@@ -24,6 +24,9 @@ Connection::Connection(QWidget *parent)
 
     connect(this, SIGNAL(displayError(QString)), this, SLOT(connection_error(QString)));
     connect(this, SIGNAL(showServerNavigator()), this, SLOT(connection_success()));
+
+    ui->lineEmail->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,20}"), this));
+    ui->linePsw->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,20}"), this));
 }
 
 Connection::~Connection()

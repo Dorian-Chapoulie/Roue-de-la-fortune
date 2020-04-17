@@ -15,13 +15,14 @@ int main()
     TCPServer mainServer(&protoclHandler);
 
     eventManger.addListener(EventManager::EVENT::CREATE_GAME, [&](void* msg) {
-        Game * g = new Game(*reinterpret_cast<std::string*>(msg));        
+        Game * g = new Game(*reinterpret_cast<std::string*>(msg));                  
     });
 
     eventManger.addListener(EventManager::EVENT::GET_ALL_GAMES, [&](void* sock) {
         for (const auto& g : Game::games) {
             std::string msg = "G-" + g->getInfos();            
             mainServer.sendMessage(msg, *reinterpret_cast<SOCKET*>(sock));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     });
 

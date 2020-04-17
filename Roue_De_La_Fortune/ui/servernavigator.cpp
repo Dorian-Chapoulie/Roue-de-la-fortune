@@ -15,6 +15,7 @@ ServerNavigator::ServerNavigator(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setAttribute(Qt::WA_DeleteOnClose);
+    ui->lineEdit->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,20}"), this));
 
     connect(this, SIGNAL(updateList(QString)), this, SLOT(addServerInList(QString)));
 
@@ -45,13 +46,27 @@ ServerNavigator::~ServerNavigator()
 
 void ServerNavigator::showEvent(QShowEvent *)
 {
-    std::thread threadGetServerGames([&](){
-        while(this->isVisible()) {
-            LocalPlayer::getInstance()->sendMessage("G"); //TODO: No duplicates
-            std::this_thread::sleep_for (std::chrono::seconds(1));
-        }
-    });
-    threadGetServerGames.detach();
+    ProtocolHandler protocol;
+    LocalPlayer::getInstance()->sendMessage(protocol.getAllGamesProtocol());
+}
+
+void ServerNavigator::joinGame(std::string &ip, int port)
+{
+    if(LocalPlayer::getInstance()->connectToServer(ip, port)) {
+
+       Game* game = new Game();
+       game->show();
+       this->close();
+
+    }else {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Navigateur de serveurs");
+        msgBox.setText("Erreur");
+        msgBox.setInformativeText("Impossible de rejoindre la partie");
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.exec();
+    }
 }
 
 void ServerNavigator::addServerInList(QString msg)
@@ -72,7 +87,6 @@ void ServerNavigator::addServerInList(QString msg)
     std::string ip = temp.substr(pos[3] + 1, pos[4] - pos[3] - 1);
     std::string port = temp.substr(pos[4] + 1);
     std::vector<std::string> list = {name, nbPlayer, nbSpec, ip, port};
-
 
     bool addGame = true;
     for (int i = 0; i < ui->tableWidget->rowCount() ; ++i) {
@@ -105,21 +119,7 @@ void ServerNavigator::on_rejoindreButton_clicked()
         std::string ip =  ui->tableWidget->model()->index(row, 3).data().toString().toStdString();
         int port =  ui->tableWidget->model()->index(row, 4).data().toInt();
 
-        if(LocalPlayer::getInstance()->connectToServer(ip, port)) {
-
-           Game* game = new Game();
-           game->show();
-           this->close();
-
-        }else {
-            QMessageBox msgBox;
-            msgBox.setWindowTitle("Navigateur de serveurs");
-            msgBox.setText("Erreur");
-            msgBox.setInformativeText("Impossible de rejoindre la partie");
-            msgBox.setDefaultButton(QMessageBox::Ok);
-            msgBox.setIcon(QMessageBox::Critical);
-            msgBox.exec();
-        }
+        joinGame(ip, port);
 
     }else {
         QMessageBox msgBox;
@@ -136,7 +136,25 @@ void ServerNavigator::on_rejoindreButton_clicked()
 
 void ServerNavigator::on_createGameButton_clicked()
 {
-    ProtocolHandler protoclolHandler;
-    std::string gameName = ui->lineEdit->text().toStdString();
-    LocalPlayer::getInstance()->sendMessage(protoclolHandler.getCreateGameProtocol(gameName));
+    if(ui->lineEdit->text().length() > 0) {
+        ProtocolHandler protoclolHandler;
+        std::string gameName = ui->lineEdit->text().toStdString();
+        LocalPlayer::getInstance()->sendMessage(protoclolHandler.getCreateGameProtocol(gameName));
+        ui->lineEdit->clear();
+    }else {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Navigateur de serveurs");
+        msgBox.setText("Erreur");
+        msgBox.setInformativeText("Vous ne pouvez pas créer une partie sans nom !");
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.exec();
+    }
+}
+
+void ServerNavigator::on_tableWidget_itemDoubleClicked(QTableWidgetItem *item)
+{
+    std::string ip =  ui->tableWidget->model()->index(item->row(), 3).data().toString().toStdString();
+    int port =  ui->tableWidget->model()->index(item->row(), 4).data().toInt();
+    joinGame(ip, port);
 }

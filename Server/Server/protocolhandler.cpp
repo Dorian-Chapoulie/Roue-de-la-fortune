@@ -90,7 +90,8 @@ void ProtocolHandler::callEventFromProtocol(std::string msg, SOCKET* socket)
     }
     else if(msg.at(0) == 'P') {       
         std::string gameName = msg.substr(msg.find("P-") + 2, msg.length());
-        eventManager->triggerEvent(EventManager::EVENT::CREATE_GAME, &gameName);                
+        eventManager->triggerEvent(EventManager::EVENT::CREATE_GAME, &gameName);  
+        eventManager->triggerEvent(EventManager::EVENT::GET_ALL_GAMES, socket);
     }
     else if (msg.at(0) == 'G') {
         eventManager->triggerEvent(EventManager::EVENT::GET_ALL_GAMES, socket);
