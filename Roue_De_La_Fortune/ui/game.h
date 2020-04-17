@@ -19,12 +19,14 @@ public:
 private slots:
     void addNewPlayer(QString);
     void addMessageToChat(QString);
+    void removePlayer(int);
 
     void on_pushButtonChat_clicked();
 
 signals:
     void notifyNewPlayer(QString);
     void notifyNewMessage(QString);
+    void notifyPlayerDisconnected(int);
 
 private:
     Ui::Game *ui;

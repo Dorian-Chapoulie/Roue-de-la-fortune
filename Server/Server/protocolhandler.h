@@ -21,6 +21,7 @@ public:
         ASK_PSEUDO,
         NOTIFY_NEW_PLAYER,
         TCHAT,
+        PLAYER_DISCONNECTED,
     };
 
     ProtocolHandler(EventManager* eventManager);    

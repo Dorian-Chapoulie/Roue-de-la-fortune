@@ -10,7 +10,8 @@ ProtocolHandler::ProtocolHandler(EventManager* eventManager)
     protocoles.insert_or_assign(PROTOCOL_NAME::PLAYER_INSCRIPTION_OK, "I-1");
     protocoles.insert_or_assign(PROTOCOL_NAME::PLAYER_INSCRIPTION_FAIL, "I-0");
     protocoles.insert_or_assign(PROTOCOL_NAME::ASK_PSEUDO, "N");
-    protocoles.insert_or_assign(PROTOCOL_NAME::NOTIFY_NEW_PLAYER, "NJ");    
+    protocoles.insert_or_assign(PROTOCOL_NAME::NOTIFY_NEW_PLAYER, "NJ");
+    protocoles.insert_or_assign(PROTOCOL_NAME::PLAYER_DISCONNECTED, "D-");
     this->eventManager = eventManager;
 }
 
@@ -54,8 +55,8 @@ void ProtocolHandler::callEventFromProtocol(std::string msg, SOCKET* socket)
         std::ifstream myfile("players.txt");
 
         std::string username = msg.substr(2, msg.find_last_of('-') - 2);
-        std::string password = msg.substr(msg.find_last_of('-') + 1, msg.length());
-        std::string lineToAppend = username + "\t" + password;
+        std::string password = msg.substr(msg.find_last_of('-') + 1, msg.length());        
+        std::string lineToAppend = username + "\t" + password;        
         bool isCredentialValid = true;
         
         if (myfile.is_open())
@@ -90,23 +91,24 @@ void ProtocolHandler::callEventFromProtocol(std::string msg, SOCKET* socket)
     }
     else if(msg.at(0) == 'P') {       
         std::string gameName = msg.substr(msg.find("P-") + 2, msg.length());
-        eventManager->triggerEvent(EventManager::EVENT::CREATE_GAME, &gameName);  
+        eventManager->triggerEvent(EventManager::EVENT::CREATE_GAME, &gameName);          
         eventManager->triggerEvent(EventManager::EVENT::GET_ALL_GAMES, socket);
     }
-    else if (msg.at(0) == 'G') {
+    else if(msg.at(0) == 'G') {
         eventManager->triggerEvent(EventManager::EVENT::GET_ALL_GAMES, socket);
     }
-    else if (msg.at(0) == 'N') {
+    else if(msg.at(0) == 'N') {
         std::string pseudo = msg.substr(2);
         pseudo += "-" + std::to_string(*reinterpret_cast<SOCKET*>(socket));
         eventManager->triggerEvent(EventManager::EVENT::ASK_PSEUDO, &pseudo);
     }
-    else if (msg.at(0) == 'T') {
+    else if(msg.at(0) == 'T') {
         eventManager->triggerEvent(EventManager::EVENT::TCHAT, &std::string(msg));
     }
-    
-
-
+    else if(msg.at(0) == 'D') {
+        SOCKET id = static_cast<SOCKET>(std::stoi(msg.substr(2)));
+        eventManager->triggerEvent(eventManager->PLAYER_DISCONNECTED, &id);
+    }
 }
 
 std::string ProtocolHandler::getProcotol(ProtocolHandler::PROTOCOL_NAME name) const

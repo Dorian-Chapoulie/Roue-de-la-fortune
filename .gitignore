@@ -16,3 +16,17 @@ Server/.vs/Server/v16/.suo
 Server/Debug/
 
 Server/Server/Debug/
+
+*.exe
+
+*.iobj
+
+*.ipdb
+
+*.pdb
+
+Server/Server/players.txt
+
+Server/Server/Release/
+
+Server/Server/x64/Release/

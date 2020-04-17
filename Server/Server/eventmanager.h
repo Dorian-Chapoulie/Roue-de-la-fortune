@@ -17,6 +17,7 @@ public:
         GET_ALL_GAMES,
         ASK_PSEUDO,
         TCHAT,
+        PLAYER_DISCONNECTED,
     };
 
     void addListener(EVENT eventName, std::function<void(void*)>&& handler);

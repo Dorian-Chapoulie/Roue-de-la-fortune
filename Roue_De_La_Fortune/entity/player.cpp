@@ -19,3 +19,8 @@ SOCKET Player::getId()
 {
     return id;
 }
+
+void Player::setName(std::string name)
+{
+    this->name = name;
+}

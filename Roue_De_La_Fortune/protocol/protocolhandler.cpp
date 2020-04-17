@@ -6,7 +6,6 @@ ProtocolHandler::ProtocolHandler()
     protocoles.insert_or_assign(PROTOCOL_NAME::GET_ALL_GAMES, "G");
 }
 
-#include <iostream>
 void ProtocolHandler::callEventFromProtocol(std::string msg)
 {
     EventManager* eventManager = EventManager::getInstance();
@@ -35,6 +34,9 @@ void ProtocolHandler::callEventFromProtocol(std::string msg)
     }else if(msg.at(0) == 'T') {
         std::string data = msg.substr(2);
         eventManager->triggerEvent(eventManager->TCHAT, data);
+    }else if(msg.at(0) == 'D') {
+        std::string id = msg.substr(2);
+        eventManager->triggerEvent(eventManager->PLAYER_DISCONNECT, id);
     }
 }
 

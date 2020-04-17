@@ -33,8 +33,11 @@ private slots:
 
     void on_tableWidget_itemDoubleClicked(QTableWidgetItem *item);
 
+    void onServerFaillure(QString msg);
+
 signals:
     void updateList(QString);
+    void notifyConnectionError(QString);
 };
 
 #endif // SERVERNAVIGATOR_H

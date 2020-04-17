@@ -18,8 +18,9 @@ EventManager::~EventManager()
 {    
 }
 
+
 void EventManager::addListener(EventManager::EVENT eventName, std::function<void(void*)>&& handler)
-{    
+{        
     events.insert_or_assign(eventName, handler);
 }
 
@@ -30,12 +31,12 @@ void EventManager::triggerEvent(EventManager::EVENT eventName)
 }
 
 void EventManager::triggerEvent(EventManager::EVENT eventName, std::string msg)
-{    
+{        
     if(events[eventName] != nullptr)
-        events[eventName](&msg);
+        events[eventName](&msg);    
 }
 
 void EventManager::unSubsribeEvent(EventManager::EVENT eventName)
-{
+{    
     events[eventName] = nullptr;
 }

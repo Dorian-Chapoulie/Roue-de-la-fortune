@@ -24,7 +24,7 @@ Game::Game(std::string& name)
 	});
 
 	eventManager.addListener(EventManager::EVENT::TCHAT, [&](void* data) {
-		std::string msg = *reinterpret_cast<std::string*>(data);
+		std::string msg = *reinterpret_cast<std::string*>(data);		
 		for (Player* p : players) {
 			SOCKET id = p->getId();
 			server->sendMessage(msg, id);
@@ -48,13 +48,42 @@ Game::Game(std::string& name)
 
 		for (Player* p : players) {								
 			for (Player* p2 : players) {
-				SOCKET tempId = p->getId();
+				SOCKET tempId = p->getId(); //TODO: fix Lvalue and Rvalue by const cast
 				
 				this->server->sendMessage(protocol->getProcotol(protocol->NOTIFY_NEW_PLAYER) + "-" + p2->getName() + "-" + std::to_string(p2->getId()), tempId);
 				std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			}			
 		}
 	});
+
+	eventManager.addListener(eventManager.PLAYER_DISCONNECTED, [&](void* socket) {
+		auto it = std::find_if(players.begin(), players.end(), [&](Player* p) {
+			return p->getId() == *static_cast<SOCKET*>(socket);
+		});
+
+		if (it != players.end()) {
+			players.erase(it);
+		}
+
+		for (Player* p : players) {
+			SOCKET tmp = p->getId();			
+			server->sendMessage(protocol->getProcotol(protocol->PLAYER_DISCONNECTED) + std::to_string(*static_cast<SOCKET*>(socket)), tmp);
+		}
+	});
+
+	std::thread threadPingPlayers([&]() { 
+		while (true){ //TODO bool is partie finished
+			mutex.lock();
+			for (Player* p : players) {
+				SOCKET tempId = p->getId(); //TODO: fix Lvalue and Rvalue by const cast
+				server->sendMessage("0", tempId);				
+				std::this_thread::sleep_for(std::chrono::milliseconds(200));
+			}
+			mutex.unlock();
+			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		}
+	});
+	threadPingPlayers.detach();
 }
 
 Game::~Game() {

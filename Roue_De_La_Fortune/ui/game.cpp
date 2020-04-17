@@ -3,6 +3,7 @@
 #include "event/eventmanager.h"
 #include "protocol/protocolhandler.h"
 #include "entity/localplayer.h"
+#include <string>
 
 #include <QMessageBox>
 #include <iostream>
@@ -15,6 +16,7 @@ Game::Game(QWidget *parent) :
 
     connect(this, SIGNAL(notifyNewPlayer(QString)), this, SLOT(addNewPlayer(QString)));
     connect(this, SIGNAL(notifyNewMessage(QString)), this, SLOT(addMessageToChat(QString)));
+    connect(this, SIGNAL(notifyPlayerDisconnected(int)), this, SLOT(removePlayer(int)));
 
     ui->lineEditChat->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,50}"), this));
 
@@ -33,7 +35,6 @@ Game::Game(QWidget *parent) :
 
     LocalPlayer::getInstance()->login();
 
-
     EventManager::getInstance()->addListener(EventManager::EVENT::ASK_PSEUDO, [](void*){
         ProtocolHandler protocol;
         LocalPlayer::getInstance()->sendMessage(protocol.getPseudoProtocol(LocalPlayer::getInstance()->getName()));
@@ -47,6 +48,11 @@ Game::Game(QWidget *parent) :
     EventManager::getInstance()->addListener(EventManager::EVENT::TCHAT, [&](void* data){
         std::string tchatData = *reinterpret_cast<std::string*>(data); //player-message
         emit notifyNewMessage(QString::fromStdString(tchatData));
+    });
+
+    EventManager::getInstance()->addListener(EventManager::PLAYER_DISCONNECT, [&](void* playerId){
+        int id = std::stoi(*reinterpret_cast<std::string*>(playerId));
+        emit notifyPlayerDisconnected(id);
     });
 
 }
@@ -98,7 +104,30 @@ void Game::addMessageToChat(QString msg)
     std::string message = msg.toStdString().substr(pos + 1, msg.length() - pos);
 
     ui->textBrowserChat->append("<font color=\"Grey\"><b>" + QString::fromStdString(pseudo) + ":</b> "
-                                 + "<font color=\"Black\">" + QString::fromStdString(message));
+                                + "<font color=\"Black\">" + QString::fromStdString(message));
+}
+
+void Game::removePlayer(int id)
+{
+    std::string pseudo = "";
+
+    auto it = std::find_if(players.begin(), players.end(), [&](Player* p){
+        return p->getId() == static_cast<SOCKET>(id);
+    });
+
+    pseudo = reinterpret_cast<Player*>(*it)->getName();
+    players.erase(it);
+
+    ui->textBrowserChat->append("<font color=\"Red\"><b>" + QString::fromStdString(pseudo) + " </b> "
+                                + "<font color=\"Black\"> à quitté la partie");
+
+    if(this->ui->labelPlayer1->text().toStdString() == pseudo) {
+        this->ui->labelPlayer1->clear();
+    }else if(this->ui->labelPlayer2->text().toStdString() == pseudo) {
+        this->ui->labelPlayer2->clear();
+    }if(this->ui->labelPlayer3->text().toStdString() == pseudo) {
+        this->ui->labelPlayer3->clear();
+    }
 }
 
 void Game::on_pushButtonChat_clicked()

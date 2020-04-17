@@ -17,6 +17,7 @@ public:
         ASK_PSEUDO,
         NEW_PLAYER,
         TCHAT,
+        PLAYER_DISCONNECT,
     };
 
     static EventManager* getInstance();

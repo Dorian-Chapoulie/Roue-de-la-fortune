@@ -17,6 +17,8 @@ public:
     std::string& getName();
     SOCKET getId();
 
+    void setName(std::string name);
+
 private:
     std::string name;
     int money = 0;

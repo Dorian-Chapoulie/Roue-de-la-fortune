@@ -34,10 +34,11 @@ void TCPServer::sendMessage(std::string msg, SOCKET& client)
         if (it != m_socketClients.end()) {
             m_socketClients.erase(it);
             std::cout << m_port << ": client disconnected: " << client <<  std::endl;
+            protocolHandler->callEventFromProtocol("D-" + std::to_string(client), &client);
         }
         else {
             std::cout << "Erreur lors de la supression du client" << std::endl;
-            m_socketClients.clear();
+            //m_socketClients.clear();
         }
         //TODO erreur
     }
@@ -75,7 +76,7 @@ void TCPServer::fn_threadReceiver(SOCKET* client)
     while (doListen) {
         bytesReceived = recv(*client, buffer, 255 - 1, 0);
         if (bytesReceived > 0) {
-            std::cout << "Client: " << std::string(buffer, bytesReceived) << std::endl;
+            //std::cout << "Client: " << std::string(buffer, bytesReceived) << std::endl;
             mutex.lock();
             protocolHandler->callEventFromProtocol(std::string(buffer, bytesReceived), client);
             mutex.unlock();

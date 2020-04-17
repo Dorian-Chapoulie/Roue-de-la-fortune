@@ -18,10 +18,16 @@ ServerNavigator::ServerNavigator(QWidget *parent) :
     ui->lineEdit->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,20}"), this));
 
     connect(this, SIGNAL(updateList(QString)), this, SLOT(addServerInList(QString)));
+    connect(this, SIGNAL(notifyConnectionError(QString)), this, SLOT(onServerFaillure(QString)));
 
     EventManager::getInstance()->addListener(EventManager::EVENT::GAMES_LIST, [&](void* msg){
         emit updateList(QString::fromStdString(*reinterpret_cast<std::string*>(msg)));
     });
+
+    EventManager::getInstance()->addListener(EventManager::EVENT::CONNEXION_FAILURE, [&](void* msg){
+        emit notifyConnectionError(QString::fromStdString(*reinterpret_cast<std::string*>(msg)));
+    });
+
 
     headerList.append("Nom");
     headerList.append("Joueurs");
@@ -157,4 +163,15 @@ void ServerNavigator::on_tableWidget_itemDoubleClicked(QTableWidgetItem *item)
     std::string ip =  ui->tableWidget->model()->index(item->row(), 3).data().toString().toStdString();
     int port =  ui->tableWidget->model()->index(item->row(), 4).data().toInt();
     joinGame(ip, port);
+}
+
+void ServerNavigator::onServerFaillure(QString msg)
+{
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Navigateur de serveurs");
+    msgBox.setText("Erreur");
+    msgBox.setInformativeText(msg);
+    msgBox.setDefaultButton(QMessageBox::Ok);
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.exec();
 }

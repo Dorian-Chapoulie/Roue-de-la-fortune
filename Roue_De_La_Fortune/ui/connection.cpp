@@ -31,14 +31,14 @@ Connection::Connection(QWidget *parent)
 
 Connection::~Connection()
 {    
-    EventManager::getInstance()->unSubsribeEvent(EventManager::EVENT::CONNEXION_SUCCESS);
-    EventManager::getInstance()->unSubsribeEvent(EventManager::EVENT::CONNEXION_FAILURE);
+    EventManager::getInstance()->unSubsribeEvent(EventManager::EVENT::CONNEXION_SUCCESS);    
     delete ui;
 }
 
 void Connection::on_connectionButton_clicked()
 {
-    LocalPlayer::setName(ui->lineEmail->text().toStdString());
+    LocalPlayer::setTempName(ui->lineEmail->text().toStdString());
+    std::cout << "Pseudo: " << LocalPlayer::getInstance()->getName() << std::endl;
     LocalPlayer::getInstance()->setPassword(ui->linePsw->text().toStdString());
     LocalPlayer::getInstance()->login();
 }

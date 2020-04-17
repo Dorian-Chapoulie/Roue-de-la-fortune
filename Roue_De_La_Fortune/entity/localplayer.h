@@ -7,7 +7,7 @@ class LocalPlayer : public Player, public TCPClient {
 
 public:
     static LocalPlayer* getInstance();
-    static void setName(std::string&& name);
+    static void setTempName(std::string name);
     static void setId(int id);
 
     void login();
@@ -24,7 +24,7 @@ private:
 
 private:
     static LocalPlayer* instance;
-    static std::string name;
+    static std::string tempName;
     static int id;
 };
 
