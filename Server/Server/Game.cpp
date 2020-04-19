@@ -3,20 +3,15 @@
 #include "eventmanager.h"
 #include "protocolhandler.h"
 
-std::vector<Game*> Game::games;
-std::mutex Game::mutex;
-
 #include <iostream>
-Game::Game(std::string& name)
+Game::Game(std::string& name, int port)
 {
 	this->name = name;
+	this->createdDate = std::chrono::system_clock::now();
 	protocol = new ProtocolHandler(&eventManager);
 
-	mutex.lock();
-	server = new TCPServer(Config::getInstance()->baseIp, Config::getInstance()->basePort + games.size() + 1, protocol);
-	games.push_back(this);
-	std::cout << "New server '" << name << "'\t " << Config::getInstance()->baseIp << ":" << Config::getInstance()->basePort + games.size() << std::endl;
-	mutex.unlock();	
+	server = new TCPServer(Config::getInstance()->baseIp, port, protocol);
+	std::cout << "New server '" << name << "'\t " << Config::getInstance()->baseIp << ":" << port << std::endl;
 
 	eventManager.addListener(EventManager::EVENT::PLAYER_CONNECT_OK, [&](void* sock) {		
 		this->players.push_back(new Player(*reinterpret_cast<SOCKET*>(sock)));
@@ -71,24 +66,34 @@ Game::Game(std::string& name)
 		}
 	});
 
-	std::thread threadPingPlayers([&]() { 
-		while (true){ //TODO bool is partie finished
+	threadPingPlayers = new std::thread([&]() { 
+		while (pingPlayers){ //TODO bool is partie finished
 			mutex.lock();
 			for (Player* p : players) {
-				SOCKET tempId = p->getId(); //TODO: fix Lvalue and Rvalue by const cast
+				SOCKET tempId = p->getId(); //TODO: fix Lvalue and Rvalue by const cast				
 				server->sendMessage("0", tempId);				
 				std::this_thread::sleep_for(std::chrono::milliseconds(200));
 			}
 			mutex.unlock();
 			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 		}
+		isThreadPingFinished = true;
 	});
-	threadPingPlayers.detach();
+	threadPingPlayers->detach();
+	
 }
 
-Game::~Game() {
+Game::~Game() {	
 	this->players.clear();
 	this->spectators.clear();
+	delete protocol;
+	pingPlayers = false;
+	while (!isThreadPingFinished) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(200));
+	}	
+	delete server;
+	server = nullptr;	
+	std::cout << "Game delete ok" << std::endl;
 }
 
 std::string Game::getInfos() const
@@ -104,4 +109,9 @@ std::string Game::getInfos() const
 		+ std::to_string(server->getPort());
 
 	return ret;
+}
+
+std::chrono::system_clock::time_point Game::getCreatedDate() const
+{
+	return createdDate;
 }

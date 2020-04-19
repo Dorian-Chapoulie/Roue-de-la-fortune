@@ -31,6 +31,7 @@ public:
     void    sendMessage(std::string msg);
     void    disconnect();
     bool    connectToServer(std::string ip, unsigned int port);
+    bool    connectToBaseServer();
 
 private:
     unsigned int m_port;

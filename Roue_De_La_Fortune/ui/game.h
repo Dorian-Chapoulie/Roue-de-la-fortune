@@ -1,6 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <QGraphicsScene>
 #include <QWidget>
 #include "entity/player.h"
 
@@ -30,8 +31,11 @@ signals:
 
 private:
     Ui::Game *ui;
-
+    QGraphicsScene* scene;
     std::vector<Player*> players;
+
+
+    void drawScene();
 };
 
 #endif // GAME_H

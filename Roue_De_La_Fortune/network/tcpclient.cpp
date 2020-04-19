@@ -1,6 +1,7 @@
 #include "network/tcpclient.h"
 #include "protocol/protocolhandler.h"
 #include "event/eventmanager.h"
+#include "config/config.h"
 
 TCPClient::TCPClient(std::string ip, unsigned int port)
 {  
@@ -20,7 +21,6 @@ void TCPClient::sendMessage(std::string msg)
     if(!isConnected)
         init();
 
-    std::cout << "send: " << msg << std::endl;
     if(send(m_socket, msg.c_str(), msg.length(), 0) < 0){
         EventManager::getInstance()->triggerEvent(EventManager::EVENT::CONNEXION_FAILURE,
                                                   "Une erreur de communication avec le serveur est survenue. Veuillez réessayer plus tard.");
@@ -51,6 +51,15 @@ bool TCPClient::connectToServer(std::string ip, unsigned int port)
     return init();
 }
 
+bool TCPClient::connectToBaseServer() {
+    if(isConnected)
+        disconnect();
+
+    m_ip = Config::getInstance()->baseServerIP;
+    m_port = Config::getInstance()->baseServerPort;
+    return init();
+}
+
 #include <iostream>
 void TCPClient::fn_threadReceiver()
 {
@@ -61,7 +70,7 @@ void TCPClient::fn_threadReceiver()
         bytesReceived = recv(m_socket, buffer, 255 - 1, 0);
         if(bytesReceived > 0) {            
             protocolHandler.callEventFromProtocol(std::string(buffer, bytesReceived));
-            std::cout << "received: " << std::string(buffer, bytesReceived) << std::endl;
+            std::cout << "received: " << std::string(buffer, bytesReceived) << "." << std::endl;
             bytesReceived = 0;
             memset(buffer, 0, 255);
         }

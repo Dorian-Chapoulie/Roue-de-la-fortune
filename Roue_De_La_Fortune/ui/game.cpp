@@ -4,6 +4,7 @@
 #include "protocol/protocolhandler.h"
 #include "entity/localplayer.h"
 #include <string>
+#include <QThread>
 
 #include <QMessageBox>
 #include <iostream>
@@ -55,11 +56,28 @@ Game::Game(QWidget *parent) :
         emit notifyPlayerDisconnected(id);
     });
 
+    scene = new QGraphicsScene(this);
+    this->ui->graphicsView->setScene(scene);
+
 }
 
 Game::~Game()
 {
     delete ui;
+}
+
+
+void Game::drawScene()
+{
+    scene->addLine(0, 0, 100, 100);
+
+    QThread::create([&](){
+        QThread::msleep(10);
+        if(!false) { //stop
+            while(!this->isActiveWindow()) QThread::msleep(10);
+           // emit renderScene();
+        }
+    })->start();
 }
 
 void Game::addNewPlayer(QString data)
@@ -148,3 +166,4 @@ void Game::on_pushButtonChat_clicked()
     }
 
 }
+

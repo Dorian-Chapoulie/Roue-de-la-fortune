@@ -8,23 +8,28 @@
 class Game {
 
 public:
-	Game(std::string& name);
+	Game(std::string& name, int port);
 	~Game();
 
 	std::string getInfos() const;
-
-	static std::vector<Game*> games;
+	std::chrono::system_clock::time_point getCreatedDate() const;
 
 private:
 	TCPServer* server = nullptr;
 	EventManager eventManager;
 	ProtocolHandler* protocol;
 
+	std::thread* threadPingPlayers;
+
 	std::string name;
+
 	std::vector<Player*> players;
 	std::vector<Player*> spectators;
+	
+	std::mutex mutex;
+	std::chrono::system_clock::time_point createdDate;
 
-private:	
-	static std::mutex mutex;
+	bool pingPlayers = true;
+	bool isThreadPingFinished = false;
 };
 

@@ -34,6 +34,7 @@ public:
 
     void    sendMessage(std::string msg, SOCKET& client);
     void    disconnect();   
+    bool    isListening() const;
 
     std::string getIp() const;
     unsigned int getPort() const;
@@ -57,6 +58,7 @@ private:
 
     bool doListen = true;  
     bool waitForPlayers = true;
+    int threadsRunning = 0;
 
     void    init();
     void    fn_threadReceiver(SOCKET* client);    

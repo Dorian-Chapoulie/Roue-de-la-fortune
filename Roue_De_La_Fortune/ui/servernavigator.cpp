@@ -46,7 +46,9 @@ ServerNavigator::ServerNavigator(QWidget *parent) :
 
 ServerNavigator::~ServerNavigator()
 {     
-    Sleep(1200);
+    EventManager::getInstance()->unSubsribeEvent(EventManager::EVENT::GAMES_LIST);
+    EventManager::getInstance()->unSubsribeEvent(EventManager::EVENT::CONNEXION_FAILURE);
+    //Sleep(1200);
     delete ui;
 }
 
@@ -65,6 +67,7 @@ void ServerNavigator::joinGame(std::string &ip, int port)
        this->close();
 
     }else {
+        LocalPlayer::getInstance()->connectToBaseServer();
         QMessageBox msgBox;
         msgBox.setWindowTitle("Navigateur de serveurs");
         msgBox.setText("Erreur");

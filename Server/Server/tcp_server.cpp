@@ -21,8 +21,16 @@ TCPServer::TCPServer(std::string ip, unsigned int port, ProtocolHandler* protoco
 
 TCPServer::~TCPServer()
 {
-    delete m_threadReceiver;
     disconnect();
+    //shutdown(m_socketFd, 0);
+    //shutdown(m_socketFd, 1);
+
+    while (threadsRunning > 0) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    }
+    std::cout << "thread delete ok" << std::endl;
+    delete m_threadAccept;
+    delete m_threadReceiver;    
 }
 
 void TCPServer::sendMessage(std::string msg, SOCKET& client)
@@ -46,12 +54,16 @@ void TCPServer::sendMessage(std::string msg, SOCKET& client)
 
 void TCPServer::disconnect()
 {
-    doListen = false;
-    m_threadReceiver->join();
+    doListen = false;    
     closesocket(m_socketfd);
 #ifdef WIN32
     WSACleanup();
 #endif
+}
+
+bool TCPServer::isListening() const
+{
+    return doListen;
 }
 
 std::string TCPServer::getIp() const
@@ -75,7 +87,7 @@ void TCPServer::fn_threadReceiver(SOCKET* client)
     int bytesReceived = 0;
     while (doListen) {
         bytesReceived = recv(*client, buffer, 255 - 1, 0);
-        if (bytesReceived > 0) {
+        if (bytesReceived > 0 && doListen) {
             //std::cout << "Client: " << std::string(buffer, bytesReceived) << std::endl;
             mutex.lock();
             protocolHandler->callEventFromProtocol(std::string(buffer, bytesReceived), client);
@@ -83,34 +95,39 @@ void TCPServer::fn_threadReceiver(SOCKET* client)
             bytesReceived = 0;
         }
     }
+    std::cout << "Thread Receiver done" << std::endl;
+    threadsRunning--;
 }
 
 void TCPServer::fn_threadAcceptNewClient()
 {
     SOCKADDR clientSockAddr; // list ?
-    int size = sizeof(clientSockAddr);    
-    std::cout << "Server " << m_ip << ":" << m_port << " listening" << std::endl;
-    while (waitForPlayers) {     
-
+    int size = sizeof(clientSockAddr);
+    while (waitForPlayers && doListen) {     
+        SOCKET tempSocket = 0;
         #ifdef _WIN32
-            m_socketClients.push_back(accept(m_socketfd, (SOCKADDR*)&clientSockAddr, &size));
+            tempSocket = accept(m_socketfd, (SOCKADDR*)&clientSockAddr, &size);
         #else
-            m_socketClients.push_back(accept(m_socketfd, (SOCKADDR*)&clientSockAddr, (socklen_t*)&size));
+            tempSocket = accept(m_socketfd, (SOCKADDR*)&clientSockAddr, (socklen_t*)&size);
         #endif
 
-        if (m_socketClients.size() == MAX_CLIENT)
+        if (m_socketClients.size() == MAX_CLIENT - 1)
             waitForPlayers = false;
-        
-        if (m_socketClients.back() < 0) {
+
+        if (tempSocket < 0) {
             printf("server acccept failed...\n");
             exit(0);
         }
-        else {               
-            std::cout << "Server: " << m_port << ", new client: " << m_socketClients.back() << std::endl;
+        else if (static_cast<unsigned int>(tempSocket) != -1) {
+            std::cout << "start receiver: " << m_port << std::endl;
+            m_socketClients.push_back(tempSocket);
             m_threadReceiver = new std::thread(&TCPServer::fn_threadReceiver, this, &m_socketClients.back());
-            m_threadReceiver->detach();
+            m_threadReceiver->detach();     
+            threadsRunning++;
         }
     }
+    std::cout << "Thread Accept closed" << std::endl;
+    threadsRunning--;
 }
 
 void TCPServer::init()
@@ -132,7 +149,6 @@ void TCPServer::init()
         exit(errno);
         //TODO errrur
     }
-
    
     SOCKADDR_IN sin;
     sin.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -152,4 +168,5 @@ void TCPServer::init()
 
     m_threadAccept = new std::thread(&TCPServer::fn_threadAcceptNewClient, this);
     m_threadAccept->detach();
+    threadsRunning++;
 }
