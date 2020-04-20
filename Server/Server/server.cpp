@@ -62,7 +62,7 @@ int main()
             auto time = std::chrono::system_clock::now();          
             std::vector<Game*>::iterator iterator = std::find_if(games.begin(), games.end(), [=](Game* g) {
                 std::chrono::duration<double> elapsed_seconds = time - g->getCreatedDate();                
-                return elapsed_seconds.count() >= 2.0;
+                return elapsed_seconds.count() >= 500.0;
             });
 
             if (iterator != games.end()) {                

@@ -94,6 +94,9 @@ void TCPServer::fn_threadReceiver(SOCKET* client)
             mutex.unlock();
             bytesReceived = 0;
         }
+        else {
+            break;
+        }
     }
     std::cout << "Thread Receiver done" << std::endl;
     threadsRunning--;
