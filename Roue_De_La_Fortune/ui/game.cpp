@@ -18,6 +18,7 @@ Game::Game(QWidget *parent) :
     connect(this, SIGNAL(notifyNewPlayer(QString)), this, SLOT(addNewPlayer(QString)));
     connect(this, SIGNAL(notifyNewMessage(QString)), this, SLOT(addMessageToChat(QString)));
     connect(this, SIGNAL(notifyPlayerDisconnected(int)), this, SLOT(removePlayer(int)));
+    connect(this, SIGNAL(notifyUpdateScene()), this, SLOT(drawScene()));
 
     ui->lineEditChat->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,50}"), this));
 
@@ -57,7 +58,64 @@ Game::Game(QWidget *parent) :
     });
 
     scene = new QGraphicsScene(this);
+     scene->setSceneRect(0, 0, 840, 430);
     this->ui->graphicsView->setScene(scene);
+
+    //50 char
+    std::string phrase = "vendredi ou la douzaine";
+
+    int sentenceLenght = phrase.length();
+    int reste = 50 - sentenceLenght;
+
+    std::cout << "rest: " << reste << std::endl;
+
+    int index = 0;
+    int charPos = 0;
+    for(int y = 0; y < 5; y++) {
+        for(int x = 0; x < 10; x++) {
+            if(charPos >= reste / 2 && index < sentenceLenght) {
+                if(phrase.at(index) != ' ') {
+                    cases.push_back(Case(x * Case::width + (x * 4), y * Case::height + (y * 6) , true));
+                    cases.back().setLetter(phrase.at(index));
+                } else {
+                    cases.push_back(Case(x * Case::width + (x * 4) ,
+                                     y * Case::height + (y * 6), false));
+                }
+                index++;
+            }else {
+                cases.push_back(Case(x * Case::width + (x * 4) ,
+                                 y * Case::height + (y * 6), false));
+            }
+            charPos++;
+        }
+    }
+
+    std::thread t([&](){
+        std::vector<char> letters = getLettersFromString(phrase);
+        for(char c : letters) {
+            for(Case& ca : cases) {
+                if(ca.getLetter() == c) {
+                    ca.displayLetterAnimation();
+                    emit notifyUpdateScene();
+                    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+                }
+            }
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(800));
+
+            for(Case& ca : cases) {
+                if(ca.getLetter() == c) {
+                    ca.displayLetter();
+                    emit notifyUpdateScene();
+                    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+                }
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        }
+    });
+    t.detach();
+
+    drawScene();
 
 }
 
@@ -69,15 +127,17 @@ Game::~Game()
 
 void Game::drawScene()
 {
-    scene->addLine(0, 0, 100, 100);
+    for(Case& c : cases) {
+        c.drawBox(this->scene);
+    }
 
-    QThread::create([&](){
+    /*QThread::create([&](){
         QThread::msleep(10);
         if(!false) { //stop
             while(!this->isActiveWindow()) QThread::msleep(10);
            // emit renderScene();
         }
-    })->start();
+    })->start();*/
 }
 
 void Game::addNewPlayer(QString data)
@@ -165,5 +225,18 @@ void Game::on_pushButtonChat_clicked()
         msgBox.exec();
     }
 
+}
+
+std::vector<char> Game::getLettersFromString(std::string s)
+{
+    std::vector<char> ret;
+    for(char c : s) {
+        auto it = std::find(ret.begin(), ret.end(), c);
+        if(it == ret.end()) {
+            ret.push_back(c);
+        }
+    }
+
+    return ret;
 }
 

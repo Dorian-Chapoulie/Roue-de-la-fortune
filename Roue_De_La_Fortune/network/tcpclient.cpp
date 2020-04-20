@@ -70,7 +70,7 @@ void TCPClient::fn_threadReceiver()
         bytesReceived = recv(m_socket, buffer, 255 - 1, 0);
         if(bytesReceived > 0) {            
             protocolHandler.callEventFromProtocol(std::string(buffer, bytesReceived));
-            std::cout << "received: " << std::string(buffer, bytesReceived) << "." << std::endl;
+            //std::cout << "received: " << std::string(buffer, bytesReceived) << "." << std::endl;
             bytesReceived = 0;
             memset(buffer, 0, 255);
         }

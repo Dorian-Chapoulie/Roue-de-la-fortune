@@ -17,10 +17,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    graphics/case.cpp \
     config/config.cpp \
     entity/localplayer.cpp \
     entity/player.cpp \
     event/eventmanager.cpp \
+    graphics/case.cpp \
     ui/game.cpp \
     ui/inscription.cpp \
     ui/servernavigator.cpp \
@@ -31,10 +33,12 @@ SOURCES += \
     main.cpp \
 
 HEADERS += \
+    graphics/case.h \
     config/config.h \
     entity/localplayer.h \
     entity/player.h \
     event/eventmanager.h \
+    graphics/case.h \
     ui/game.h \
     ui/inscription.h \
     ui/servernavigator.h \
