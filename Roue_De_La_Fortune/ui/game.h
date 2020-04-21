@@ -26,6 +26,8 @@ private slots:
 
     void on_pushButtonChat_clicked();
 
+    void on_pushButton_clicked();
+
 signals:
     void notifyNewPlayer(QString);
     void notifyNewMessage(QString);
@@ -35,10 +37,16 @@ signals:
 private:
     Ui::Game *ui;
     QGraphicsScene* scene;
+
+    std::string currentSentence;
+
     std::vector<Player*> players;
     std::vector<Case> cases;
 
+    bool isQuickRiddle = true;
+
     std::vector<char> getLettersFromString(std::string s);
+    void prepareScene();
 };
 
 #endif // GAME_H

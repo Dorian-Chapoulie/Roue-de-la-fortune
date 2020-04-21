@@ -12,6 +12,9 @@ ProtocolHandler::ProtocolHandler(EventManager* eventManager)
     protocoles.insert_or_assign(PROTOCOL_NAME::ASK_PSEUDO, "N");
     protocoles.insert_or_assign(PROTOCOL_NAME::NOTIFY_NEW_PLAYER, "NJ");
     protocoles.insert_or_assign(PROTOCOL_NAME::PLAYER_DISCONNECTED, "D-");
+    protocoles.insert_or_assign(PROTOCOL_NAME::SEND_QUICK_RIDDLE, "Q-");
+    protocoles.insert_or_assign(PROTOCOL_NAME::SEND_WORD, "W-");
+    protocoles.insert_or_assign(PROTOCOL_NAME::SEND_WINNER_ID, "J-");
     this->eventManager = eventManager;
 }
 
@@ -109,9 +112,29 @@ void ProtocolHandler::callEventFromProtocol(std::string msg, SOCKET* socket)
         SOCKET id = static_cast<SOCKET>(std::stoi(msg.substr(2)));
         eventManager->triggerEvent(eventManager->PLAYER_DISCONNECTED, &id);
     }
+    else if (msg.at(0) == 'Q') {
+        std::string data = msg.substr(2);
+        data += "-" + std::to_string(*socket);
+        eventManager->triggerEvent(eventManager->PLAYER_QUICK_RIDDLE, &data);
+    }
 }
 
 std::string ProtocolHandler::getProcotol(ProtocolHandler::PROTOCOL_NAME name) const
 {
     return this->protocoles.at(name);
+}
+
+std::string ProtocolHandler::getQuickRiddleProtocol(std::string& sentence)
+{
+    return this->protocoles.at(PROTOCOL_NAME::SEND_QUICK_RIDDLE) + sentence;
+}
+
+std::string ProtocolHandler::getSendLetterProtocol(char& letter, int position)
+{
+    return this->protocoles.at(PROTOCOL_NAME::SEND_WORD) + letter + "-" + std::to_string(position);
+}
+
+std::string ProtocolHandler::getWinnerIdProtocol(int id)
+{
+    return this->protocoles.at(PROTOCOL_NAME::SEND_WINNER_ID) + std::to_string(id);
 }

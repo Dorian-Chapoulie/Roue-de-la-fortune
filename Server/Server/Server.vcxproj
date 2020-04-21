@@ -142,6 +142,7 @@
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="eventmanager.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="protocolhandler.cpp" />
     <ClCompile Include="server.cpp" />
@@ -151,6 +152,7 @@
     <ClInclude Include="Config.h" />
     <ClInclude Include="eventmanager.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameManager.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="protocolhandler.h" />
     <ClInclude Include="tcp_server.h" />

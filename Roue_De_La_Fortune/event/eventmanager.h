@@ -18,6 +18,8 @@ public:
         NEW_PLAYER,
         TCHAT,
         PLAYER_DISCONNECT,
+        RECEIVE_QUICK_RIDDLE,
+        RECEIVE_LETTER,
     };
 
     static EventManager* getInstance();

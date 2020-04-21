@@ -1,10 +1,11 @@
 #include "case.h"
+#include <QString>
 
 int Case::width = 80;
 int Case::height = 80;
 
 #include <iostream>
-Case::Case(int x, int y, bool isWaittingLetter) : x(x), y(y), isWaittingLetter(isWaittingLetter)
+Case::Case(int x, int y, int id, bool isWaittingLetter) : x(x), y(y), id(id), isWaittingLetter(isWaittingLetter)
 {}
 
 void Case::drawBox(QGraphicsScene* scene) {
@@ -33,7 +34,7 @@ void Case::drawBox(QGraphicsScene* scene) {
     }
 }
 
-void Case::setLetter(char letter) {
+void Case::setLetter(char letter) {   
     this->letter = letter;
 }
 
@@ -45,6 +46,11 @@ void Case::displayLetter() {
 void Case::displayLetterAnimation()
 {
     this->animateLetter = true;
+}
+
+int Case::getId()
+{
+    return id;
 }
 
 char Case::getLetter() const

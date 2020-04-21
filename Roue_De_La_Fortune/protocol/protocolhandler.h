@@ -13,6 +13,7 @@ public:
         ASK_PSEUDO,
         TCHAT,
         GET_ALL_GAMES,
+        SEND_QUICK_RIDDLE_PROPOSITION,
     };
 
     ProtocolHandler();
@@ -23,6 +24,7 @@ public:
     std::string getPseudoProtocol(std::string& pseudo);
     std::string getTchatProtocol(std::string& pseudo, std::string& message);
     std::string getAllGamesProtocol() const;
+    std::string getQuickRiddlePropositon(std::string& sentence);
 
     void callEventFromProtocol(std::string msg);
 

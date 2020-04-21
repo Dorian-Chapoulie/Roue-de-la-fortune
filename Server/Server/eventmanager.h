@@ -18,6 +18,7 @@ public:
         ASK_PSEUDO,
         TCHAT,
         PLAYER_DISCONNECTED,
+    	PLAYER_QUICK_RIDDLE,
     };
 
     void addListener(EVENT eventName, std::function<void(void*)>&& handler);

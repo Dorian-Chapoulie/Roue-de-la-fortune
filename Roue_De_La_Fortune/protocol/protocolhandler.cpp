@@ -37,7 +37,14 @@ void ProtocolHandler::callEventFromProtocol(std::string msg)
     }else if(msg.at(0) == 'D') {
         std::string id = msg.substr(2);
         eventManager->triggerEvent(eventManager->PLAYER_DISCONNECT, id);
+    }else if(msg.at(0) == 'Q'){ // quick riddle
+        std::string phrase = msg.substr(2);
+        eventManager->triggerEvent(eventManager->RECEIVE_QUICK_RIDDLE, phrase);
+    }else if(msg.at(0) == 'W') { // receive letter and pos
+        std::string data = msg.substr(2);
+        eventManager->triggerEvent(eventManager->RECEIVE_LETTER, data);
     }
+
 }
 
 std::string ProtocolHandler::getLoginProtocol(std::string& pseudo, std::string& password) {
@@ -73,4 +80,10 @@ std::string ProtocolHandler::getTchatProtocol(std::string& pseudo, std::string &
 std::string ProtocolHandler::getAllGamesProtocol() const
 {
     return protocoles.at(PROTOCOL_NAME::GET_ALL_GAMES);
+}
+
+std::string ProtocolHandler::getQuickRiddlePropositon(std::string &sentence)
+{
+    protocoles.insert_or_assign(PROTOCOL_NAME::SEND_QUICK_RIDDLE_PROPOSITION, "Q-" + sentence);
+    return protocoles[PROTOCOL_NAME::SEND_QUICK_RIDDLE_PROPOSITION];
 }

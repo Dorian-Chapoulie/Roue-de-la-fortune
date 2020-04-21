@@ -57,38 +57,35 @@ Game::Game(QWidget *parent) :
         emit notifyPlayerDisconnected(id);
     });
 
+    EventManager::getInstance()->addListener(EventManager::RECEIVE_QUICK_RIDDLE, [&](void* sentence){
+        currentSentence = std::string(*reinterpret_cast<std::string*>(sentence));
+        isQuickRiddle = true;
+        prepareScene();
+        emit notifyUpdateScene();
+    });
+
+
+    EventManager::getInstance()->addListener(EventManager::RECEIVE_LETTER, [&](void* data){
+        std::string s_data = *reinterpret_cast<std::string*>(data);
+        char c = s_data.at(0);
+        s_data = s_data.substr(s_data.find("-") + 1);
+        int position = std::stoi(s_data);
+
+        for(Case& c : cases) {
+            if(c.getId() == position){
+                c.displayLetter();
+                break;
+            }
+        }
+        emit notifyUpdateScene();
+
+    });
+
     scene = new QGraphicsScene(this);
-     scene->setSceneRect(0, 0, 840, 430);
+    scene->setSceneRect(0, 0, 840, 430);
     this->ui->graphicsView->setScene(scene);
 
-    //50 char
-    std::string phrase = "vendredi ou la douzaine";
-
-    int sentenceLenght = phrase.length();
-    int reste = 50 - sentenceLenght;
-
-    std::cout << "rest: " << reste << std::endl;
-
-    int index = 0;
-    int charPos = 0;
-    for(int y = 0; y < 5; y++) {
-        for(int x = 0; x < 10; x++) {
-            if(charPos >= reste / 2 && index < sentenceLenght) {
-                if(phrase.at(index) != ' ') {
-                    cases.push_back(Case(x * Case::width + (x * 4), y * Case::height + (y * 6) , true));
-                    cases.back().setLetter(phrase.at(index));
-                } else {
-                    cases.push_back(Case(x * Case::width + (x * 4) ,
-                                     y * Case::height + (y * 6), false));
-                }
-                index++;
-            }else {
-                cases.push_back(Case(x * Case::width + (x * 4) ,
-                                 y * Case::height + (y * 6), false));
-            }
-            charPos++;
-        }
-    }
+     /*
 
     std::thread t([&](){
         std::vector<char> letters = getLettersFromString(phrase);
@@ -113,7 +110,7 @@ Game::Game(QWidget *parent) :
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         }
     });
-    t.detach();
+    t.detach();*/
 
     drawScene();
 
@@ -124,9 +121,36 @@ Game::~Game()
     delete ui;
 }
 
+void Game::prepareScene() {
+
+    int sentenceLenght = currentSentence.length();
+    int reste = 50 - sentenceLenght;
+
+    int index = 0;
+    int charPos = 0;
+    for(int y = 0; y < 5; y++) {
+        for(int x = 0; x < 10; x++) {
+            if(charPos >= reste / 2 && index < sentenceLenght) {
+                if(currentSentence.at(index) != ' ') {
+                    cases.push_back(Case(x * Case::width + (x * 4), y * Case::height + (y * 6), index, true));
+                    cases.back().setLetter(currentSentence.at(index));
+                } else {
+                    cases.push_back(Case(x * Case::width + (x * 4) ,
+                                     y * Case::height + (y * 6), index, false));
+                    cases.back().setLetter(currentSentence.at(index));
+                }
+                index++;
+            }else {
+                cases.push_back(Case(x * Case::width + (x * 4) ,
+                                 y * Case::height + (y * 6), -1, false));
+            }
+            charPos++;
+        }
+    }
+}
 
 void Game::drawScene()
-{
+{    
     for(Case& c : cases) {
         c.drawBox(this->scene);
     }
@@ -240,3 +264,12 @@ std::vector<char> Game::getLettersFromString(std::string s)
     return ret;
 }
 
+
+void Game::on_pushButton_clicked()
+{
+    ProtocolHandler protocolHanlder;
+    std::string proposition = ui->lineEditWord->text().toStdString();
+    if(isQuickRiddle) {
+        LocalPlayer::getInstance()->sendMessage(protocolHanlder.getQuickRiddlePropositon(proposition));
+    }
+}

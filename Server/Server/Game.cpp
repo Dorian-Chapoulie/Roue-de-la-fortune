@@ -2,13 +2,14 @@
 #include "Config.h"
 #include "eventmanager.h"
 #include "protocolhandler.h"
-
+#include "GameManager.h"
 #include <iostream>
+
 Game::Game(std::string& name, int port)
 {
 	this->name = name;
 	this->createdDate = std::chrono::system_clock::now();
-	protocol = new ProtocolHandler(&eventManager);
+	this->protocol = new ProtocolHandler(&eventManager);		
 
 	server = new TCPServer(Config::getInstance()->baseIp, port, protocol);
 	std::cout << "New server '" << name << "'\t " << Config::getInstance()->baseIp << ":" << port << std::endl;
@@ -49,6 +50,7 @@ Game::Game(std::string& name, int port)
 				std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			}			
 		}
+		
 	});
 
 	eventManager.addListener(eventManager.PLAYER_DISCONNECTED, [&](void* socket) {
@@ -80,7 +82,16 @@ Game::Game(std::string& name, int port)
 		isThreadPingFinished = true;
 	});
 	threadPingPlayers->detach();
-	
+
+	std::thread treadStartGame([&]()
+		{
+			while(players.size() < 1)
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			}
+			startGame();
+		});
+	treadStartGame.detach();
 }
 
 Game::~Game() {	
@@ -114,4 +125,47 @@ std::string Game::getInfos() const
 std::chrono::system_clock::time_point Game::getCreatedDate() const
 {
 	return createdDate;
+}
+
+EventManager* Game::getEventManager()
+{
+	return &eventManager;
+}
+
+ProtocolHandler* Game::getProtocolHandler()
+{
+	return protocol;
+}
+
+TCPServer* Game::getServer()
+{
+	return server;
+}
+
+void Game::startGame()
+{
+	GameManager* gameManager = new GameManager(&mutex, &players, protocol, &eventManager, this);	
+	
+	int winnerId = gameManager->quickRiddle();
+
+	if (winnerId != -1) {
+
+		auto it = std::find_if(players.begin(), players.end(), [&](Player* p)
+			{
+				return p->getId() == winnerId;
+			});
+		currentPlayer = winnerId;
+
+	}else {
+		currentPlayer = players.at(0)->getId();
+	}
+	
+	mutex.lock();
+	for(Player* s : players)
+	{
+		SOCKET tmp = s->getId();
+		server->sendMessage(protocol->getWinnerIdProtocol(s->getId()), tmp);
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	}
+	mutex.unlock();
 }

@@ -7,9 +7,10 @@ public:
 	static Config* getInstance();
 
 
-	std::string baseIp = "localhost";
+	std::string baseIp = "192.168.1.50";
 	unsigned int basePort = 25565;
 
+	std::string quickRiddleFile = "quickRiddle.txt";
 
 private:
 	Config();

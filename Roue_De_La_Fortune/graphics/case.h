@@ -8,12 +8,13 @@
 class Case
 {
 public:
-    Case(int x, int y, bool isWaittingLetter = true);
+    Case(int x, int y, int id, bool isWaittingLetter);
 
     void drawBox(QGraphicsScene* scene);
     void setLetter(char letter);
     void displayLetter();
     void displayLetterAnimation();
+    int getId();
     char getLetter() const;
 
     static int width;
@@ -26,6 +27,7 @@ private:
 
     int x = 0;
     int y = 0;
+    int id = -1;
 
     QGraphicsTextItem* text = nullptr;
 };

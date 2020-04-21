@@ -14,7 +14,14 @@ public:
 	std::string getInfos() const;
 	std::chrono::system_clock::time_point getCreatedDate() const;
 
+	EventManager* getEventManager();
+	ProtocolHandler* getProtocolHandler();
+	
+	TCPServer* getServer();
 private:
+
+	void startGame();
+	
 	TCPServer* server = nullptr;
 	EventManager eventManager;
 	ProtocolHandler* protocol;
@@ -29,7 +36,10 @@ private:
 	std::mutex mutex;
 	std::chrono::system_clock::time_point createdDate;
 
+	int currentPlayer = -1;
+
 	bool pingPlayers = true;
 	bool isThreadPingFinished = false;
+	bool isGameFinished = false;
 };
 

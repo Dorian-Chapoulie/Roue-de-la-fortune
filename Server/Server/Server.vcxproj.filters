@@ -27,6 +27,9 @@
     <Filter Include="entity">
       <UniqueIdentifier>{3df00cb4-82e3-483b-ae42-987b272902f3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="game\manager">
+      <UniqueIdentifier>{76585022-e566-4776-b448-4b4fdfff3c58}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="server.cpp">
@@ -50,6 +53,9 @@
     <ClCompile Include="Player.cpp">
       <Filter>entity</Filter>
     </ClCompile>
+    <ClCompile Include="GameManager.cpp">
+      <Filter>game\manager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tcp_server.h">
@@ -69,6 +75,9 @@
     </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>entity</Filter>
+    </ClInclude>
+    <ClInclude Include="GameManager.h">
+      <Filter>game\manager</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

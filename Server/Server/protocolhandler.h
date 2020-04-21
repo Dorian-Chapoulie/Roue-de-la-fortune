@@ -22,12 +22,19 @@ public:
         NOTIFY_NEW_PLAYER,
         TCHAT,
         PLAYER_DISCONNECTED,
+        SEND_QUICK_RIDDLE,
+        SEND_WORD,
+        QUICK_RIDDLE_FOUND,
+    	SEND_WINNER_ID,
     };
 
     ProtocolHandler(EventManager* eventManager);    
 
     void callEventFromProtocol(std::string msg, SOCKET* socket);
     std::string getProcotol(PROTOCOL_NAME name) const;
+    std::string getQuickRiddleProtocol(std::string& sentence);
+    std::string getSendLetterProtocol(char& letter, int position);
+    std::string getWinnerIdProtocol(int id);
 
 private:
     std::unordered_map<PROTOCOL_NAME, std::string> protocoles;
