@@ -15,6 +15,10 @@ ProtocolHandler::ProtocolHandler(EventManager* eventManager)
     protocoles.insert_or_assign(PROTOCOL_NAME::SEND_QUICK_RIDDLE, "Q-");
     protocoles.insert_or_assign(PROTOCOL_NAME::SEND_WORD, "W-");
     protocoles.insert_or_assign(PROTOCOL_NAME::SEND_WINNER_ID, "J-");
+    protocoles.insert_or_assign(PROTOCOL_NAME::BOOL_CAN_PLAY, "B-");
+    protocoles.insert_or_assign(PROTOCOL_NAME::SERVER_CHAT, "T-[Serveur]-");
+    protocoles.insert_or_assign(PROTOCOL_NAME::BAD_RESPONSE, "M");
+    protocoles.insert_or_assign(PROTOCOL_NAME::DISPLAY_RESPONSE, "F");
     this->eventManager = eventManager;
 }
 
@@ -137,4 +141,14 @@ std::string ProtocolHandler::getSendLetterProtocol(char& letter, int position)
 std::string ProtocolHandler::getWinnerIdProtocol(int id)
 {
     return this->protocoles.at(PROTOCOL_NAME::SEND_WINNER_ID) + std::to_string(id);
+}
+
+std::string ProtocolHandler::getCanPlayProtocol(bool canPlay)
+{
+    return this->protocoles.at(PROTOCOL_NAME::BOOL_CAN_PLAY) + std::to_string(canPlay);
+}
+
+std::string ProtocolHandler::getServerChatProtocol(std::string msg)
+{
+    return this->protocoles.at(PROTOCOL_NAME::SERVER_CHAT) + msg;
 }

@@ -21,6 +21,7 @@ public:
 private:
 
 	void startGame();
+	void handleWinner(int winnerId, std::string sentence);
 	
 	TCPServer* server = nullptr;
 	EventManager eventManager;

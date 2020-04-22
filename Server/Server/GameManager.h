@@ -12,6 +12,7 @@ public:
 		Game* game);	
 
 	int quickRiddle();
+	std::string getCurrentSentence();
 private:
 
 	enum EnigmaType { QUICK_RIDDLE, SENTENCE_RIDDLE };		

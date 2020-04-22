@@ -8,6 +8,12 @@ int Case::height = 80;
 Case::Case(int x, int y, int id, bool isWaittingLetter) : x(x), y(y), id(id), isWaittingLetter(isWaittingLetter)
 {}
 
+Case::~Case()
+{
+    delete text;
+    delete rect;
+}
+
 void Case::drawBox(QGraphicsScene* scene) {
     if(isWaittingLetter) {
         scene->addRect(x, y, width, height);
@@ -26,11 +32,11 @@ void Case::drawBox(QGraphicsScene* scene) {
             scene->addRect(x, y, width, height, pen, brush);
         }
 
-    }else {
+    }else if(rect == nullptr) {
         QPen pen;
         QBrush brush(Qt::cyan);
         brush.setStyle(Qt::SolidPattern);
-        scene->addRect(x, y, width, height, pen, brush);
+        rect = scene->addRect(x, y, width, height, pen, brush);
     }
 }
 

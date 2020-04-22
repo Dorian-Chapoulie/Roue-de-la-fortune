@@ -1,1 +1,2 @@
 vendredi tout est permi
+vendredi tout n'est pas permi

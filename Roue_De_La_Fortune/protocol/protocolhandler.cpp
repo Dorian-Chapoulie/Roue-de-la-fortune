@@ -1,5 +1,6 @@
 #include "protocol/protocolhandler.h"
 #include "event/eventmanager.h"
+#include <string>
 
 ProtocolHandler::ProtocolHandler()
 {
@@ -43,6 +44,14 @@ void ProtocolHandler::callEventFromProtocol(std::string msg)
     }else if(msg.at(0) == 'W') { // receive letter and pos
         std::string data = msg.substr(2);
         eventManager->triggerEvent(eventManager->RECEIVE_LETTER, data);
+    }else if(msg.at(0) == 'J') { //gagnant de l'énigme actuelle
+        eventManager->triggerEvent(eventManager->WINNER, msg.substr(2));
+    }else if(msg.at(0) == 'B') { //canPLay
+        eventManager->triggerEvent(eventManager->CAN_PLAY, msg.substr(2));
+    }else if(msg.at(0) == 'M') { //mauvaise réponse
+        eventManager->triggerEvent(eventManager->BAD_RESPONSE);
+    }else if(msg.at(0) == 'F') { //afficher la réponse
+        eventManager->triggerEvent(eventManager->DISPLAY_RESPONSE);
     }
 
 }
@@ -82,8 +91,9 @@ std::string ProtocolHandler::getAllGamesProtocol() const
     return protocoles.at(PROTOCOL_NAME::GET_ALL_GAMES);
 }
 
+#include <iostream>
 std::string ProtocolHandler::getQuickRiddlePropositon(std::string &sentence)
 {
     protocoles.insert_or_assign(PROTOCOL_NAME::SEND_QUICK_RIDDLE_PROPOSITION, "Q-" + sentence);
-    return protocoles[PROTOCOL_NAME::SEND_QUICK_RIDDLE_PROPOSITION];
+    return protocoles.at(PROTOCOL_NAME::SEND_QUICK_RIDDLE_PROPOSITION);
 }

@@ -9,6 +9,7 @@ class Case
 {
 public:
     Case(int x, int y, int id, bool isWaittingLetter);
+    ~Case();
 
     void drawBox(QGraphicsScene* scene);
     void setLetter(char letter);
@@ -30,6 +31,7 @@ private:
     int id = -1;
 
     QGraphicsTextItem* text = nullptr;
+    QGraphicsRectItem* rect = nullptr;
 };
 
 #endif // CASE_H

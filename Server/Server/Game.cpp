@@ -145,8 +145,18 @@ TCPServer* Game::getServer()
 void Game::startGame()
 {
 	GameManager* gameManager = new GameManager(&mutex, &players, protocol, &eventManager, this);	
+
 	
 	int winnerId = gameManager->quickRiddle();
+	handleWinner(winnerId, gameManager->getCurrentSentence());
+	
+	std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+	winnerId = gameManager->quickRiddle();
+	handleWinner(winnerId, gameManager->getCurrentSentence());
+}
+
+void Game::handleWinner(int winnerId, std::string sentence)
+{
 
 	if (winnerId != -1) {
 
@@ -156,16 +166,40 @@ void Game::startGame()
 			});
 		currentPlayer = winnerId;
 
-	}else {
-		currentPlayer = players.at(0)->getId();
+		Player* p = reinterpret_cast<Player*>(*it);
+
+		mutex.lock();
+		for (Player* s : players)
+		{
+			SOCKET tmp = s->getId();
+			server->sendMessage(protocol->getServerChatProtocol("Le gagnant est: " + p->getName() + ", la reponse etait: " + sentence + " !"), tmp);
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			server->sendMessage(protocol->getServerChatProtocol(p->getName() + " prend la main."), tmp);
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			server->sendMessage(protocol->getWinnerIdProtocol(p->getId()), tmp);
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		}
+		mutex.unlock();
+
 	}
-	
-	mutex.lock();
-	for(Player* s : players)
-	{
-		SOCKET tmp = s->getId();
-		server->sendMessage(protocol->getWinnerIdProtocol(s->getId()), tmp);
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	else {
+		if (players.size() > 0) {
+			currentPlayer = players.at(0)->getId();
+		}
+		else
+		{
+			currentPlayer = -1;
+		}
+
+		mutex.lock();
+		for (Player* s : players)
+		{
+			SOCKET tmp = s->getId();
+			server->sendMessage(protocol->getServerChatProtocol("Personne n'a gagne, la reponse etait: " + sentence + " !"), tmp);
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			server->sendMessage(protocol->getServerChatProtocol(players.at(0)->getName() + " prend la main."), tmp);
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		}
+		mutex.unlock();
 	}
-	mutex.unlock();
 }

@@ -23,9 +23,11 @@ private slots:
     void addMessageToChat(QString);
     void removePlayer(int);
     void drawScene();
+    void setCanPlay(bool);
+    void diaplayWinner(int);
+    void diaplayBadResponse();
 
     void on_pushButtonChat_clicked();
-
     void on_pushButton_clicked();
 
 signals:
@@ -33,6 +35,9 @@ signals:
     void notifyNewMessage(QString);
     void notifyPlayerDisconnected(int);
     void notifyUpdateScene();
+    void notifyCanPlayValue(bool);
+    void notifyWinner(int);
+    void notifyBadResponse();
 
 private:
     Ui::Game *ui;

@@ -20,6 +20,10 @@ public:
         PLAYER_DISCONNECT,
         RECEIVE_QUICK_RIDDLE,
         RECEIVE_LETTER,
+        WINNER,
+        CAN_PLAY,
+        BAD_RESPONSE,
+        DISPLAY_RESPONSE,
     };
 
     static EventManager* getInstance();

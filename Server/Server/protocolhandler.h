@@ -26,6 +26,10 @@ public:
         SEND_WORD,
         QUICK_RIDDLE_FOUND,
     	SEND_WINNER_ID,
+    	BOOL_CAN_PLAY,
+    	SERVER_CHAT,
+    	BAD_RESPONSE,
+    	DISPLAY_RESPONSE,
     };
 
     ProtocolHandler(EventManager* eventManager);    
@@ -35,6 +39,8 @@ public:
     std::string getQuickRiddleProtocol(std::string& sentence);
     std::string getSendLetterProtocol(char& letter, int position);
     std::string getWinnerIdProtocol(int id);
+    std::string getCanPlayProtocol(bool canPlay);
+    std::string getServerChatProtocol(std::string msg);
 
 private:
     std::unordered_map<PROTOCOL_NAME, std::string> protocoles;

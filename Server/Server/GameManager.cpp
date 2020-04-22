@@ -19,7 +19,7 @@ GameManager::GameManager(std::mutex* mutex, std::vector<Player*>* players, Proto
 
 void GameManager::initGame()
 {
-    this->setCurrentSentence(this->QUICK_RIDDLE);    
+      
 }
 
 #include <iostream>
@@ -34,6 +34,10 @@ void GameManager::setEventsHandler()
 		{
             winnerId = id;
             isQuickRiddleFound = true;           
+		}else
+		{
+            SOCKET sock = id;
+            game->getServer()->sendMessage(protocol_->getProcotol(protocol_->BAD_RESPONSE), sock);
 		}
 	});
 }
@@ -64,12 +68,17 @@ void GameManager::setCurrentSentence(EnigmaType type)
 
 int GameManager::quickRiddle()
 {
-
+    this->setCurrentSentence(this->QUICK_RIDDLE);
+    isQuickRiddleFound = false;
+	
     mutex->lock();
     for(const auto* p : *players)
     {
         SOCKET tmp = p->getId();
+        game->getServer()->sendMessage(protocol_->getServerChatProtocol("epreuve rapide."), tmp);
         game->getServer()->sendMessage(protocol_->getQuickRiddleProtocol(currentSentence), tmp);
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        game->getServer()->sendMessage(protocol_->getCanPlayProtocol(true), tmp);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     mutex->unlock();
@@ -106,7 +115,23 @@ int GameManager::quickRiddle()
         mutex->unlock();                
     }
 
+
+    mutex->lock();
+    for (const auto* p : *players)
+    {
+        SOCKET tmp = p->getId();
+        game->getServer()->sendMessage(protocol_->getCanPlayProtocol(false), tmp);
+        game->getServer()->sendMessage(protocol_->getProcotol(protocol_->DISPLAY_RESPONSE), tmp);
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+    mutex->unlock();
+	
     return winnerId;
+}
+
+std::string GameManager::getCurrentSentence()
+{
+    return currentSentence;
 }
 
 void GameManager::sentenceRiddle()

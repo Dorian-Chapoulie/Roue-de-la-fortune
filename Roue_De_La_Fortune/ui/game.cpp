@@ -19,8 +19,11 @@ Game::Game(QWidget *parent) :
     connect(this, SIGNAL(notifyNewMessage(QString)), this, SLOT(addMessageToChat(QString)));
     connect(this, SIGNAL(notifyPlayerDisconnected(int)), this, SLOT(removePlayer(int)));
     connect(this, SIGNAL(notifyUpdateScene()), this, SLOT(drawScene()));
+    connect(this, SIGNAL(notifyCanPlayValue(bool)), this, SLOT(setCanPlay(bool)));
+    connect(this, SIGNAL(notifyWinner(int)), this, SLOT(diaplayWinner(int)));
+    connect(this, SIGNAL(notifyBadResponse()), this, SLOT(diaplayBadResponse()));
 
-    ui->lineEditChat->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,50}"), this));
+    ui->lineEditChat->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,50}"), this));    
 
     const char consonnes[19] = {'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'x', 'z'};
     const char voyelles[6] = {'a', 'e', 'i','o', 'u', 'y'};
@@ -33,6 +36,10 @@ Game::Game(QWidget *parent) :
         ui->comboBoxVoyelle->addItem(QChar(c));
     }
 
+    ui->lineEditWord->setEnabled(false);
+    ui->pushButtonVoyelle->setEnabled(false);
+    ui->pushButtonConsonne->setEnabled(false);
+    ui->pushButton->setEnabled(false);
 
 
     LocalPlayer::getInstance()->login();
@@ -64,6 +71,32 @@ Game::Game(QWidget *parent) :
         emit notifyUpdateScene();
     });
 
+    EventManager::getInstance()->addListener(EventManager::WINNER, [&](void* id){
+        int t = std::stoi(*static_cast<std::string*>(id));
+        auto it = std::find_if(players.begin(), players.end(), [&](Player* p) {
+            return p->getId() == static_cast<SOCKET>(t);
+        });
+        if(it != players.end()) {
+            emit notifyWinner(reinterpret_cast<Player*>(*it)->getId());
+        }
+    });
+
+    EventManager::getInstance()->addListener(EventManager::CAN_PLAY, [&](void* canPlayValue){
+        int canPlayint = std::stoi(*reinterpret_cast<std::string*>(canPlayValue));
+        bool canPlay = canPlayint == 1 ? true : false;
+        emit notifyCanPlayValue(canPlay);
+    });
+
+    EventManager::getInstance()->addListener(EventManager::BAD_RESPONSE, [&](void*){
+        emit notifyBadResponse();
+    });
+
+    EventManager::getInstance()->addListener(EventManager::DISPLAY_RESPONSE, [&](void*){
+        for(Case& c : cases) {
+            c.displayLetter();
+        }
+        emit notifyUpdateScene();
+    });
 
     EventManager::getInstance()->addListener(EventManager::RECEIVE_LETTER, [&](void* data){
         std::string s_data = *reinterpret_cast<std::string*>(data);
@@ -85,32 +118,6 @@ Game::Game(QWidget *parent) :
     scene->setSceneRect(0, 0, 840, 430);
     this->ui->graphicsView->setScene(scene);
 
-     /*
-
-    std::thread t([&](){
-        std::vector<char> letters = getLettersFromString(phrase);
-        for(char c : letters) {
-            for(Case& ca : cases) {
-                if(ca.getLetter() == c) {
-                    ca.displayLetterAnimation();
-                    emit notifyUpdateScene();
-                    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-                }
-            }
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(800));
-
-            for(Case& ca : cases) {
-                if(ca.getLetter() == c) {
-                    ca.displayLetter();
-                    emit notifyUpdateScene();
-                    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-                }
-            }
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        }
-    });
-    t.detach();*/
 
     drawScene();
 
@@ -122,6 +129,10 @@ Game::~Game()
 }
 
 void Game::prepareScene() {
+
+    cases.clear();
+
+
 
     int sentenceLenght = currentSentence.length();
     int reste = 50 - sentenceLenght;
@@ -154,14 +165,6 @@ void Game::drawScene()
     for(Case& c : cases) {
         c.drawBox(this->scene);
     }
-
-    /*QThread::create([&](){
-        QThread::msleep(10);
-        if(!false) { //stop
-            while(!this->isActiveWindow()) QThread::msleep(10);
-           // emit renderScene();
-        }
-    })->start();*/
 }
 
 void Game::addNewPlayer(QString data)
@@ -204,9 +207,15 @@ void Game::addMessageToChat(QString msg)
     size_t pos = pseudo.find("-");
     pseudo = pseudo.substr(0, pos);
     std::string message = msg.toStdString().substr(pos + 1, msg.length() - pos);
+    QString toDisplay = QString::fromStdString(message).toUtf8();
 
-    ui->textBrowserChat->append("<font color=\"Grey\"><b>" + QString::fromStdString(pseudo) + ":</b> "
-                                + "<font color=\"Black\">" + QString::fromStdString(message));
+    if(pseudo == "[Serveur]") {
+        ui->textBrowserChat->append("<font color=\"Red\"><b>" + QString::fromStdString(pseudo) + ":</b> "
+                                + "<font color=\"Black\">" + toDisplay);
+    }else {
+        ui->textBrowserChat->append("<font color=\"Grey\"><b>" + QString::fromStdString(pseudo) + ":</b> "
+                                + "<font color=\"Black\">" + toDisplay);
+    }
 }
 
 void Game::removePlayer(int id)
@@ -264,12 +273,48 @@ std::vector<char> Game::getLettersFromString(std::string s)
     return ret;
 }
 
-
 void Game::on_pushButton_clicked()
 {
     ProtocolHandler protocolHanlder;
-    std::string proposition = ui->lineEditWord->text().toStdString();
-    if(isQuickRiddle) {
+    std::string proposition = ui->lineEditWord->text().toLower().toStdString();
+    if(isQuickRiddle) {        
         LocalPlayer::getInstance()->sendMessage(protocolHanlder.getQuickRiddlePropositon(proposition));
     }
+    ui->lineEditWord->clear();
+
+    setCanPlay(false);
+}
+
+void Game::setCanPlay(bool value) {
+    ui->lineEditWord->setEnabled(value);
+    ui->pushButtonVoyelle->setEnabled(value);
+    ui->pushButtonConsonne->setEnabled(value);
+    ui->pushButton->setEnabled(value);
+}
+
+void Game::diaplayWinner(int id) {
+
+    auto it = std::find_if(players.begin(), players.end(), [&](Player* p) {
+        return p->getId() == static_cast<SOCKET>(id);
+    });
+
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Game");
+    msgBox.setText("Winner");
+    msgBox.setInformativeText(QString::fromStdString(reinterpret_cast<Player*>(*it)->getName()) + " à gagné la manche !");
+    msgBox.setDefaultButton(QMessageBox::Ok);
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.exec();
+}
+
+void Game::diaplayBadResponse() {
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Game");
+    msgBox.setText("Proposition");
+    msgBox.setInformativeText("Ce n'est pas la bonne réponse !");
+    msgBox.setDefaultButton(QMessageBox::Ok);
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.exec();
+
+    setCanPlay(true);
 }
