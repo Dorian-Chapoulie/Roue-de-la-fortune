@@ -53,12 +53,13 @@ Game::Game(std::string& name, int port)
 		
 	});
 
-	eventManager.addListener(eventManager.PLAYER_DISCONNECTED, [&](void* socket) {
+	eventManager.addListener(EventManager::EVENT::PLAYER_DISCONNECTED, [&](void* socket) {
 		auto it = std::find_if(players.begin(), players.end(), [&](Player* p) {
 			return p->getId() == *static_cast<SOCKET*>(socket);
 		});
 
 		if (it != players.end()) {
+			std::cout << reinterpret_cast<Player*>(*it)->getName() << " s'est deconnecte" << std::endl;
 			players.erase(it);
 		}
 
@@ -68,6 +69,19 @@ Game::Game(std::string& name, int port)
 		}
 	});
 
+	
+	eventManager.addListener(EventManager::EVENT::SPIN_WHEEL, [&](void*) {
+		int randomValue = rand() % 360;
+		mutex.lock();
+		for (const auto* p : players)
+		{
+			SOCKET tmp = p->getId();
+			server->sendMessage(protocol->getSpinWheelProtocol(randomValue), tmp);
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		}
+		mutex.unlock();
+		});
+	
 	threadPingPlayers = new std::thread([&]() { 
 		while (pingPlayers){ //TODO bool is partie finished
 			mutex.lock();
@@ -83,9 +97,10 @@ Game::Game(std::string& name, int port)
 	});
 	threadPingPlayers->detach();
 
+	//TEMP
 	std::thread treadStartGame([&]()
 		{
-			while(players.size() < 1)
+			while(players.size() < 3)
 			{
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			}

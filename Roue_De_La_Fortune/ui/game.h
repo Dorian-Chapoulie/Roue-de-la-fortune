@@ -5,6 +5,7 @@
 #include <QWidget>
 #include "graphics/case.h"
 #include "entity/player.h"
+#include "graphics/wheel.h"
 
 namespace Ui {
 class Game;
@@ -26,9 +27,12 @@ private slots:
     void setCanPlay(bool);
     void diaplayWinner(int);
     void diaplayBadResponse();
+    void drawWheelScene(int);
 
     void on_pushButtonChat_clicked();
     void on_pushButton_clicked();
+
+    void on_buttonSpinWheel_clicked();
 
 signals:
     void notifyNewPlayer(QString);
@@ -38,10 +42,12 @@ signals:
     void notifyCanPlayValue(bool);
     void notifyWinner(int);
     void notifyBadResponse();
+    void notifySpinWheel(int);
 
 private:
     Ui::Game *ui;
     QGraphicsScene* scene;
+    QGraphicsScene* wheelScene;
 
     std::string currentSentence;
 
@@ -49,9 +55,13 @@ private:
     std::vector<Case> cases;
 
     bool isQuickRiddle = true;
+    int rotationValueWheel = 0;
+
+    Wheel* wheel = nullptr;
 
     std::vector<char> getLettersFromString(std::string s);
     void prepareScene();
+    void setEvents();
 };
 
 #endif // GAME_H

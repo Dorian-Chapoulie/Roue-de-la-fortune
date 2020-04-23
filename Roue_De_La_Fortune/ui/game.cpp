@@ -3,10 +3,11 @@
 #include "event/eventmanager.h"
 #include "protocol/protocolhandler.h"
 #include "entity/localplayer.h"
+#include "graphics/wheelfactory.h"
 #include <string>
 #include <QThread>
-
 #include <QMessageBox>
+
 #include <iostream>
 
 Game::Game(QWidget *parent) :
@@ -22,6 +23,7 @@ Game::Game(QWidget *parent) :
     connect(this, SIGNAL(notifyCanPlayValue(bool)), this, SLOT(setCanPlay(bool)));
     connect(this, SIGNAL(notifyWinner(int)), this, SLOT(diaplayWinner(int)));
     connect(this, SIGNAL(notifyBadResponse()), this, SLOT(diaplayBadResponse()));
+    connect(this, SIGNAL(notifySpinWheel(int)), this, SLOT(drawWheelScene(int)));
 
     ui->lineEditChat->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,50}"), this));    
 
@@ -40,10 +42,48 @@ Game::Game(QWidget *parent) :
     ui->pushButtonVoyelle->setEnabled(false);
     ui->pushButtonConsonne->setEnabled(false);
     ui->pushButton->setEnabled(false);
+    //ui->buttonSpinWheel->setEnabled(false);
 
 
+    setEvents();
     LocalPlayer::getInstance()->login();
 
+
+    scene = new QGraphicsScene(this);
+    wheelScene = new QGraphicsScene(this);
+
+    scene->setSceneRect(0, 0, 840, 430);
+    wheelScene->setSceneRect(0, 0, 350, 270);
+    this->ui->graphicsView->setScene(scene);
+    this->ui->graphicsViewRoue->setScene(wheelScene);
+
+    this->wheel = WheelFactory::getInstance()->getWheel(WheelFactory::WHEEL_ONE);
+    wheel->setPosition(350 / 2, 270 /2 + 15);
+    wheelScene->addItem(wheel->getItem());
+
+
+    QPen pen;
+    QBrush brush(Qt::red);
+    brush.setStyle(Qt::SolidPattern);
+    wheelScene->addRect(350/2 - 5, 0, 10, 10, pen, brush);
+
+    wheelScene->addLine(350/2, 10, 350/2, 30);
+    wheelScene->addLine(350/2, 30, 350/2 - 5, 20);
+    wheelScene->addLine(350/2, 30, 350/2 + 5, 20);
+
+    drawScene();
+}
+
+Game::~Game()
+{
+    delete ui;
+    delete wheel;
+    delete scene;
+    delete wheelScene;
+    players.clear();
+}
+
+void Game::setEvents() {
     EventManager::getInstance()->addListener(EventManager::EVENT::ASK_PSEUDO, [](void*){
         ProtocolHandler protocol;
         LocalPlayer::getInstance()->sendMessage(protocol.getPseudoProtocol(LocalPlayer::getInstance()->getName()));
@@ -100,7 +140,7 @@ Game::Game(QWidget *parent) :
 
     EventManager::getInstance()->addListener(EventManager::RECEIVE_LETTER, [&](void* data){
         std::string s_data = *reinterpret_cast<std::string*>(data);
-        char c = s_data.at(0);
+        //char c = s_data.at(0);
         s_data = s_data.substr(s_data.find("-") + 1);
         int position = std::stoi(s_data);
 
@@ -114,25 +154,27 @@ Game::Game(QWidget *parent) :
 
     });
 
-    scene = new QGraphicsScene(this);
-    scene->setSceneRect(0, 0, 840, 430);
-    this->ui->graphicsView->setScene(scene);
+    EventManager::getInstance()->addListener(EventManager::SPIN_WHEEL, [&](void* value){
+        rotationValueWheel = std::stoi(*static_cast<std::string*>(value));
+        std::thread threadTemp([&](){
 
+           for(int i = 0; i < 360; i++) {
+                emit notifySpinWheel(1);
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            }
 
-    drawScene();
-
-}
-
-Game::~Game()
-{
-    delete ui;
+            while(wheel->getRotationStep() != rotationValueWheel) {
+                emit notifySpinWheel(1);
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            }
+        });
+        threadTemp.detach();
+    });
 }
 
 void Game::prepareScene() {
 
     cases.clear();
-
-
 
     int sentenceLenght = currentSentence.length();
     int reste = 50 - sentenceLenght;
@@ -164,7 +206,11 @@ void Game::drawScene()
 {    
     for(Case& c : cases) {
         c.drawBox(this->scene);
-    }
+    }   
+}
+
+void Game::drawWheelScene(int value) {
+    wheel->rotate(value);
 }
 
 void Game::addNewPlayer(QString data)
@@ -287,9 +333,14 @@ void Game::on_pushButton_clicked()
 
 void Game::setCanPlay(bool value) {
     ui->lineEditWord->setEnabled(value);
-    ui->pushButtonVoyelle->setEnabled(value);
-    ui->pushButtonConsonne->setEnabled(value);
     ui->pushButton->setEnabled(value);
+
+    if(isQuickRiddle) {
+        ui->pushButtonVoyelle->setEnabled(!value);
+        ui->pushButtonConsonne->setEnabled(!value);
+        ui->buttonSpinWheel->setEnabled(!value);
+    }
+
 }
 
 void Game::diaplayWinner(int id) {
@@ -317,4 +368,11 @@ void Game::diaplayBadResponse() {
     msgBox.exec();
 
     setCanPlay(true);
+}
+
+void Game::on_buttonSpinWheel_clicked()
+{
+    ProtocolHandler protocol;
+    LocalPlayer::getInstance()->sendMessage(protocol.getSpinWheelProtocol());
+    ui->buttonSpinWheel->setEnabled(false);
 }

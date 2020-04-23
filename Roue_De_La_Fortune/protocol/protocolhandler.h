@@ -14,6 +14,7 @@ public:
         TCHAT,
         GET_ALL_GAMES,
         SEND_QUICK_RIDDLE_PROPOSITION,
+        SPIN_WHEEL,
     };
 
     ProtocolHandler();
@@ -25,6 +26,7 @@ public:
     std::string getTchatProtocol(std::string& pseudo, std::string& message);
     std::string getAllGamesProtocol() const;
     std::string getQuickRiddlePropositon(std::string& sentence);
+    std::string getSpinWheelProtocol();
 
     void callEventFromProtocol(std::string msg);
 

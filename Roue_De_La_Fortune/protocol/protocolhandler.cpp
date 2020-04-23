@@ -23,19 +23,19 @@ void ProtocolHandler::callEventFromProtocol(std::string msg)
         }else {
             eventManager->triggerEvent(eventManager->INSCRIPTION_FAILURE, "Pseudo déjà pris.");
         }
-    }else if(msg.at(0) == 'G') {
+    }else if(msg.at(0) == 'G') { //get game server list
         eventManager->triggerEvent(eventManager->GAMES_LIST, msg);
-    }else if(msg.at(0) == 'N') {
+    }else if(msg.at(0) == 'N') { //new player
         if(msg.length() >= 2 && msg.at(1) == 'J') {
             std::string name = msg.substr(3);
             eventManager->triggerEvent(eventManager->NEW_PLAYER, name);
         }else {
             eventManager->triggerEvent(eventManager->ASK_PSEUDO);
         }
-    }else if(msg.at(0) == 'T') {
+    }else if(msg.at(0) == 'T') { //tchat
         std::string data = msg.substr(2);
         eventManager->triggerEvent(eventManager->TCHAT, data);
-    }else if(msg.at(0) == 'D') {
+    }else if(msg.at(0) == 'D') { //player disconnected
         std::string id = msg.substr(2);
         eventManager->triggerEvent(eventManager->PLAYER_DISCONNECT, id);
     }else if(msg.at(0) == 'Q'){ // quick riddle
@@ -52,6 +52,9 @@ void ProtocolHandler::callEventFromProtocol(std::string msg)
         eventManager->triggerEvent(eventManager->BAD_RESPONSE);
     }else if(msg.at(0) == 'F') { //afficher la réponse
         eventManager->triggerEvent(eventManager->DISPLAY_RESPONSE);
+    }else if(msg.at(0) == 'S') { //Spin wheel
+        std::string value = msg.substr(2);
+        eventManager->triggerEvent(eventManager->SPIN_WHEEL, value);
     }
 
 }
@@ -91,9 +94,14 @@ std::string ProtocolHandler::getAllGamesProtocol() const
     return protocoles.at(PROTOCOL_NAME::GET_ALL_GAMES);
 }
 
-#include <iostream>
 std::string ProtocolHandler::getQuickRiddlePropositon(std::string &sentence)
 {
     protocoles.insert_or_assign(PROTOCOL_NAME::SEND_QUICK_RIDDLE_PROPOSITION, "Q-" + sentence);
     return protocoles.at(PROTOCOL_NAME::SEND_QUICK_RIDDLE_PROPOSITION);
+}
+
+std::string ProtocolHandler::getSpinWheelProtocol()
+{
+    protocoles.insert_or_assign(PROTOCOL_NAME::SPIN_WHEEL, "S");
+    return protocoles.at(PROTOCOL_NAME::SPIN_WHEEL);
 }

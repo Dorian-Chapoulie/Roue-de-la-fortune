@@ -19,6 +19,7 @@ ProtocolHandler::ProtocolHandler(EventManager* eventManager)
     protocoles.insert_or_assign(PROTOCOL_NAME::SERVER_CHAT, "T-[Serveur]-");
     protocoles.insert_or_assign(PROTOCOL_NAME::BAD_RESPONSE, "M");
     protocoles.insert_or_assign(PROTOCOL_NAME::DISPLAY_RESPONSE, "F");
+    protocoles.insert_or_assign(PROTOCOL_NAME::SPIN_WHEEL, "S-");
     this->eventManager = eventManager;
 }
 
@@ -121,6 +122,9 @@ void ProtocolHandler::callEventFromProtocol(std::string msg, SOCKET* socket)
         data += "-" + std::to_string(*socket);
         eventManager->triggerEvent(eventManager->PLAYER_QUICK_RIDDLE, &data);
     }
+    else if (msg.at(0) == 'S') {
+        eventManager->triggerEvent(eventManager->SPIN_WHEEL);
+    }
 }
 
 std::string ProtocolHandler::getProcotol(ProtocolHandler::PROTOCOL_NAME name) const
@@ -151,4 +155,9 @@ std::string ProtocolHandler::getCanPlayProtocol(bool canPlay)
 std::string ProtocolHandler::getServerChatProtocol(std::string msg)
 {
     return this->protocoles.at(PROTOCOL_NAME::SERVER_CHAT) + msg;
+}
+
+std::string ProtocolHandler::getSpinWheelProtocol(int value)
+{    
+    return this->protocoles.at(PROTOCOL_NAME::SPIN_WHEEL) + std::to_string(value);
 }

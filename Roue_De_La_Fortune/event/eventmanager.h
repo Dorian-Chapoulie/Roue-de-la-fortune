@@ -24,6 +24,7 @@ public:
         CAN_PLAY,
         BAD_RESPONSE,
         DISPLAY_RESPONSE,
+        SPIN_WHEEL,
     };
 
     static EventManager* getInstance();

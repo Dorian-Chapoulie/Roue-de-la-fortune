@@ -37,8 +37,7 @@ Connection::~Connection()
 
 void Connection::on_connectionButton_clicked()
 {
-    LocalPlayer::setTempName(ui->lineEmail->text().toStdString());
-    std::cout << "Pseudo: " << LocalPlayer::getInstance()->getName() << std::endl;
+    LocalPlayer::setTempName(ui->lineEmail->text().toStdString());    
     LocalPlayer::getInstance()->setPassword(ui->linePsw->text().toStdString());
     LocalPlayer::getInstance()->login();
 }

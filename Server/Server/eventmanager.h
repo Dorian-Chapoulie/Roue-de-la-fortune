@@ -13,12 +13,13 @@ public:
         PLAYER_CONNECT_FAIL,
         PLAYER_INSCRIPTION_OK,
         PLAYER_INSCRIPTION_FAIL,
-        CREATE_GAME, 
+        CREATE_GAME,
         GET_ALL_GAMES,
         ASK_PSEUDO,
         TCHAT,
         PLAYER_DISCONNECTED,
-    	PLAYER_QUICK_RIDDLE,
+        PLAYER_QUICK_RIDDLE,
+        SPIN_WHEEL,
     };
 
     void addListener(EVENT eventName, std::function<void(void*)>&& handler);

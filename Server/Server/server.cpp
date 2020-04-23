@@ -65,7 +65,7 @@ int main()
                 return elapsed_seconds.count() >= 500.0;
             });
 
-            if (iterator != games.end()) {                
+            if (iterator != games.end()) {            	
                 delete* iterator;
                 games.erase(iterator);
             }

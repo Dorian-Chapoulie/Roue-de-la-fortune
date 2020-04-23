@@ -30,6 +30,7 @@ public:
     	SERVER_CHAT,
     	BAD_RESPONSE,
     	DISPLAY_RESPONSE,
+    	SPIN_WHEEL,
     };
 
     ProtocolHandler(EventManager* eventManager);    
@@ -41,6 +42,7 @@ public:
     std::string getWinnerIdProtocol(int id);
     std::string getCanPlayProtocol(bool canPlay);
     std::string getServerChatProtocol(std::string msg);
+    std::string getSpinWheelProtocol(int value);
 
 private:
     std::unordered_map<PROTOCOL_NAME, std::string> protocoles;
