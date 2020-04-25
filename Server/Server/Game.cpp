@@ -69,9 +69,8 @@ Game::Game(std::string& name, int port)
 		}
 	});
 
-	
 	eventManager.addListener(EventManager::EVENT::SPIN_WHEEL, [&](void*) {
-		int randomValue = rand() % 360;
+		int randomValue = rand() % 360;//TODO: real random
 		mutex.lock();
 		for (const auto* p : players)
 		{
@@ -80,7 +79,8 @@ Game::Game(std::string& name, int port)
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		}
 		mutex.unlock();
-		});
+		isWheelSpinned = true;
+	});
 	
 	threadPingPlayers = new std::thread([&]() { 
 		while (pingPlayers){ //TODO bool is partie finished
@@ -100,7 +100,7 @@ Game::Game(std::string& name, int port)
 	//TEMP
 	std::thread treadStartGame([&]()
 		{
-			while(players.size() < 3)
+			while(players.size() < 1)
 			{
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			}
@@ -164,10 +164,11 @@ void Game::startGame()
 	
 	int winnerId = gameManager->quickRiddle();
 	handleWinner(winnerId, gameManager->getCurrentSentence());
-	
+
 	std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-	winnerId = gameManager->quickRiddle();
-	handleWinner(winnerId, gameManager->getCurrentSentence());
+
+	winnerId = gameManager->sentenceRiddle(currentPlayer, isWheelSpinned);
+	
 }
 
 void Game::handleWinner(int winnerId, std::string sentence)

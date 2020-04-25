@@ -12,6 +12,8 @@ public:
 		Game* game);	
 
 	int quickRiddle();
+	int sentenceRiddle(int& currentPlayer, bool& isWheelSpinned);
+	
 	std::string getCurrentSentence();
 private:
 
@@ -20,9 +22,7 @@ private:
 	void initGame();
 	
 	void setEventsHandler();
-	void setCurrentSentence(EnigmaType type);
-		
-	void sentenceRiddle();
+	void setCurrentSentence(EnigmaType type);			
 
 	
 	Game* game = nullptr;

@@ -20,6 +20,8 @@ ProtocolHandler::ProtocolHandler(EventManager* eventManager)
     protocoles.insert_or_assign(PROTOCOL_NAME::BAD_RESPONSE, "M");
     protocoles.insert_or_assign(PROTOCOL_NAME::DISPLAY_RESPONSE, "F");
     protocoles.insert_or_assign(PROTOCOL_NAME::SPIN_WHEEL, "S-");
+    protocoles.insert_or_assign(PROTOCOL_NAME::SEND_SENTENCE_RIDDLE, "R-");
+    protocoles.insert_or_assign(PROTOCOL_NAME::ACTIVE_WHEEL, "A-");
     this->eventManager = eventManager;
 }
 
@@ -149,7 +151,7 @@ std::string ProtocolHandler::getWinnerIdProtocol(int id)
 
 std::string ProtocolHandler::getCanPlayProtocol(bool canPlay)
 {
-    return this->protocoles.at(PROTOCOL_NAME::BOOL_CAN_PLAY) + std::to_string(canPlay);
+    return this->protocoles.at(PROTOCOL_NAME::BOOL_CAN_PLAY) + std::to_string(canPlay) +"\n";
 }
 
 std::string ProtocolHandler::getServerChatProtocol(std::string msg)
@@ -160,4 +162,14 @@ std::string ProtocolHandler::getServerChatProtocol(std::string msg)
 std::string ProtocolHandler::getSpinWheelProtocol(int value)
 {    
     return this->protocoles.at(PROTOCOL_NAME::SPIN_WHEEL) + std::to_string(value);
+}
+
+std::string ProtocolHandler::getSentenceRiddleProtocol(std::string sentence)
+{
+    return this->protocoles.at(PROTOCOL_NAME::SEND_SENTENCE_RIDDLE) + sentence;
+}
+
+std::string ProtocolHandler::getActivateWheelProtocol(bool isEnabled)
+{
+    return this->protocoles.at(PROTOCOL_NAME::ACTIVE_WHEEL) + std::to_string(isEnabled) + "\n";
 }

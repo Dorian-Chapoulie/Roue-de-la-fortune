@@ -31,6 +31,8 @@ public:
     	BAD_RESPONSE,
     	DISPLAY_RESPONSE,
     	SPIN_WHEEL,
+    	SEND_SENTENCE_RIDDLE,
+    	ACTIVE_WHEEL,
     };
 
     ProtocolHandler(EventManager* eventManager);    
@@ -43,6 +45,8 @@ public:
     std::string getCanPlayProtocol(bool canPlay);
     std::string getServerChatProtocol(std::string msg);
     std::string getSpinWheelProtocol(int value);
+    std::string getSentenceRiddleProtocol(std::string sentence);
+    std::string getActivateWheelProtocol(bool isEnabled);
 
 private:
     std::unordered_map<PROTOCOL_NAME, std::string> protocoles;

@@ -14,12 +14,13 @@ public:
     void drawBox(QGraphicsScene* scene);
     void setLetter(char letter);
     void displayLetter();
-    void displayLetterAnimation();
+    void displayLetterAnimation();    
     int getId();
     char getLetter() const;
 
     static int width;
     static int height;
+
 private:
     bool isWaittingLetter = true;
     bool showLetter = false;

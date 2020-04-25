@@ -10,7 +10,8 @@ public:
 	std::string baseIp = "192.168.1.50";
 	unsigned int basePort = 25565;
 
-	std::string quickRiddleFile = "quickRiddle.txt";
+	const std::string quickRiddleFile = "quickRiddle.txt";
+	const std::string normalRiddleFile = "riddle.txt";
 
 private:
 	Config();

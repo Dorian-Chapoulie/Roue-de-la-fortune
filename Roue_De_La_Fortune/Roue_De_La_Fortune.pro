@@ -23,6 +23,8 @@ SOURCES += \
     entity/player.cpp \
     event/eventmanager.cpp \
     graphics/case.cpp \
+    graphics/wheel.cpp \
+    graphics/wheelfactory.cpp \
     ui/game.cpp \
     ui/inscription.cpp \
     ui/servernavigator.cpp \
@@ -39,6 +41,8 @@ HEADERS += \
     entity/player.h \
     event/eventmanager.h \
     graphics/case.h \
+    graphics/wheel.h \
+    graphics/wheelfactory.h \
     ui/game.h \
     ui/inscription.h \
     ui/servernavigator.h \

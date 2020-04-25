@@ -24,6 +24,8 @@ Game::Game(QWidget *parent) :
     connect(this, SIGNAL(notifyWinner(int)), this, SLOT(diaplayWinner(int)));
     connect(this, SIGNAL(notifyBadResponse()), this, SLOT(diaplayBadResponse()));
     connect(this, SIGNAL(notifySpinWheel(int)), this, SLOT(drawWheelScene(int)));
+    connect(this, SIGNAL(notifyCleanScene()), this, SLOT(clearScene()));
+    connect(this, SIGNAL(notifySetEnableWheel(bool)), this, SLOT(setEnableWheel(bool)));
 
     ui->lineEditChat->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,50}"), this));    
 
@@ -42,7 +44,7 @@ Game::Game(QWidget *parent) :
     ui->pushButtonVoyelle->setEnabled(false);
     ui->pushButtonConsonne->setEnabled(false);
     ui->pushButton->setEnabled(false);
-    //ui->buttonSpinWheel->setEnabled(false);
+    ui->buttonSpinWheel->setEnabled(false);
 
 
     setEvents();
@@ -84,6 +86,7 @@ Game::~Game()
 }
 
 void Game::setEvents() {
+
     EventManager::getInstance()->addListener(EventManager::EVENT::ASK_PSEUDO, [](void*){
         ProtocolHandler protocol;
         LocalPlayer::getInstance()->sendMessage(protocol.getPseudoProtocol(LocalPlayer::getInstance()->getName()));
@@ -105,8 +108,25 @@ void Game::setEvents() {
     });
 
     EventManager::getInstance()->addListener(EventManager::RECEIVE_QUICK_RIDDLE, [&](void* sentence){
+        emit notifyCleanScene();
+        while(!isSceneCleared) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        }
+        isSceneCleared = false;
         currentSentence = std::string(*reinterpret_cast<std::string*>(sentence));
         isQuickRiddle = true;
+        prepareScene();
+        emit notifyUpdateScene();
+    });
+
+    EventManager::getInstance()->addListener(EventManager::RECEIVE_SENTENCE_RIDDLE, [&](void* sentence){
+        emit notifyCleanScene();
+        while(!isSceneCleared) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        }
+        isSceneCleared = false;
+        currentSentence = std::string(*reinterpret_cast<std::string*>(sentence));
+        isQuickRiddle = false;
         prepareScene();
         emit notifyUpdateScene();
     });
@@ -123,8 +143,14 @@ void Game::setEvents() {
 
     EventManager::getInstance()->addListener(EventManager::CAN_PLAY, [&](void* canPlayValue){
         int canPlayint = std::stoi(*reinterpret_cast<std::string*>(canPlayValue));
-        bool canPlay = canPlayint == 1 ? true : false;
+        bool canPlay = canPlayint > 0 ? true : false;
         emit notifyCanPlayValue(canPlay);
+    });
+
+    EventManager::getInstance()->addListener(EventManager::ENABLE_WHEEL, [&](void* isWheelEnabled){
+        int wheelEnabled = std::stoi(*reinterpret_cast<std::string*>(isWheelEnabled));
+        bool value = wheelEnabled > 0 ? true : false;
+        emit notifySetEnableWheel(value);
     });
 
     EventManager::getInstance()->addListener(EventManager::BAD_RESPONSE, [&](void*){
@@ -132,8 +158,8 @@ void Game::setEvents() {
     });
 
     EventManager::getInstance()->addListener(EventManager::DISPLAY_RESPONSE, [&](void*){
-        for(Case& c : cases) {
-            c.displayLetter();
+        for(Case* c : cases) {
+            c->displayLetter();
         }
         emit notifyUpdateScene();
     });
@@ -144,9 +170,9 @@ void Game::setEvents() {
         s_data = s_data.substr(s_data.find("-") + 1);
         int position = std::stoi(s_data);
 
-        for(Case& c : cases) {
-            if(c.getId() == position){
-                c.displayLetter();
+        for(Case* c : cases) {
+            if(c->getId() == position){
+                c->displayLetter();
                 break;
             }
         }
@@ -174,7 +200,7 @@ void Game::setEvents() {
 
 void Game::prepareScene() {
 
-    cases.clear();
+    mutex.lock();
 
     int sentenceLenght = currentSentence.length();
     int reste = 50 - sentenceLenght;
@@ -185,28 +211,31 @@ void Game::prepareScene() {
         for(int x = 0; x < 10; x++) {
             if(charPos >= reste / 2 && index < sentenceLenght) {
                 if(currentSentence.at(index) != ' ') {
-                    cases.push_back(Case(x * Case::width + (x * 4), y * Case::height + (y * 6), index, true));
-                    cases.back().setLetter(currentSentence.at(index));
+                    cases.push_back(new Case(x * Case::width + (x * 4), y * Case::height + (y * 6), index, true));
+                    cases.back()->setLetter(currentSentence.at(index));
                 } else {
-                    cases.push_back(Case(x * Case::width + (x * 4) ,
+                    cases.push_back(new Case(x * Case::width + (x * 4) ,
                                      y * Case::height + (y * 6), index, false));
-                    cases.back().setLetter(currentSentence.at(index));
+                    cases.back()->setLetter(currentSentence.at(index));
                 }
                 index++;
             }else {
-                cases.push_back(Case(x * Case::width + (x * 4) ,
+                cases.push_back(new Case(x * Case::width + (x * 4) ,
                                  y * Case::height + (y * 6), -1, false));
             }
             charPos++;
         }
     }
+    mutex.unlock();
 }
 
 void Game::drawScene()
 {    
-    for(Case& c : cases) {
-        c.drawBox(this->scene);
+    mutex.lock();
+    for(Case* c : cases) {
+        c->drawBox(this->scene);
     }   
+    mutex.unlock();
 }
 
 void Game::drawWheelScene(int value) {
@@ -333,12 +362,14 @@ void Game::on_pushButton_clicked()
 
 void Game::setCanPlay(bool value) {
     ui->lineEditWord->setEnabled(value);
-    ui->pushButton->setEnabled(value);
+    ui->pushButton->setEnabled(value);       
 
-    if(isQuickRiddle) {
+    if(isQuickRiddle && value) {
         ui->pushButtonVoyelle->setEnabled(!value);
-        ui->pushButtonConsonne->setEnabled(!value);
-        ui->buttonSpinWheel->setEnabled(!value);
+        ui->pushButtonConsonne->setEnabled(!value);        
+    }else {
+        ui->pushButtonVoyelle->setEnabled(value);
+        ui->pushButtonConsonne->setEnabled(value);
     }
 
 }
@@ -370,9 +401,20 @@ void Game::diaplayBadResponse() {
     setCanPlay(true);
 }
 
+void Game::clearScene() {
+    scene->clear();
+    cases.clear();
+    isSceneCleared = true;
+}
+
 void Game::on_buttonSpinWheel_clicked()
 {
     ProtocolHandler protocol;
     LocalPlayer::getInstance()->sendMessage(protocol.getSpinWheelProtocol());
     ui->buttonSpinWheel->setEnabled(false);
+}
+
+void Game::setEnableWheel(bool value)
+{
+    ui->buttonSpinWheel->setEnabled(value);
 }

@@ -3,6 +3,7 @@
 
 #include <QGraphicsScene>
 #include <QWidget>
+#include <mutex>
 #include "graphics/case.h"
 #include "entity/player.h"
 #include "graphics/wheel.h"
@@ -28,10 +29,11 @@ private slots:
     void diaplayWinner(int);
     void diaplayBadResponse();
     void drawWheelScene(int);
+    void clearScene();
+    void setEnableWheel(bool);
 
     void on_pushButtonChat_clicked();
     void on_pushButton_clicked();
-
     void on_buttonSpinWheel_clicked();
 
 signals:
@@ -43,6 +45,8 @@ signals:
     void notifyWinner(int);
     void notifyBadResponse();
     void notifySpinWheel(int);
+    void notifyCleanScene();
+    void notifySetEnableWheel(bool);
 
 private:
     Ui::Game *ui;
@@ -52,9 +56,11 @@ private:
     std::string currentSentence;
 
     std::vector<Player*> players;
-    std::vector<Case> cases;
+    std::vector<Case*> cases;
+    std::mutex mutex;
 
     bool isQuickRiddle = true;
+    bool isSceneCleared = false;
     int rotationValueWheel = 0;
 
     Wheel* wheel = nullptr;

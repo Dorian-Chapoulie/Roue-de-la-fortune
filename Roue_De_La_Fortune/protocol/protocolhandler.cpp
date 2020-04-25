@@ -6,7 +6,7 @@ ProtocolHandler::ProtocolHandler()
 {
     protocoles.insert_or_assign(PROTOCOL_NAME::GET_ALL_GAMES, "G");
 }
-
+#include <iostream>
 void ProtocolHandler::callEventFromProtocol(std::string msg)
 {
     EventManager* eventManager = EventManager::getInstance();
@@ -55,6 +55,12 @@ void ProtocolHandler::callEventFromProtocol(std::string msg)
     }else if(msg.at(0) == 'S') { //Spin wheel
         std::string value = msg.substr(2);
         eventManager->triggerEvent(eventManager->SPIN_WHEEL, value);
+    }else if(msg.at(0) == 'R') { //sentence riddle
+        std::string phrase = msg.substr(2);
+        eventManager->triggerEvent(eventManager->RECEIVE_SENTENCE_RIDDLE, phrase);
+    }else if(msg.at(0) == 'A') {  //enable spin wheel
+        std::string data = msg.substr(2);
+        eventManager->triggerEvent(eventManager->ENABLE_WHEEL, data);
     }
 
 }

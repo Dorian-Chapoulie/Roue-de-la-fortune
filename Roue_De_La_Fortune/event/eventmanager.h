@@ -19,12 +19,14 @@ public:
         TCHAT,
         PLAYER_DISCONNECT,
         RECEIVE_QUICK_RIDDLE,
+        RECEIVE_SENTENCE_RIDDLE,
         RECEIVE_LETTER,
         WINNER,
         CAN_PLAY,
         BAD_RESPONSE,
         DISPLAY_RESPONSE,
         SPIN_WHEEL,
+        ENABLE_WHEEL,
     };
 
     static EventManager* getInstance();

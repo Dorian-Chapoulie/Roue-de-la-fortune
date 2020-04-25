@@ -10,11 +10,17 @@ Case::Case(int x, int y, int id, bool isWaittingLetter) : x(x), y(y), id(id), is
 
 Case::~Case()
 {
-    delete text;
-    delete rect;
+    if(text != nullptr) {
+        delete text;
+    }
+
+    if(rect != nullptr) {
+        delete rect;
+    }
 }
 
 void Case::drawBox(QGraphicsScene* scene) {
+
     if(isWaittingLetter) {
         scene->addRect(x, y, width, height);
 
@@ -25,12 +31,12 @@ void Case::drawBox(QGraphicsScene* scene) {
                          y);
         }
 
-        if(animateLetter) {
+        /*if(animateLetter) {
             QPen pen;
             QBrush brush(Qt::green);
             brush.setStyle(Qt::SolidPattern);
             scene->addRect(x, y, width, height, pen, brush);
-        }
+        }*/
 
     }else if(rect == nullptr) {
         QPen pen;
