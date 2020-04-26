@@ -22,6 +22,7 @@ ProtocolHandler::ProtocolHandler(EventManager* eventManager)
     protocoles.insert_or_assign(PROTOCOL_NAME::SPIN_WHEEL, "S-");
     protocoles.insert_or_assign(PROTOCOL_NAME::SEND_SENTENCE_RIDDLE, "R-");
     protocoles.insert_or_assign(PROTOCOL_NAME::ACTIVE_WHEEL, "A-");
+    protocoles.insert_or_assign(PROTOCOL_NAME::SEND_MONEY, "E-");
     this->eventManager = eventManager;
 }
 
@@ -125,8 +126,19 @@ void ProtocolHandler::callEventFromProtocol(std::string msg, SOCKET* socket)
         eventManager->triggerEvent(eventManager->PLAYER_QUICK_RIDDLE, &data);
     }
     else if (msg.at(0) == 'S') {
-        eventManager->triggerEvent(eventManager->SPIN_WHEEL);
+        if (msg.length() == 1) { //demande de tourner la roue
+            eventManager->triggerEvent(eventManager->SPIN_WHEEL);
+        }else {//roue tournée
+            std::string wheelValue = msg.substr(4);
+            eventManager->triggerEvent(eventManager->WHEEL_VALUE, &wheelValue);
+        }
     }
+	else if(msg.at(0) == 'W') //receive letter from client
+    {
+		std::string letter = msg.substr(2);
+        eventManager->triggerEvent(eventManager->RECEIVE_LETTER, &letter);
+    }
+
 }
 
 std::string ProtocolHandler::getProcotol(ProtocolHandler::PROTOCOL_NAME name) const
@@ -172,4 +184,9 @@ std::string ProtocolHandler::getSentenceRiddleProtocol(std::string sentence)
 std::string ProtocolHandler::getActivateWheelProtocol(bool isEnabled)
 {
     return this->protocoles.at(PROTOCOL_NAME::ACTIVE_WHEEL) + std::to_string(isEnabled) + "\n";
+}
+
+std::string ProtocolHandler::getSendMoneyProtocol(Player* p)
+{
+    return this->protocoles.at(PROTOCOL_NAME::SEND_MONEY) + std::to_string(p->getId()) + "-" + std::to_string(p->getMoney());
 }

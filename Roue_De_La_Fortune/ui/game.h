@@ -31,10 +31,13 @@ private slots:
     void drawWheelScene(int);
     void clearScene();
     void setEnableWheel(bool);
+    void displayMoney();
 
     void on_pushButtonChat_clicked();
     void on_pushButton_clicked();
     void on_buttonSpinWheel_clicked();
+
+    void on_pushButtonVoyelle_clicked();
 
 signals:
     void notifyNewPlayer(QString);
@@ -47,6 +50,7 @@ signals:
     void notifySpinWheel(int);
     void notifyCleanScene();
     void notifySetEnableWheel(bool);
+    void notifyMoneyChanged();
 
 private:
     Ui::Game *ui;

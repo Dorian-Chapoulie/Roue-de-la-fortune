@@ -26,6 +26,7 @@ Game::Game(QWidget *parent) :
     connect(this, SIGNAL(notifySpinWheel(int)), this, SLOT(drawWheelScene(int)));
     connect(this, SIGNAL(notifyCleanScene()), this, SLOT(clearScene()));
     connect(this, SIGNAL(notifySetEnableWheel(bool)), this, SLOT(setEnableWheel(bool)));
+    connect(this, SIGNAL(notifyMoneyChanged()), this, SLOT(displayMoney()));
 
     ui->lineEditChat->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,50}"), this));    
 
@@ -48,7 +49,7 @@ Game::Game(QWidget *parent) :
 
 
     setEvents();
-    LocalPlayer::getInstance()->login();
+    LocalPlayer::getInstance()->login();    
 
 
     scene = new QGraphicsScene(this);
@@ -71,7 +72,7 @@ Game::Game(QWidget *parent) :
 
     wheelScene->addLine(350/2, 10, 350/2, 30);
     wheelScene->addLine(350/2, 30, 350/2 - 5, 20);
-    wheelScene->addLine(350/2, 30, 350/2 + 5, 20);
+    wheelScene->addLine(350/2, 30, 350/2 + 5, 20);   
 
     drawScene();
 }
@@ -86,6 +87,11 @@ Game::~Game()
 }
 
 void Game::setEvents() {
+
+    EventManager::getInstance()->addListener(EventManager::EVENT::CONNEXION_SUCCESS, [&](void* idStr){
+        int id = std::stoi(*static_cast<std::string*>(idStr));
+        LocalPlayer::getInstance()->setId(id);
+    });
 
     EventManager::getInstance()->addListener(EventManager::EVENT::ASK_PSEUDO, [](void*){
         ProtocolHandler protocol;
@@ -150,6 +156,7 @@ void Game::setEvents() {
     EventManager::getInstance()->addListener(EventManager::ENABLE_WHEEL, [&](void* isWheelEnabled){
         int wheelEnabled = std::stoi(*reinterpret_cast<std::string*>(isWheelEnabled));
         bool value = wheelEnabled > 0 ? true : false;
+        //TODO: add animation to button
         emit notifySetEnableWheel(value);
     });
 
@@ -169,7 +176,6 @@ void Game::setEvents() {
         //char c = s_data.at(0);
         s_data = s_data.substr(s_data.find("-") + 1);
         int position = std::stoi(s_data);
-
         for(Case* c : cases) {
             if(c->getId() == position){
                 c->displayLetter();
@@ -184,7 +190,7 @@ void Game::setEvents() {
         rotationValueWheel = std::stoi(*static_cast<std::string*>(value));
         std::thread threadTemp([&](){
 
-           for(int i = 0; i < 360; i++) {
+            for(int i = 0; i < 360; i++) {
                 emit notifySpinWheel(1);
                 std::this_thread::sleep_for(std::chrono::milliseconds(5));
             }
@@ -193,8 +199,27 @@ void Game::setEvents() {
                 emit notifySpinWheel(1);
                 std::this_thread::sleep_for(std::chrono::milliseconds(5));
             }
+
+            ProtocolHandler protocol;
+            LocalPlayer::getInstance()->sendMessage(protocol.getWheelSpinnedProtocol(wheel->getCaseFromRotation()));
         });
         threadTemp.detach();
+    });
+
+    EventManager::getInstance()->addListener(EventManager::EVENT::PLAYER_MONEY, [&](void* data){
+        std::string stringData = *reinterpret_cast<std::string*>(data); //player-ammount
+        int id = std::stoi(stringData.substr(0, stringData.find("-")));
+        int ammount = std::stoi(stringData.substr(stringData.find("-") + 1, stringData.length() - stringData.find("-")));
+
+        auto it = std::find_if(players.begin(), players.end(), [&](Player* p) {
+            return id == p->getId();
+        });
+        if(it != players.end()) {
+            Player *p = reinterpret_cast<Player*>(*it);
+            p->setMoney(ammount);
+            emit notifyMoneyChanged();
+        }
+
     });
 }
 
@@ -255,8 +280,12 @@ void Game::addNewPlayer(QString data)
         }
     }
 
-
-    players.push_back(new Player(name, s));
+    if(s == LocalPlayer::getInstance()->getId()) {
+        std::cout << "adding local player" << std::endl;
+        players.push_back(LocalPlayer::getInstance());
+    }else {
+        players.push_back(new Player(name, s));
+    }
 
     switch(players.size()) {
         case 1:
@@ -286,7 +315,7 @@ void Game::addMessageToChat(QString msg)
 
     if(pseudo == "[Serveur]") {
         ui->textBrowserChat->append("<font color=\"Red\"><b>" + QString::fromStdString(pseudo) + ":</b> "
-                                + "<font color=\"Black\">" + toDisplay);
+                                + "<font color=\"Orange\">" + toDisplay);
     }else {
         ui->textBrowserChat->append("<font color=\"Grey\"><b>" + QString::fromStdString(pseudo) + ":</b> "
                                 + "<font color=\"Black\">" + toDisplay);
@@ -368,7 +397,9 @@ void Game::setCanPlay(bool value) {
         ui->pushButtonVoyelle->setEnabled(!value);
         ui->pushButtonConsonne->setEnabled(!value);        
     }else {
-        ui->pushButtonVoyelle->setEnabled(value);
+        if(LocalPlayer::getInstance()->getMoney() >= 200) {
+            ui->pushButtonVoyelle->setEnabled(value);
+        }
         ui->pushButtonConsonne->setEnabled(value);
     }
 
@@ -417,4 +448,30 @@ void Game::on_buttonSpinWheel_clicked()
 void Game::setEnableWheel(bool value)
 {
     ui->buttonSpinWheel->setEnabled(value);
+}
+
+void Game::displayMoney()
+{
+    for(Player* p : players) {
+        if(p->getName() == ui->labelPlayer1->text().toStdString()) {
+            ui->labelMoneyP1->setText(QString::number(p->getMoney()));
+        }else if(p->getName() == ui->labelPlayer2->text().toStdString()) {
+            ui->labelMoneyP2->setText(QString::number(p->getMoney()));
+        }else {
+            ui->labelMoneyP3->setText(QString::number(p->getMoney()));
+        }
+    }
+}
+
+void Game::on_pushButtonVoyelle_clicked()
+{
+    LocalPlayer::getInstance()->buyVoyelle();
+    emit notifyMoneyChanged();
+    emit setCanPlay(false);
+
+    char letter = ui->comboBoxVoyelle->currentText().toStdString().at(0);
+
+    ProtocolHandler protocol;
+    LocalPlayer::getInstance()->sendMessage(protocol.getSendLetterProtocol(letter));
+
 }

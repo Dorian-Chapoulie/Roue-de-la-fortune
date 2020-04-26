@@ -20,6 +20,8 @@ public:
         PLAYER_DISCONNECTED,
         PLAYER_QUICK_RIDDLE,
         SPIN_WHEEL,
+    	WHEEL_VALUE,
+    	RECEIVE_LETTER,
     };
 
     void addListener(EVENT eventName, std::function<void(void*)>&& handler);

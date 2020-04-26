@@ -12,7 +12,8 @@ public:
 		Game* game);	
 
 	int quickRiddle();
-	int sentenceRiddle(int& currentPlayer, bool& isWheelSpinned);
+	int sentenceRiddle(int& currentPlayer);
+	void handleWheelValue(std::string value);
 	
 	std::string getCurrentSentence();
 private:
@@ -22,7 +23,8 @@ private:
 	void initGame();
 	
 	void setEventsHandler();
-	void setCurrentSentence(EnigmaType type);			
+	void setCurrentSentence(EnigmaType type);
+	std::vector<std::string> getCharFromSentence(char c);
 
 	
 	Game* game = nullptr;
@@ -36,6 +38,16 @@ private:
 	std::vector<std::string> usedSentences;
 	
 	bool isQuickRiddleFound = false;
+	bool isWheelSpinned = false;
+	bool isWheelStartedSpin = false;
+	bool playerSentLetter = false;
+
+	char playerChoice = '_';
+	
 	int winnerId = -1;
+	int wheelValue = 0;
+	
+	const int WAITING_TIME = 30;
+	const int QUICK_RIDDLE_MONNEY = 500;
 };
 

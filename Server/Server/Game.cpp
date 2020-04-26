@@ -16,6 +16,10 @@ Game::Game(std::string& name, int port)
 
 	eventManager.addListener(EventManager::EVENT::PLAYER_CONNECT_OK, [&](void* sock) {		
 		this->players.push_back(new Player(*reinterpret_cast<SOCKET*>(sock)));
+		
+		std::string msg = protocol->getProcotol(ProtocolHandler::PLAYER_CONNECT_OK) + std::to_string(*reinterpret_cast<SOCKET*>(sock));
+		this->server->sendMessage(msg, *reinterpret_cast<SOCKET*>(sock));
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		this->server->sendMessage(protocol->getProcotol(protocol->ASK_PSEUDO), *reinterpret_cast<SOCKET*>(sock));
 	});
 
@@ -68,19 +72,7 @@ Game::Game(std::string& name, int port)
 			server->sendMessage(protocol->getProcotol(protocol->PLAYER_DISCONNECTED) + std::to_string(*static_cast<SOCKET*>(socket)), tmp);
 		}
 	});
-
-	eventManager.addListener(EventManager::EVENT::SPIN_WHEEL, [&](void*) {
-		int randomValue = rand() % 360;//TODO: real random
-		mutex.lock();
-		for (const auto* p : players)
-		{
-			SOCKET tmp = p->getId();
-			server->sendMessage(protocol->getSpinWheelProtocol(randomValue), tmp);
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		}
-		mutex.unlock();
-		isWheelSpinned = true;
-	});
+	
 	
 	threadPingPlayers = new std::thread([&]() { 
 		while (pingPlayers){ //TODO bool is partie finished
@@ -167,7 +159,7 @@ void Game::startGame()
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
-	winnerId = gameManager->sentenceRiddle(currentPlayer, isWheelSpinned);
+	winnerId = gameManager->sentenceRiddle(currentPlayer);
 	
 }
 

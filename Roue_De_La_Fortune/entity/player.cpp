@@ -24,3 +24,23 @@ void Player::setName(std::string name)
 {
     this->name = name;
 }
+
+void Player::setMoney(int ammount)
+{
+    this->money = ammount;
+}
+
+void Player::buyVoyelle()
+{
+    this->money -= 200;
+}
+
+void Player::setId(int id)
+{
+    this->id = id;
+}
+
+int Player::getMoney()
+{
+    return money;
+}

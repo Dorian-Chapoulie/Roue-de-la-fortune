@@ -27,6 +27,7 @@ public:
         DISPLAY_RESPONSE,
         SPIN_WHEEL,
         ENABLE_WHEEL,
+        PLAYER_MONEY,
     };
 
     static EventManager* getInstance();

@@ -2,6 +2,7 @@
 #define PROTOCOLHANDLER_H
 #include <unordered_map>
 #include "eventmanager.h"
+#include "Player.h"
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -33,6 +34,7 @@ public:
     	SPIN_WHEEL,
     	SEND_SENTENCE_RIDDLE,
     	ACTIVE_WHEEL,
+    	SEND_MONEY,
     };
 
     ProtocolHandler(EventManager* eventManager);    
@@ -47,6 +49,7 @@ public:
     std::string getSpinWheelProtocol(int value);
     std::string getSentenceRiddleProtocol(std::string sentence);
     std::string getActivateWheelProtocol(bool isEnabled);
+    std::string getSendMoneyProtocol(Player* p);
 
 private:
     std::unordered_map<PROTOCOL_NAME, std::string> protocoles;

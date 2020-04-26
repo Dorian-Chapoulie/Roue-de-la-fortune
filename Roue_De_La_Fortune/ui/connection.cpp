@@ -14,7 +14,9 @@ Connection::Connection(QWidget *parent)
     ui->setupUi(this);
     this->setAttribute(Qt::WA_DeleteOnClose);
 
-    EventManager::getInstance()->addListener(EventManager::EVENT::CONNEXION_SUCCESS, [&](void*){
+    EventManager::getInstance()->addListener(EventManager::EVENT::CONNEXION_SUCCESS, [&](void* idStr){
+        int id = std::stoi(*static_cast<std::string*>(idStr));
+        LocalPlayer::getInstance()->setId(id);
         emit showServerNavigator();
     });
 

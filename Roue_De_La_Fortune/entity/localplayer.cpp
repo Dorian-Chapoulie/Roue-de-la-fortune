@@ -4,7 +4,6 @@
 
 LocalPlayer* LocalPlayer::instance = nullptr;
 std::string LocalPlayer::tempName;
-int LocalPlayer::id = -1;
 
 void LocalPlayer::setTempName(std::string name) {
     LocalPlayer::tempName = name;
@@ -14,15 +13,10 @@ void LocalPlayer::setTempName(std::string name) {
     instance->setName(name);
 }
 
-void LocalPlayer::setId(int id)
-{
-    LocalPlayer::id = id;
-    instance->id = id;
-}
 
 LocalPlayer* LocalPlayer::getInstance() {
     if(LocalPlayer::instance == nullptr)
-        LocalPlayer::instance = new LocalPlayer(LocalPlayer::tempName, LocalPlayer::id);
+        LocalPlayer::instance = new LocalPlayer(LocalPlayer::tempName, 0);
     return LocalPlayer::instance;
 }
 

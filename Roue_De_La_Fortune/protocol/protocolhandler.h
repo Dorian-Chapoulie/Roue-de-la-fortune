@@ -15,6 +15,8 @@ public:
         GET_ALL_GAMES,
         SEND_QUICK_RIDDLE_PROPOSITION,
         SPIN_WHEEL,
+        WHEEL_SPINNED,
+        SEND_LETTER,
     };
 
     ProtocolHandler();
@@ -27,6 +29,8 @@ public:
     std::string getAllGamesProtocol() const;
     std::string getQuickRiddlePropositon(std::string& sentence);
     std::string getSpinWheelProtocol();
+    std::string getWheelSpinnedProtocol(std::string value);
+    std::string getSendLetterProtocol(char c);
 
     void callEventFromProtocol(std::string msg);
 

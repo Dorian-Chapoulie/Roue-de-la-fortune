@@ -38,10 +38,9 @@ private:
 	std::chrono::system_clock::time_point createdDate;
 
 	int currentPlayer = -1;
-	
-	bool isWheelSpinned = false;
+
 	bool pingPlayers = true;
 	bool isThreadPingFinished = false;
-	bool isGameFinished = false;
+	bool isGameFinished = false;	
 };
 

@@ -18,6 +18,10 @@ public:
     SOCKET getId();
 
     void setName(std::string name);
+    void setMoney(int ammount);
+    void buyVoyelle();
+    void setId(int id);
+    int getMoney();
 
 private:
     std::string name;

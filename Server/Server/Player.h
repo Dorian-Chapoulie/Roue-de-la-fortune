@@ -11,6 +11,9 @@ public:
 	std::string getName() const;
 
 	void setName(std::string& name);
+	void addMoney(int ammount);
+	void clearMoney();
+	int getMoney();
 
 private:
 	SOCKET id;

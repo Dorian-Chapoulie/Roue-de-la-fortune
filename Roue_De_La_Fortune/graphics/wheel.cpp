@@ -6,7 +6,7 @@ Wheel::Wheel(std::string imagePath, int nombreCase, std::vector<std::string> cas
     tailleCase = 360 / nombreCase;
     this->cases = cases;
 
-    rotationStep = tailleCase / 2;//???
+    //rotationStep = nombreCase / 2;//???
 
     pixmap = new QPixmap(QString::fromStdString(imagePath));
     item = new QGraphicsPixmapItem(pixmap->scaled(SCALE_WIDTH, SCALE_HEIGHT));
@@ -19,8 +19,16 @@ Wheel::~Wheel() {
 }
 
 std::string Wheel::getCaseFromRotation()
-{
-    return cases.at(std::floor((float)rotationStep / (float)tailleCase));
+{    
+    int pos = (float)(rotationStep + 7) / (float)tailleCase;
+
+    if(pos >= cases.size() - 1) {
+        pos = cases.size() - 1;
+    }
+    if(rotationStep >= 353) {
+        pos = 0;
+    }
+    return cases.at(pos);
 }
 
 QGraphicsPixmapItem* Wheel::getItem() {

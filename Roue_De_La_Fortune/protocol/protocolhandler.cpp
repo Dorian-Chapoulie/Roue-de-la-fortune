@@ -15,7 +15,8 @@ void ProtocolHandler::callEventFromProtocol(std::string msg)
         if(msg == "C-0") {
             eventManager->triggerEvent(eventManager->CONNEXION_FAILURE, "Identifiant ou mot de passe incorrect.");
         }else if (msg.find("C-1-") != std::string::npos){
-            eventManager->triggerEvent(eventManager->CONNEXION_SUCCESS);
+            std::string id = msg.substr(4);
+            eventManager->triggerEvent(eventManager->CONNEXION_SUCCESS, id);
         }
     }else if (msg.at(0) == 'I') {//Inscription
         if(msg == "I-1") {
@@ -61,6 +62,9 @@ void ProtocolHandler::callEventFromProtocol(std::string msg)
     }else if(msg.at(0) == 'A') {  //enable spin wheel
         std::string data = msg.substr(2);
         eventManager->triggerEvent(eventManager->ENABLE_WHEEL, data);
+    }else if(msg.at(0) == 'E') {
+        std::string data = msg.substr(2);
+        eventManager->triggerEvent(eventManager->PLAYER_MONEY, data);
     }
 
 }
@@ -110,4 +114,16 @@ std::string ProtocolHandler::getSpinWheelProtocol()
 {
     protocoles.insert_or_assign(PROTOCOL_NAME::SPIN_WHEEL, "S");
     return protocoles.at(PROTOCOL_NAME::SPIN_WHEEL);
+}
+
+std::string ProtocolHandler::getWheelSpinnedProtocol(std::string value)
+{
+    protocoles.insert_or_assign(PROTOCOL_NAME::WHEEL_SPINNED, "S-1-");
+    return protocoles.at(PROTOCOL_NAME::WHEEL_SPINNED) + value;
+}
+
+std::string ProtocolHandler::getSendLetterProtocol(char c)
+{
+    protocoles.insert_or_assign(PROTOCOL_NAME::SEND_LETTER, "W-");
+    return protocoles.at(PROTOCOL_NAME::SEND_LETTER) + c;
 }

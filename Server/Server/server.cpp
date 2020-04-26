@@ -34,7 +34,7 @@ int main()
 
 
     event_manager.addListener(EventManager::EVENT::PLAYER_CONNECT_OK, [&](void* sock) {
-        std::string msg = protocolHandler.getProcotol(ProtocolHandler::PLAYER_CONNECT_OK) + std::to_string(*reinterpret_cast<SOCKET*>(sock));
+        std::string msg = protocolHandler.getProcotol(ProtocolHandler::PLAYER_CONNECT_OK) + std::to_string(*reinterpret_cast<SOCKET*>(sock));        
         main_server.sendMessage(msg, *reinterpret_cast<SOCKET*>(sock));
     });
 
