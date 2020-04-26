@@ -32,6 +32,7 @@ private slots:
     void clearScene();
     void setEnableWheel(bool);
     void displayMoney();
+    void changeWheelButtonColor(bool);
 
     void on_pushButtonChat_clicked();
     void on_pushButton_clicked();
@@ -51,6 +52,7 @@ signals:
     void notifyCleanScene();
     void notifySetEnableWheel(bool);
     void notifyMoneyChanged();
+    void notifyWheelButtonAnimation(bool);
 
 private:
     Ui::Game *ui;
@@ -65,6 +67,7 @@ private:
 
     bool isQuickRiddle = true;
     bool isSceneCleared = false;
+    bool isWheelButtonClicked = false;
     int rotationValueWheel = 0;
 
     Wheel* wheel = nullptr;

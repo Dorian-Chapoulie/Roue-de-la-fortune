@@ -27,6 +27,7 @@ Game::Game(QWidget *parent) :
     connect(this, SIGNAL(notifyCleanScene()), this, SLOT(clearScene()));
     connect(this, SIGNAL(notifySetEnableWheel(bool)), this, SLOT(setEnableWheel(bool)));
     connect(this, SIGNAL(notifyMoneyChanged()), this, SLOT(displayMoney()));
+    connect(this, SIGNAL(notifyWheelButtonAnimation(bool)), this, SLOT(changeWheelButtonColor(bool)));
 
     ui->lineEditChat->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,50}"), this));    
 
@@ -156,7 +157,19 @@ void Game::setEvents() {
     EventManager::getInstance()->addListener(EventManager::ENABLE_WHEEL, [&](void* isWheelEnabled){
         int wheelEnabled = std::stoi(*reinterpret_cast<std::string*>(isWheelEnabled));
         bool value = wheelEnabled > 0 ? true : false;
-        //TODO: add animation to button
+
+        std::thread threadAnimation([&](){
+            bool value = true;
+            while(!isWheelButtonClicked) {
+                emit notifyWheelButtonAnimation(value);
+                value = !value;
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+            emit notifyWheelButtonAnimation(false);
+            isWheelButtonClicked = false;
+        });
+        threadAnimation.detach();
+
         emit notifySetEnableWheel(value);
     });
 
@@ -281,7 +294,6 @@ void Game::addNewPlayer(QString data)
     }
 
     if(s == LocalPlayer::getInstance()->getId()) {
-        std::cout << "adding local player" << std::endl;
         players.push_back(LocalPlayer::getInstance());
     }else {
         players.push_back(new Player(name, s));
@@ -397,8 +409,10 @@ void Game::setCanPlay(bool value) {
         ui->pushButtonVoyelle->setEnabled(!value);
         ui->pushButtonConsonne->setEnabled(!value);        
     }else {
-        if(LocalPlayer::getInstance()->getMoney() >= 200) {
+        if(LocalPlayer::getInstance()->getMoney() >= 200) {            
             ui->pushButtonVoyelle->setEnabled(value);
+        }else {
+            ui->pushButtonVoyelle->setEnabled(!value);
         }
         ui->pushButtonConsonne->setEnabled(value);
     }
@@ -443,6 +457,7 @@ void Game::on_buttonSpinWheel_clicked()
     ProtocolHandler protocol;
     LocalPlayer::getInstance()->sendMessage(protocol.getSpinWheelProtocol());
     ui->buttonSpinWheel->setEnabled(false);
+    isWheelButtonClicked = true;
 }
 
 void Game::setEnableWheel(bool value)
@@ -460,6 +475,15 @@ void Game::displayMoney()
         }else {
             ui->labelMoneyP3->setText(QString::number(p->getMoney()));
         }
+    }
+}
+
+void Game::changeWheelButtonColor(bool value)
+{
+    if(value) {
+        ui->buttonSpinWheel->setStyleSheet("QPushButton{ background-color: green }");
+    }else {
+        ui->buttonSpinWheel->setStyleSheet("QPushButton{ background-color: none }");
     }
 }
 
