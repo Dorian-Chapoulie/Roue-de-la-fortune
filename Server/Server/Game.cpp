@@ -144,6 +144,49 @@ ProtocolHandler* Game::getProtocolHandler()
 	return protocol;
 }
 
+Player* Game::getPlayerFromId(int id)
+{
+	auto it = std::find_if(players.begin(), players.end(), [&](Player* p)
+		{
+			return p->getId() == id;
+		});
+
+	if(it != players.end())
+	{
+		return reinterpret_cast<Player*>(*it);
+	}else
+	{
+		return nullptr;
+	}
+}
+
+int Game::getNextPlayer()
+{
+	if(currentPlayer == players.at(players.size() - 1)->getId())
+	{
+		return players.at(0)->getId();
+	}
+
+	bool setNewPlayer = false;
+	int newPlayer = -1;
+	for(Player* p : players)
+	{
+		if(p->getId() == currentPlayer)
+		{
+			setNewPlayer = true;
+			continue;
+		}
+
+		if(setNewPlayer)
+		{
+			newPlayer = p->getId();
+			break;
+		}
+	}
+
+	return newPlayer;
+}
+
 TCPServer* Game::getServer()
 {
 	return server;
@@ -155,6 +198,7 @@ void Game::startGame()
 
 	
 	int winnerId = gameManager->quickRiddle();
+
 	handleWinner(winnerId, gameManager->getCurrentSentence());
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(3000));
@@ -165,8 +209,11 @@ void Game::startGame()
 
 void Game::handleWinner(int winnerId, std::string sentence)
 {
-
-	if (winnerId != -1) {
+	mutex.lock();
+	int size = players.size();
+	mutex.unlock();
+	
+	if (winnerId != -1 && size > 0) {
 
 		auto it = std::find_if(players.begin(), players.end(), [&](Player* p)
 			{

@@ -41,9 +41,9 @@ void GameManager::setEventsHandler()
                 SOCKET tmp = p->getId();
                 game->getServer()->sendMessage(protocol_->getSendMoneyProtocol(p), tmp);
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
-			}            
-            winnerId = id;
-            isQuickRiddleFound = true;           
+                winnerId = id;
+                isQuickRiddleFound = true;
+			}                                
 		}else
 		{
             SOCKET sock = id;
@@ -195,6 +195,7 @@ int GameManager::quickRiddle()
     {
         SOCKET tmp = p->getId();
         game->getServer()->sendMessage(protocol_->getCanPlayProtocol(false), tmp);
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
         game->getServer()->sendMessage(protocol_->getProcotol(protocol_->DISPLAY_RESPONSE), tmp);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
@@ -218,21 +219,28 @@ int GameManager::sentenceRiddle(int& currentPlayer)
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         game->getServer()->sendMessage(protocol_->getSentenceRiddleProtocol(currentSentence), tmp);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    	
-        if (currentPlayer == p->getId()) {
-            game->getServer()->sendMessage(protocol_->getActivateWheelProtocol(true), tmp);
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            game->getServer()->sendMessage(protocol_->getServerChatProtocol("Vous avez 30 secondes pour tourner la roue."), tmp);
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        }
-    	
-        game->getServer()->sendMessage(protocol_->getCanPlayProtocol(false), tmp);        
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     mutex->unlock();
 	
     float waitedTime = 0.0f;
     while(!isRiddleFound) {
+
+        mutex->lock();
+        for (const auto* p : *players)
+        {
+            SOCKET tmp = p->getId();
+        	
+            if (currentPlayer == p->getId()) {
+                game->getServer()->sendMessage(protocol_->getActivateWheelProtocol(true), tmp);
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                game->getServer()->sendMessage(protocol_->getServerChatProtocol("Vous avez 30 secondes pour tourner la roue."), tmp);
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+
+            game->getServer()->sendMessage(protocol_->getCanPlayProtocol(false), tmp);
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+        mutex->unlock();
     	
         while(!isWheelSpinned) { // and if players > 0
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -284,7 +292,7 @@ int GameManager::sentenceRiddle(int& currentPlayer)
 
         		}else
         		{
-                    break;
+                    return -1;
         		}
         	}
         }
@@ -296,67 +304,84 @@ int GameManager::sentenceRiddle(int& currentPlayer)
     	SOCKET s = currentPlayer;
         game->getServer()->sendMessage(protocol_->getCanPlayProtocol(true),  s);
 
-        while (true) {
-            while (!playerSentLetter) { // and if players > 0
+       
+	    while (!playerSentLetter) { // and if players > 0
+	        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	        waitedTime += 0.1;
+
+	        auto it = std::find_if(players->begin(), players->end(), [&](Player* p)
+	            {
+	                return p->getId() == currentPlayer;
+	            });
+
+	        if (it == players->end() || waitedTime >= WAITING_TIME) // 30s
+	        {
+	            waitedTime = 0.0f;
+	            if (players->size() > 0)
+	            {
+	                mutex->lock();
+	                SOCKET tmp = static_cast<SOCKET>(currentPlayer);
+	                game->getServer()->sendMessage(protocol_->getCanPlayProtocol(false), tmp);
+	                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	                std::string newPlayerName;
+	                for (const auto* p : *players)
+	                {
+	                    if (p->getId() != currentPlayer)
+	                    {
+	                        currentPlayer = p->getId();
+	                        newPlayerName = p->getName();
+	                        break;
+	                    }
+	                }
+
+	                tmp = static_cast<SOCKET>(currentPlayer);
+	                mutex->unlock();
+
+	                game->getServer()->sendMessage(protocol_->getCanPlayProtocol(true), tmp);
+	                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	                game->getServer()->sendMessage(protocol_->getServerChatProtocol("Vous avez 30 secondes pour proposer une lettre."), tmp);
+
+
+	                mutex->lock();
+	                for (const auto* p : *players)
+	                {
+	                    SOCKET tmp = p->getId();
+	                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	                    game->getServer()->sendMessage(protocol_->getServerChatProtocol(newPlayerName + " prend la main !"), tmp);
+	                }
+	                mutex->unlock();
+
+	            }
+	            else
+	            {
+	                return -1;
+	            }
+	        }
+	    }
+	    playerSentLetter = false;
+	    waitedTime = 0.0f;
+	    
+	    s = currentPlayer;
+	    game->getServer()->sendMessage(protocol_->getCanPlayProtocol(true), s);
+
+	    std::vector<std::string> foundLetters = getCharFromSentence(playerChoice);	    
+
+	    if(foundLetters.size() <= 0) //si il a rien trouvé
+	    {
+	        currentPlayer = game->getNextPlayer();
+            Player* player = game->getPlayerFromId(currentPlayer);
+	    	
+            mutex->lock();
+            for (const auto* p : *players)
+            {
+                SOCKET tmp = p->getId();            
+                game->getServer()->sendMessage(protocol_->getServerChatProtocol(player->getName() + " prend la main !"), tmp);
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                waitedTime += 0.1;
-
-                auto it = std::find_if(players->begin(), players->end(), [&](Player* p)
-                    {
-                        return p->getId() == currentPlayer;
-                    });
-
-                if (it == players->end() || waitedTime >= WAITING_TIME) // 30s
-                {
-                    waitedTime = 0.0f;
-                    if (players->size() > 0)
-                    {
-                        mutex->lock();
-                        SOCKET tmp = static_cast<SOCKET>(currentPlayer);
-                        game->getServer()->sendMessage(protocol_->getCanPlayProtocol(false), tmp);
-                        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                        std::string newPlayerName;
-                        for (const auto* p : *players)
-                        {
-                            if (p->getId() != currentPlayer)
-                            {
-                                currentPlayer = p->getId();
-                                newPlayerName = p->getName();
-                                break;
-                            }
-                        }
-
-                        tmp = static_cast<SOCKET>(currentPlayer);
-                        mutex->unlock();
-
-                        game->getServer()->sendMessage(protocol_->getCanPlayProtocol(true), tmp);
-                        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                        game->getServer()->sendMessage(protocol_->getServerChatProtocol("Vous avez 30 secondes pour proposer une lettre."), tmp);
-
-
-                        mutex->lock();
-                        for (const auto* p : *players)
-                        {
-                            SOCKET tmp = p->getId();
-                            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                            game->getServer()->sendMessage(protocol_->getServerChatProtocol(newPlayerName + " prend la main !"), tmp);
-                        }
-                        mutex->unlock();
-
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
             }
-            playerSentLetter = false;
-            waitedTime = 0.0f;
-        	
-            s = currentPlayer;
-            game->getServer()->sendMessage(protocol_->getCanPlayProtocol(true), s);
-
-            std::vector<std::string> foundLetters = getCharFromSentence(playerChoice);
+            mutex->unlock();
+	    	
+	    }else
+	    {
             for (std::string s : foundLetters)
             {
                 for (Player* p : *players)
@@ -366,8 +391,20 @@ int GameManager::sentenceRiddle(int& currentPlayer)
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 }
             }
-        }
-        break;
+            char choice = foundLetters.at(0).substr(2).at(0);
+            if (!isVoyelle(choice))
+            {
+                int money = wheelValue * foundLetters.size();
+                Player* p = game->getPlayerFromId(currentPlayer);
+                p->addMoney(money);
+                SOCKET tmp = p->getId();
+                game->getServer()->sendMessage(protocol_->getSendMoneyProtocol(p), tmp);
+            }
+           
+	    }
+	    foundLetters.clear();
+        
+
     }
 
     return -1;
@@ -391,4 +428,11 @@ void GameManager::handleWheelValue(std::string value)
     {
         wheelValue = std::stoi(value);
     }
+}
+
+bool GameManager::isVoyelle(char c) const
+{
+    std::vector<char> voyelles = { 'a', 'e', 'i','o', 'u', 'y' };
+    auto it = std::find(voyelles.begin(), voyelles.end(), c);
+    return it != voyelles.end();
 }

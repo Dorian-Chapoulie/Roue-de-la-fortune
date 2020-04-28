@@ -16,6 +16,8 @@ public:
 
 	EventManager* getEventManager();
 	ProtocolHandler* getProtocolHandler();
+	Player* getPlayerFromId(int id);
+	int getNextPlayer();
 	
 	TCPServer* getServer();
 private:
