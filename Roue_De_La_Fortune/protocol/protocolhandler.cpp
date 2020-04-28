@@ -110,6 +110,12 @@ std::string ProtocolHandler::getQuickRiddlePropositon(std::string &sentence)
     return protocoles.at(PROTOCOL_NAME::SEND_QUICK_RIDDLE_PROPOSITION);
 }
 
+std::string ProtocolHandler::getSentenceRiddlePropositon(std::string &sentence)
+{
+    protocoles.insert_or_assign(PROTOCOL_NAME::SEND_SENTENCE_RIDDLE_PROPOSITION, "R-" + sentence);
+    return protocoles.at(PROTOCOL_NAME::SEND_SENTENCE_RIDDLE_PROPOSITION);
+}
+
 std::string ProtocolHandler::getSpinWheelProtocol()
 {
     protocoles.insert_or_assign(PROTOCOL_NAME::SPIN_WHEEL, "S");

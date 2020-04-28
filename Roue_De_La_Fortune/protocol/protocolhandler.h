@@ -14,6 +14,7 @@ public:
         TCHAT,
         GET_ALL_GAMES,
         SEND_QUICK_RIDDLE_PROPOSITION,
+        SEND_SENTENCE_RIDDLE_PROPOSITION,
         SPIN_WHEEL,
         WHEEL_SPINNED,
         SEND_LETTER,
@@ -28,6 +29,7 @@ public:
     std::string getTchatProtocol(std::string& pseudo, std::string& message);
     std::string getAllGamesProtocol() const;
     std::string getQuickRiddlePropositon(std::string& sentence);
+    std::string getSentenceRiddlePropositon(std::string& sentence);
     std::string getSpinWheelProtocol();
     std::string getWheelSpinnedProtocol(std::string value);
     std::string getSendLetterProtocol(char c);

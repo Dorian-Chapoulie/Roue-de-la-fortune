@@ -40,9 +40,12 @@ private:
 	std::vector<std::string> usedSentences;
 	
 	bool isQuickRiddleFound = false;
+	bool isRiddleFound = false;
 	bool isWheelSpinned = false;
 	bool isWheelStartedSpin = false;
 	bool playerSentLetter = false;
+
+	float waitedTime = 0.0f;
 
 	char playerChoice = '_';
 	

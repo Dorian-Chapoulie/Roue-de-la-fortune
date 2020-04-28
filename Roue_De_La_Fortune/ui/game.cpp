@@ -399,6 +399,8 @@ void Game::on_pushButton_clicked()
     std::string proposition = ui->lineEditWord->text().toLower().toStdString();
     if(isQuickRiddle) {        
         LocalPlayer::getInstance()->sendMessage(protocolHanlder.getQuickRiddlePropositon(proposition));
+    }else {
+        LocalPlayer::getInstance()->sendMessage(protocolHanlder.getSentenceRiddlePropositon(proposition));
     }
     ui->lineEditWord->clear();
 
@@ -406,19 +408,23 @@ void Game::on_pushButton_clicked()
 }
 
 void Game::setCanPlay(bool value) {
-    ui->lineEditWord->setEnabled(value);
-    ui->pushButton->setEnabled(value);       
 
-    if(isQuickRiddle && value) {
-        ui->pushButtonVoyelle->setEnabled(!value);
-        ui->pushButtonConsonne->setEnabled(!value);        
+    std::cout << "Can play: " << value << ", is quick: " << isQuickRiddle << std::endl;
+
+    if(isQuickRiddle) {
+        ui->pushButtonVoyelle->setEnabled(false);
+        ui->pushButtonConsonne->setEnabled(false);
+        ui->lineEditWord->setEnabled(value);
+        ui->pushButton->setEnabled(value);
     }else {
-        if(LocalPlayer::getInstance()->getMoney() >= 200) {            
+        if(LocalPlayer::getInstance()->getMoney() >= 200) {
             ui->pushButtonVoyelle->setEnabled(value);
         }else {
-            ui->pushButtonVoyelle->setEnabled(!value);
+            ui->pushButtonVoyelle->setEnabled(false);
         }
         ui->pushButtonConsonne->setEnabled(value);
+        ui->lineEditWord->setEnabled(value);
+        ui->pushButton->setEnabled(value);
     }
 
 }

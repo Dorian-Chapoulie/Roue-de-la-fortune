@@ -137,6 +137,11 @@ void ProtocolHandler::callEventFromProtocol(std::string msg, SOCKET* socket)
     {
 		std::string letter = msg.substr(2);
         eventManager->triggerEvent(eventManager->RECEIVE_LETTER, &letter);
+    }else if(msg.at(0) == 'R')// receive sentence
+    { 
+        std::string data = msg.substr(2);
+        data += "-" + std::to_string(*socket);
+        eventManager->triggerEvent(eventManager->PLAYER_SENTENCE_RIDDLE, &data);
     }
 
 }
