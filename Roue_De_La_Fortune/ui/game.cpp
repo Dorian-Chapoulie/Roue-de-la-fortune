@@ -28,6 +28,7 @@ Game::Game(QWidget *parent) :
     connect(this, SIGNAL(notifySetEnableWheel(bool)), this, SLOT(setEnableWheel(bool)));
     connect(this, SIGNAL(notifyMoneyChanged()), this, SLOT(displayMoney()));
     connect(this, SIGNAL(notifyWheelButtonAnimation(bool)), this, SLOT(changeWheelButtonColor(bool)));
+    connect(this, SIGNAL(notifyRemoveLetter(char)), this, SLOT(removeLetter(char)));
 
     ui->lineEditChat->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,50}"), this));    
 
@@ -186,7 +187,7 @@ void Game::setEvents() {
 
     EventManager::getInstance()->addListener(EventManager::RECEIVE_LETTER, [&](void* data){
         std::string s_data = *reinterpret_cast<std::string*>(data);
-        //char c = s_data.at(0);
+        char c = s_data.at(0);
         s_data = s_data.substr(s_data.find("-") + 1);
         int position = std::stoi(s_data);
         for(Case* c : cases) {
@@ -194,6 +195,9 @@ void Game::setEvents() {
                 c->displayLetter();
                 break;
             }
+        }
+        if(!isQuickRiddle) {
+            emit notifyRemoveLetter(c);
         }
         emit notifyUpdateScene();
 
@@ -487,6 +491,29 @@ void Game::changeWheelButtonColor(bool value)
     }
 }
 
+void Game::removeLetter(char c)
+{
+    bool isVoyelle = false;
+    for(int i = 0; i < ui->comboBoxVoyelle->count(); i++) {
+        std::string lettre = ui->comboBoxVoyelle->itemText(i).toStdString();
+        if(lettre.at(0) == c) {
+            ui->comboBoxVoyelle->removeItem(i);
+            isVoyelle = true;
+            break;
+        }
+    }
+
+    if(!isVoyelle) {
+        for(int i = 0; i < ui->comboBoxConsonne->count(); i++) {
+            std::string lettre = ui->comboBoxConsonne->itemText(i).toStdString();
+            if(lettre.at(0) == c) {
+                ui->comboBoxConsonne->removeItem(i);
+                break;
+            }
+        }
+    }
+}
+
 void Game::on_pushButtonVoyelle_clicked()
 {
     LocalPlayer::getInstance()->buyVoyelle();
@@ -497,5 +524,14 @@ void Game::on_pushButtonVoyelle_clicked()
 
     ProtocolHandler protocol;
     LocalPlayer::getInstance()->sendMessage(protocol.getSendLetterProtocol(letter));
+}
 
+void Game::on_pushButtonConsonne_clicked()
+{
+    emit setCanPlay(false);
+
+    char letter = ui->comboBoxConsonne->currentText().toStdString().at(0);
+
+    ProtocolHandler protocol;
+    LocalPlayer::getInstance()->sendMessage(protocol.getSendLetterProtocol(letter));
 }

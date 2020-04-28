@@ -33,12 +33,14 @@ private slots:
     void setEnableWheel(bool);
     void displayMoney();
     void changeWheelButtonColor(bool);
+    void removeLetter(char);
 
     void on_pushButtonChat_clicked();
     void on_pushButton_clicked();
     void on_buttonSpinWheel_clicked();
-
     void on_pushButtonVoyelle_clicked();
+
+    void on_pushButtonConsonne_clicked();
 
 signals:
     void notifyNewPlayer(QString);
@@ -53,6 +55,7 @@ signals:
     void notifySetEnableWheel(bool);
     void notifyMoneyChanged();
     void notifyWheelButtonAnimation(bool);
+    void notifyRemoveLetter(char);
 
 private:
     Ui::Game *ui;
