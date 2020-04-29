@@ -38,6 +38,7 @@ private slots:
     void changeWheelButtonColor(bool);
     void removeLetter(char);  
     void showMsgBox(QString);
+    void setComboBox();
 
     void on_pushButtonChat_clicked();
     void on_pushButton_clicked();
@@ -62,6 +63,7 @@ signals:
     void notifyRemoveLetter(char);
     void notifyUpdateBank();
     void notifyMsgBox(QString);
+    void notifySetComboBox();
 
 private:
     Ui::Game *ui;

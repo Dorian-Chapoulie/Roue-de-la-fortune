@@ -14,10 +14,12 @@ public:
 	void addMoney(int ammount);
 	void clearMoney();
 	int getMoney();
+	int getBank();
 
 private:
 	SOCKET id;
 	int money = 0;
+	int bank = 0;
 	std::string name;
 };
 

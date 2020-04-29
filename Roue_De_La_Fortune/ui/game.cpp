@@ -32,19 +32,11 @@ Game::Game(QWidget *parent) :
     connect(this, SIGNAL(notifyRemoveLetter(char)), this, SLOT(removeLetter(char)));
     connect(this, SIGNAL(notifyUpdateBank()), this, SLOT(updateBank()));
     connect(this, SIGNAL(notifyMsgBox(QString)), this, SLOT(showMsgBox(QString)));
+    connect(this, SIGNAL(notifySetComboBox()), this, SLOT(setComboBox()));
 
     ui->lineEditChat->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,50}"), this));    
 
-    const char consonnes[19] = {'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'x', 'z'};
-    const char voyelles[6] = {'a', 'e', 'i','o', 'u', 'y'};
-
-    for(const auto& c : consonnes) {
-        ui->comboBoxConsonne->addItem(QChar(c));
-    }
-
-    for(const auto& c : voyelles) {
-        ui->comboBoxVoyelle->addItem(QChar(c));
-    }
+    emit notifySetComboBox();
 
     ui->lineEditWord->setEnabled(false);
     ui->pushButtonVoyelle->setEnabled(false);
@@ -278,6 +270,7 @@ void Game::setEvents() {
         }
         emit notifyMoneyChanged();
         emit notifyUpdateBank();
+        emit notifySetComboBox();
     });
 
     EventManager::getInstance()->addListener(EventManager::EVENT::VICTORY, [&](void* data){
@@ -293,6 +286,24 @@ void Game::setEvents() {
         str += QString::number(LocalPlayer::getInstance()->getBank());
         emit notifyMsgBox(str);
     });
+}
+
+void Game::setComboBox()
+{
+    const char consonnes[19] = {'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'x', 'z'};
+    const char voyelles[6] = {'a', 'e', 'i','o', 'u', 'y'};
+
+    ui->comboBoxVoyelle->clear();
+    ui->comboBoxConsonne->clear();
+
+    for(const auto& c : consonnes) {
+        ui->comboBoxConsonne->addItem(QChar(c));
+    }
+
+    for(const auto& c : voyelles) {
+        ui->comboBoxVoyelle->addItem(QChar(c));
+    }
+
 }
 
 void Game::prepareScene() {

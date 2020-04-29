@@ -26,10 +26,16 @@ void Player::addMoney(int ammount)
 
 void Player::clearMoney()
 {
+	bank += money;
 	money = 0;
 }
 
 int Player::getMoney()
 {
 	return money;
+}
+
+int Player::getBank()
+{
+	return bank;
 }

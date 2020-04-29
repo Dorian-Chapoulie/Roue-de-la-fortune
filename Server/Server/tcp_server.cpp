@@ -168,6 +168,9 @@ void TCPServer::init()
         exit(0);
     }
 
+    int yes = '1';
+    setsockopt(m_socketfd,IPPROTO_TCP,TCP_NODELAY,(char*)&yes,sizeof(int));
+
     int list = listen(m_socketfd, MAX_CLIENT);
     if (list != 0) {
         printf("Listen failed...\n");
