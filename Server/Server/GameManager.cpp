@@ -423,6 +423,19 @@ int GameManager::sentenceRiddle(int& currentPlayer)
 	    	
 	        currentPlayer = game->getNextPlayer();
             Player* player = game->getPlayerFromId(currentPlayer);
+
+            std::string toSend = "W-";
+            toSend.push_back(playerChoice);
+            toSend += "--1";
+	    	
+            for (Player* p : *players)
+            {
+                SOCKET tmp = p->getId();
+                
+                std::cout << "send: " << toSend  << std::endl;
+                game->getServer()->sendMessage(toSend, tmp);
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
 	    	
             mutex->lock();
             for (const auto* p : *players)

@@ -190,16 +190,21 @@ void Game::setEvents() {
         char c = s_data.at(0);
         s_data = s_data.substr(s_data.find("-") + 1);
         int position = std::stoi(s_data);
-        for(Case* c : cases) {
-            if(c->getId() == position){
-                c->displayLetter();
-                break;
-            }
-        }
+
         if(!isQuickRiddle) {
             emit notifyRemoveLetter(c);
         }
-        emit notifyUpdateScene();
+
+        if(position != -1) {
+            for(Case* c : cases) {
+                if(c->getId() == position){
+                    c->displayLetter();
+                    break;
+                }
+            }
+
+            emit notifyUpdateScene();
+        }
 
     });
 
@@ -507,7 +512,7 @@ void Game::changeWheelButtonColor(bool value)
 
 void Game::removeLetter(char c)
 {
-    bool isVoyelle = false;
+    bool isVoyelle = false;    
     for(int i = 0; i < ui->comboBoxVoyelle->count(); i++) {
         std::string lettre = ui->comboBoxVoyelle->itemText(i).toStdString();
         if(lettre.at(0) == c) {
