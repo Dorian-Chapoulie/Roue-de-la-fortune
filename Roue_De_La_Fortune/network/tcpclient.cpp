@@ -18,6 +18,7 @@ TCPClient::~TCPClient()
 #include <iostream>
 void TCPClient::sendMessage(std::string msg)
 {
+    //std::cout << "send: " << msg << std::endl;
     if(!isConnected)
         init();
 
@@ -60,7 +61,6 @@ bool TCPClient::connectToBaseServer() {
     return init();
 }
 
-#include <iostream>
 void TCPClient::fn_threadReceiver()
 {
     ProtocolHandler protocolHandler;

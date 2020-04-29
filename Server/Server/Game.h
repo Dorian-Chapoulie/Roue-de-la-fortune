@@ -18,6 +18,10 @@ public:
 	ProtocolHandler* getProtocolHandler();
 	Player* getPlayerFromId(int id);
 	int getNextPlayer();
+
+	bool isJoinable();
+	bool isFinished();
+	bool isEmpty();
 	
 	TCPServer* getServer();
 private:
@@ -36,7 +40,6 @@ private:
 	std::string name;
 
 	std::vector<Player*> players;
-	std::vector<Player*> spectators;
 	
 	std::recursive_mutex mutex;
 	std::chrono::system_clock::time_point createdDate;
@@ -47,5 +50,7 @@ private:
 	bool isThreadPingFinished = false;
 	bool isGameFinished = false;
 	bool isGameDone = false;
+	bool isGameStarted = false;
+	bool isThreadGameFinished = false;
 };
 

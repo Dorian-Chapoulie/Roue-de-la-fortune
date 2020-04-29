@@ -12,24 +12,31 @@
 int main() 
 {      
     std::vector<Game*> games;
+    std::recursive_mutex mutex;
     EventManager event_manager;
     ProtocolHandler protocolHandler(&event_manager);
     TCPServer main_server(&protocolHandler);
 
-    event_manager.addListener(EventManager::EVENT::CREATE_GAME, [&](void* msg) {        
+    event_manager.addListener(EventManager::EVENT::CREATE_GAME, [&](void* msg) {
+        mutex.lock();
         games.push_back(new Game(*static_cast<std::string*>(msg), games.size() + Config::getInstance()->basePort + 1));
+        
         for (SOCKET s : main_server.getClients()) {
             main_server.sendMessage("G-" + games.back()->getInfos(), s);
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
+        mutex.unlock();
     });
 
     event_manager.addListener(EventManager::EVENT::GET_ALL_GAMES, [&](void* sock) {
+        mutex.lock();
         for (const auto& g : games) {
+            if (!g->isJoinable()) continue;
             std::string msg = "G-" + g->getInfos();            
             main_server.sendMessage(msg, *reinterpret_cast<SOCKET*>(sock));
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
+        mutex.unlock();
     });
 
 
@@ -57,19 +64,21 @@ int main()
     //supprimer partie chez le client
 
     while(true) { //replace by join
+        mutex.lock();
         if (games.size() > 0) {
             
             auto time = std::chrono::system_clock::now();          
             std::vector<Game*>::iterator iterator = std::find_if(games.begin(), games.end(), [=](Game* g) {
                 std::chrono::duration<double> elapsed_seconds = time - g->getCreatedDate();                
-                return elapsed_seconds.count() >= 500.0;
+                return g->isFinished();
             });
 
             if (iterator != games.end()) {            	
                 delete* iterator;
                 games.erase(iterator);
             }
-        }                
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+        mutex.unlock();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 } 

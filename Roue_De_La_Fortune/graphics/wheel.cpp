@@ -12,15 +12,9 @@ Wheel::Wheel(std::string imagePath, int nombreCase, std::vector<std::string> cas
     item = new QGraphicsPixmapItem(pixmap->scaled(SCALE_WIDTH, SCALE_HEIGHT));
     item->setTransformationMode(Qt::TransformationMode::SmoothTransformation);
 }
-#include <iostream>
+
 Wheel::~Wheel() {
     delete pixmap;
-    if(!item) {
-        std::cout << "1" << std::endl;
-    }
-    if(item == nullptr) {
-        std::cout << "2" << std::endl;
-    }
     //delete item;
 }
 
