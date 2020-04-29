@@ -92,7 +92,7 @@ Game::Game(std::string& name, int port)
 	//TEMP
 	std::thread treadStartGame([&]()
 		{
-			while(players.size() < 1)
+			while(players.size() < 2)
 			{
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			}
@@ -184,6 +184,11 @@ int Game::getNextPlayer()
 		}
 	}
 
+	if(newPlayer == -1)
+	{
+		newPlayer = players.at(0)->getId();
+	}
+
 	return newPlayer;
 }
 
@@ -221,7 +226,17 @@ void Game::handleWinner(int winnerId, std::string sentence)
 			});
 		currentPlayer = winnerId;
 
-		Player* p = reinterpret_cast<Player*>(*it);
+		Player* p = nullptr;
+		if(it == players.end())
+		{
+			std::cout << "old: " << currentPlayer << std::endl;
+			currentPlayer = getNextPlayer();
+			std::cout << "new: " << currentPlayer << std::endl;
+			p = getPlayerFromId(currentPlayer);
+		}
+		else {
+			p = reinterpret_cast<Player*>(*it);
+		}
 
 		mutex.lock();
 		for (Player* s : players)

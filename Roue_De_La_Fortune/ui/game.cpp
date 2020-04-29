@@ -346,6 +346,15 @@ void Game::removePlayer(int id)
         return p->getId() == static_cast<SOCKET>(id);
     });
 
+
+    for(Player* p : players) {
+        std::cout << p->getId() << std::endl;
+    }
+
+    if(it == players.end()) {
+        std::cout << "not found" << std::endl;
+        return;
+    }
     pseudo = reinterpret_cast<Player*>(*it)->getName();
     players.erase(it);
 
@@ -409,8 +418,6 @@ void Game::on_pushButton_clicked()
 
 void Game::setCanPlay(bool value) {
 
-    std::cout << "Can play: " << value << ", is quick: " << isQuickRiddle << std::endl;
-
     if(isQuickRiddle) {
         ui->pushButtonVoyelle->setEnabled(false);
         ui->pushButtonConsonne->setEnabled(false);
@@ -453,7 +460,8 @@ void Game::diaplayBadResponse() {
     msgBox.setIcon(QMessageBox::Information);
     msgBox.exec();
 
-    setCanPlay(true);
+    if(isQuickRiddle)
+        setCanPlay(true);
 }
 
 void Game::clearScene() {
