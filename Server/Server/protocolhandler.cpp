@@ -23,6 +23,7 @@ ProtocolHandler::ProtocolHandler(EventManager* eventManager)
     protocoles.insert_or_assign(PROTOCOL_NAME::SEND_SENTENCE_RIDDLE, "R-");
     protocoles.insert_or_assign(PROTOCOL_NAME::ACTIVE_WHEEL, "A-");
     protocoles.insert_or_assign(PROTOCOL_NAME::SEND_MONEY, "E-");
+    protocoles.insert_or_assign(PROTOCOL_NAME::NEW_ROUND, "Z-");
     this->eventManager = eventManager;
 }
 
@@ -194,4 +195,9 @@ std::string ProtocolHandler::getActivateWheelProtocol(bool isEnabled)
 std::string ProtocolHandler::getSendMoneyProtocol(Player* p)
 {
     return this->protocoles.at(PROTOCOL_NAME::SEND_MONEY) + std::to_string(p->getId()) + "-" + std::to_string(p->getMoney());
+}
+
+std::string ProtocolHandler::getNewRoundProtocol(int roundNumber)
+{
+    return this->protocoles.at(PROTOCOL_NAME::NEW_ROUND) + std::to_string(roundNumber);
 }

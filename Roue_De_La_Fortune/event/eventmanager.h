@@ -28,6 +28,7 @@ public:
         SPIN_WHEEL,
         ENABLE_WHEEL,
         PLAYER_MONEY,
+        NEW_ROUND,
     };
 
     static EventManager* getInstance();

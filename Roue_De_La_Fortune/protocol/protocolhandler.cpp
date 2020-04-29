@@ -62,9 +62,12 @@ void ProtocolHandler::callEventFromProtocol(std::string msg)
     }else if(msg.at(0) == 'A') {  //enable spin wheel
         std::string data = msg.substr(2);
         eventManager->triggerEvent(eventManager->ENABLE_WHEEL, data);
-    }else if(msg.at(0) == 'E') {
+    }else if(msg.at(0) == 'E') { //money
         std::string data = msg.substr(2);
         eventManager->triggerEvent(eventManager->PLAYER_MONEY, data);
+    }else if(msg.at(0) == 'Z') { // new round
+        std::string data = msg.substr(2);
+        eventManager->triggerEvent(eventManager->NEW_ROUND, data);
     }
 
 }

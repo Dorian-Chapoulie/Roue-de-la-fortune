@@ -32,8 +32,9 @@ private slots:
     void clearScene();
     void setEnableWheel(bool);
     void displayMoney();
+    void updateBank();
     void changeWheelButtonColor(bool);
-    void removeLetter(char);
+    void removeLetter(char);  
 
     void on_pushButtonChat_clicked();
     void on_pushButton_clicked();
@@ -56,6 +57,7 @@ signals:
     void notifyMoneyChanged();
     void notifyWheelButtonAnimation(bool);
     void notifyRemoveLetter(char);
+    void notifyUpdateBank();
 
 private:
     Ui::Game *ui;

@@ -44,6 +44,7 @@ private:
 	bool isWheelSpinned = false;
 	bool isWheelStartedSpin = false;
 	bool playerSentLetter = false;
+	bool restartWithNewPlayer = false;
 
 	float waitedTime = 0.0f;
 

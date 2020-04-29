@@ -35,6 +35,7 @@ public:
     	SEND_SENTENCE_RIDDLE,
     	ACTIVE_WHEEL,
     	SEND_MONEY,
+        NEW_ROUND,
     };
 
     ProtocolHandler(EventManager* eventManager);    
@@ -50,6 +51,7 @@ public:
     std::string getSentenceRiddleProtocol(std::string sentence);
     std::string getActivateWheelProtocol(bool isEnabled);
     std::string getSendMoneyProtocol(Player* p);
+    std::string getNewRoundProtocol(int roundNumber);
 
 private:
     std::unordered_map<PROTOCOL_NAME, std::string> protocoles;

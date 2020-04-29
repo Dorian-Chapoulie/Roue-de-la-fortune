@@ -30,6 +30,12 @@ void Player::setMoney(int ammount)
     this->money = ammount;
 }
 
+void Player::updateBank()
+{
+    bank += money;
+    money = 0;
+}
+
 void Player::buyVoyelle()
 {
     this->money -= 200;
@@ -43,4 +49,9 @@ void Player::setId(int id)
 int Player::getMoney()
 {
     return money;
+}
+
+int Player::getBank()
+{
+    return bank;
 }

@@ -22,7 +22,7 @@ public:
         SPIN_WHEEL,
     	WHEEL_VALUE,
     	RECEIVE_LETTER,
-    	PLAYER_SENTENCE_RIDDLE,
+    	PLAYER_SENTENCE_RIDDLE,    	
     };
 
     void addListener(EVENT eventName, std::function<void(void*)>&& handler);

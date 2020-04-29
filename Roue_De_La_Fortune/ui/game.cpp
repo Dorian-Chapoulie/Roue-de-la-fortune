@@ -29,6 +29,7 @@ Game::Game(QWidget *parent) :
     connect(this, SIGNAL(notifyMoneyChanged()), this, SLOT(displayMoney()));
     connect(this, SIGNAL(notifyWheelButtonAnimation(bool)), this, SLOT(changeWheelButtonColor(bool)));
     connect(this, SIGNAL(notifyRemoveLetter(char)), this, SLOT(removeLetter(char)));
+    connect(this, SIGNAL(notifyUpdateBank()), this, SLOT(updateBank()));
 
     ui->lineEditChat->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,50}"), this));    
 
@@ -157,7 +158,8 @@ void Game::setEvents() {
 
     EventManager::getInstance()->addListener(EventManager::ENABLE_WHEEL, [&](void* isWheelEnabled){
         int wheelEnabled = std::stoi(*reinterpret_cast<std::string*>(isWheelEnabled));
-        bool value = wheelEnabled > 0 ? true : false;
+        bool value = wheelEnabled > 0 ? true : false;        
+        isWheelButtonClicked = false;
 
         std::thread threadAnimation([&](){
             bool value = true;
@@ -170,6 +172,10 @@ void Game::setEvents() {
             isWheelButtonClicked = false;
         });
         threadAnimation.detach();
+
+        if(!value) {
+            isWheelButtonClicked = true;
+        }
 
         emit notifySetEnableWheel(value);
     });
@@ -242,6 +248,17 @@ void Game::setEvents() {
             emit notifyMoneyChanged();
         }
 
+    });
+
+    EventManager::getInstance()->addListener(EventManager::EVENT::NEW_ROUND, [&](void* data){
+        std::string roundNumber = *reinterpret_cast<std::string*>(data);
+        emit notifyNewMessage(QString::fromStdString("[INFO]-Nouvelle manche:" + roundNumber));
+
+        for(Player* p : players) {
+            p->updateBank();
+        }
+        emit notifyMoneyChanged();
+        emit notifyUpdateBank();
     });
 }
 
@@ -337,6 +354,9 @@ void Game::addMessageToChat(QString msg)
     if(pseudo == "[Serveur]") {
         ui->textBrowserChat->append("<font color=\"Red\"><b>" + QString::fromStdString(pseudo) + ":</b> "
                                 + "<font color=\"Orange\">" + toDisplay);
+    }else if(pseudo == "[INFO]") {
+        ui->textBrowserChat->append("<font color=\"Green\"><b>" + QString::fromStdString(pseudo) + ":</b> "
+                                + "<font color=\"Black\">" + toDisplay);
     }else {
         ui->textBrowserChat->append("<font color=\"Grey\"><b>" + QString::fromStdString(pseudo) + ":</b> "
                                 + "<font color=\"Black\">" + toDisplay);
@@ -352,14 +372,10 @@ void Game::removePlayer(int id)
     });
 
 
-    for(Player* p : players) {
-        std::cout << p->getId() << std::endl;
-    }
-
     if(it == players.end()) {
-        std::cout << "not found" << std::endl;
         return;
     }
+
     pseudo = reinterpret_cast<Player*>(*it)->getName();
     players.erase(it);
 
@@ -497,6 +513,19 @@ void Game::displayMoney()
             ui->labelMoneyP2->setText(QString::number(p->getMoney()));
         }else {
             ui->labelMoneyP3->setText(QString::number(p->getMoney()));
+        }
+    }
+}
+
+void Game::updateBank()
+{
+    for(Player* p : players) {
+        if(p->getName() == ui->labelPlayer1->text().toStdString()) {
+            ui->labelbankP1->setText(QString::number(p->getBank()));
+        }else if(p->getName() == ui->labelPlayer2->text().toStdString()) {
+            ui->labelbankP2->setText(QString::number(p->getBank()));
+        }else {
+            ui->labelbankP3->setText(QString::number(p->getBank()));
         }
     }
 }

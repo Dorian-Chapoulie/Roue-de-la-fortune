@@ -19,13 +19,16 @@ public:
 
     void setName(std::string name);
     void setMoney(int ammount);
+    void updateBank();
     void buyVoyelle();
     void setId(int id);
     int getMoney();
+    int getBank();
 
 private:
     std::string name;
     int money = 0;
+    int bank = 0;
     SOCKET id = -1;
 };
 

@@ -201,14 +201,18 @@ void Game::startGame()
 {
 	GameManager* gameManager = new GameManager(&mutex, &players, protocol, &eventManager, this);	
 
+
+	for (int i = 1; i < 5; i++) {
+		int winnerId = gameManager->quickRiddle();
+		handleWinner(winnerId, gameManager->getCurrentSentence());
+		std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+
+		winnerId = gameManager->sentenceRiddle(currentPlayer);
+		handleWinner(winnerId, gameManager->getCurrentSentence());
+		hanldeNewRound(i);
+		std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+	}
 	
-	int winnerId = gameManager->quickRiddle();
-
-	handleWinner(winnerId, gameManager->getCurrentSentence());
-
-	std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-
-	winnerId = gameManager->sentenceRiddle(currentPlayer);
 	
 }
 
@@ -229,9 +233,7 @@ void Game::handleWinner(int winnerId, std::string sentence)
 		Player* p = nullptr;
 		if(it == players.end())
 		{
-			std::cout << "old: " << currentPlayer << std::endl;
 			currentPlayer = getNextPlayer();
-			std::cout << "new: " << currentPlayer << std::endl;
 			p = getPlayerFromId(currentPlayer);
 		}
 		else {
@@ -272,4 +274,23 @@ void Game::handleWinner(int winnerId, std::string sentence)
 		}
 		mutex.unlock();
 	}
+}
+
+void Game::hanldeNewRound(int roundNumber)
+{
+	mutex.lock();
+	for (Player* s : players)
+	{
+		SOCKET tmp = s->getId();
+		server->sendMessage(protocol->getActivateWheelProtocol(false), tmp);
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		server->sendMessage(protocol->getCanPlayProtocol(false), tmp);
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		server->sendMessage(protocol->getSendMoneyProtocol(s), tmp);
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		server->sendMessage(protocol->getNewRoundProtocol(roundNumber), tmp);
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		s->clearMoney();
+	}
+	mutex.unlock();
 }
