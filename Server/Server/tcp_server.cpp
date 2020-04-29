@@ -35,7 +35,7 @@ TCPServer::~TCPServer()
 
 void TCPServer::sendMessage(std::string msg, SOCKET& client)
 {
-    //std::cout << "Send: " << msg << std::endl;
+    //std::cout << "Send: " << msg << std::endl;    
     if (send(client, msg.c_str(), msg.length(), 0) < 0) {
 
         auto it = std::find(m_socketClients.begin(), m_socketClients.end(), client);
@@ -59,6 +59,11 @@ void TCPServer::disconnect()
 #ifdef WIN32
     WSACleanup();
 #endif
+}
+
+void TCPServer::disconnectClient(int socketFd)
+{
+    closesocket(socketFd);
 }
 
 bool TCPServer::isListening() const

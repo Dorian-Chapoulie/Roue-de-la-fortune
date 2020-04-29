@@ -5,7 +5,7 @@ class GameManager
 {
 
 public:
-	GameManager(std::mutex* mutex,
+	GameManager(std::recursive_mutex* mutex,
 		std::vector<Player*>* players,
 		ProtocolHandler* protocol,
 		EventManager* eventManager,
@@ -16,13 +16,12 @@ public:
 	void handleWheelValue(std::string value);
 
 	bool isVoyelle(char c) const;
+	void stopGame();
 	
 	std::string getCurrentSentence();
 private:
 
-	enum EnigmaType { QUICK_RIDDLE, SENTENCE_RIDDLE };		
-
-	void initGame();
+	enum EnigmaType { QUICK_RIDDLE, SENTENCE_RIDDLE };			
 	
 	void setEventsHandler();
 	void setCurrentSentence(EnigmaType type);
@@ -34,7 +33,7 @@ private:
 	EventManager* eventManager;
 	
 	std::vector<Player*>* players;
-	std::mutex* mutex;
+	std::recursive_mutex* mutex;
 
 	std::string currentSentence;
 	std::vector<std::string> usedSentences;

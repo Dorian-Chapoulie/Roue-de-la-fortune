@@ -11,7 +11,7 @@ public:
 	Game(std::string& name, int port);
 	~Game();
 
-	std::string getInfos() const;
+	std::string getInfos();
 	std::chrono::system_clock::time_point getCreatedDate() const;
 
 	EventManager* getEventManager();
@@ -25,6 +25,7 @@ private:
 	void startGame();
 	void handleWinner(int winnerId, std::string sentence);
 	void hanldeNewRound(int roundNumber);
+	int getLooser();
 	
 	TCPServer* server = nullptr;
 	EventManager eventManager;
@@ -37,13 +38,14 @@ private:
 	std::vector<Player*> players;
 	std::vector<Player*> spectators;
 	
-	std::mutex mutex;
+	std::recursive_mutex mutex;
 	std::chrono::system_clock::time_point createdDate;
 
 	int currentPlayer = -1;
 
 	bool pingPlayers = true;
 	bool isThreadPingFinished = false;
-	bool isGameFinished = false;	
+	bool isGameFinished = false;
+	bool isGameDone = false;
 };
 

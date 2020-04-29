@@ -14,8 +14,10 @@ Game::Game(std::string& name, int port)
 	server = new TCPServer(Config::getInstance()->baseIp, port, protocol);
 	std::cout << "New server '" << name << "'\t " << Config::getInstance()->baseIp << ":" << port << std::endl;
 
-	eventManager.addListener(EventManager::EVENT::PLAYER_CONNECT_OK, [&](void* sock) {		
+	eventManager.addListener(EventManager::EVENT::PLAYER_CONNECT_OK, [&](void* sock) {
+		mutex.lock();
 		this->players.push_back(new Player(*reinterpret_cast<SOCKET*>(sock)));
+		mutex.unlock();
 		
 		std::string msg = protocol->getProcotol(ProtocolHandler::PLAYER_CONNECT_OK) + std::to_string(*reinterpret_cast<SOCKET*>(sock));
 		this->server->sendMessage(msg, *reinterpret_cast<SOCKET*>(sock));
@@ -24,12 +26,14 @@ Game::Game(std::string& name, int port)
 	});
 
 	eventManager.addListener(EventManager::EVENT::TCHAT, [&](void* data) {
-		std::string msg = *reinterpret_cast<std::string*>(data);		
+		std::string msg = *reinterpret_cast<std::string*>(data);
+		mutex.lock();
 		for (Player* p : players) {
 			SOCKET id = p->getId();
 			server->sendMessage(msg, id);
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		}
+		mutex.unlock();
 	});
 
 	eventManager.addListener(EventManager::EVENT::ASK_PSEUDO, [&](void* pseudoAndSocket) {
@@ -39,6 +43,7 @@ Game::Game(std::string& name, int port)
 
 		std::cout << "New player: " << pseudo << ":" << id << std::endl;
 
+		mutex.lock();
 		for (Player* p : players) {
 			if (p->getId() == std::stoi(id)) {
 				p->setName(pseudo);
@@ -54,10 +59,12 @@ Game::Game(std::string& name, int port)
 				std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			}			
 		}
+		mutex.unlock();
 		
 	});
 
 	eventManager.addListener(EventManager::EVENT::PLAYER_DISCONNECTED, [&](void* socket) {
+		mutex.lock();
 		auto it = std::find_if(players.begin(), players.end(), [&](Player* p) {
 			return p->getId() == *static_cast<SOCKET*>(socket);
 		});
@@ -71,6 +78,7 @@ Game::Game(std::string& name, int port)
 			SOCKET tmp = p->getId();			
 			server->sendMessage(protocol->getProcotol(protocol->PLAYER_DISCONNECTED) + std::to_string(*static_cast<SOCKET*>(socket)), tmp);
 		}
+		mutex.unlock();
 	});
 	
 	
@@ -92,8 +100,13 @@ Game::Game(std::string& name, int port)
 	//TEMP
 	std::thread treadStartGame([&]()
 		{
-			while(players.size() < 2)
+	
+			int size = 0;
+			while(size < 2)
 			{
+				mutex.lock();
+				size = players.size();
+				mutex.unlock();
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			}
 			startGame();
@@ -114,8 +127,9 @@ Game::~Game() {
 	std::cout << "Game delete ok" << std::endl;
 }
 
-std::string Game::getInfos() const
+std::string Game::getInfos()
 {
+	mutex.lock();
 	std::string ret = this->name
 		+ "-"
 		+ std::to_string(this->players.size())
@@ -125,7 +139,7 @@ std::string Game::getInfos() const
 		+ server->getIp()
 		+ "-"
 		+ std::to_string(server->getPort());
-
+	mutex.unlock();
 	return ret;
 }
 
@@ -146,6 +160,7 @@ ProtocolHandler* Game::getProtocolHandler()
 
 Player* Game::getPlayerFromId(int id)
 {
+	mutex.lock();
 	auto it = std::find_if(players.begin(), players.end(), [&](Player* p)
 		{
 			return p->getId() == id;
@@ -153,17 +168,22 @@ Player* Game::getPlayerFromId(int id)
 
 	if(it != players.end())
 	{
+		mutex.unlock();
 		return reinterpret_cast<Player*>(*it);
 	}else
 	{
+		mutex.unlock();
 		return nullptr;
 	}
+	
 }
 
 int Game::getNextPlayer()
 {
+	mutex.lock();
 	if(currentPlayer == players.at(players.size() - 1)->getId())
 	{
+		mutex.unlock();
 		return players.at(0)->getId();
 	}
 
@@ -188,7 +208,7 @@ int Game::getNextPlayer()
 	{
 		newPlayer = players.at(0)->getId();
 	}
-
+	mutex.unlock();
 	return newPlayer;
 }
 
@@ -199,28 +219,78 @@ TCPServer* Game::getServer()
 
 void Game::startGame()
 {
+	mutex.lock();
 	GameManager* gameManager = new GameManager(&mutex, &players, protocol, &eventManager, this);	
-
+	mutex.unlock();
 
 	for (int i = 1; i < 5; i++) {
 		int winnerId = gameManager->quickRiddle();
 		handleWinner(winnerId, gameManager->getCurrentSentence());
+
+		mutex.lock();
+		if(players.size() <= 1)
+		{
+			gameManager->stopGame();
+			mutex.unlock();
+			break;
+		}
+		mutex.unlock();
+		
 		std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
 		winnerId = gameManager->sentenceRiddle(currentPlayer);
 		handleWinner(winnerId, gameManager->getCurrentSentence());
 		hanldeNewRound(i);
+
+		mutex.lock();
+		if (players.size() > 1) {
+			auto it = std::find_if(players.begin(), players.end(), [&](Player* p)
+				{
+					return p->getId() == getLooser();
+				});
+			Player* looser = reinterpret_cast<Player*>(*it);
+			std::string toSend = "Le joueur: <font color=\"Red\"><b>" + looser->getName() + "</b><font color=\"Orange\"> a perdu !";
+
+			
+			for (Player* s : players)
+			{
+				SOCKET tmp = s->getId();
+				server->sendMessage(protocol->getServerChatProtocol(toSend), tmp);
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
+				s->clearMoney();
+			}
+			
+
+			SOCKET socket = looser->getId();
+			server->sendMessage(protocol->getProcotol(protocol->LOOSE), socket);
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			getServer()->disconnectClient(looser->getId());
+			players.erase(it);
+		}else {
+			gameManager->stopGame();
+			mutex.unlock();
+			break;
+		}
+
+		mutex.unlock();
+		
 		std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 	}
-	
-	
+
+	mutex.lock();
+	SOCKET socket = players.at(0)->getId();
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	server->sendMessage(protocol->getProcotol(protocol->VICTORY), socket);
+	server->disconnectClient(players.at(0)->getId());
+	mutex.unlock();
+	isGameDone = true;
 }
 
 void Game::handleWinner(int winnerId, std::string sentence)
 {
 	mutex.lock();
 	int size = players.size();
-	mutex.unlock();
+	
 	
 	if (winnerId != -1 && size > 0) {
 
@@ -240,7 +310,7 @@ void Game::handleWinner(int winnerId, std::string sentence)
 			p = reinterpret_cast<Player*>(*it);
 		}
 
-		mutex.lock();
+		
 		for (Player* s : players)
 		{
 			SOCKET tmp = s->getId();
@@ -251,7 +321,7 @@ void Game::handleWinner(int winnerId, std::string sentence)
 			server->sendMessage(protocol->getWinnerIdProtocol(p->getId()), tmp);
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		}
-		mutex.unlock();
+		
 
 	}
 	else {
@@ -263,7 +333,7 @@ void Game::handleWinner(int winnerId, std::string sentence)
 			currentPlayer = -1;
 		}
 
-		mutex.lock();
+		
 		for (Player* s : players)
 		{
 			SOCKET tmp = s->getId();
@@ -272,8 +342,9 @@ void Game::handleWinner(int winnerId, std::string sentence)
 			server->sendMessage(protocol->getServerChatProtocol(players.at(0)->getName() + " prend la main."), tmp);
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		}
-		mutex.unlock();
+		
 	}
+	mutex.unlock();
 }
 
 void Game::hanldeNewRound(int roundNumber)
@@ -289,8 +360,25 @@ void Game::hanldeNewRound(int roundNumber)
 		server->sendMessage(protocol->getSendMoneyProtocol(s), tmp);
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		server->sendMessage(protocol->getNewRoundProtocol(roundNumber), tmp);
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		s->clearMoney();
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));		
 	}
 	mutex.unlock();
+}
+
+int Game::getLooser()
+{
+	mutex.lock();
+	int temp = players.at(0)->getMoney();
+	int id = players.at(0)->getId();
+	for(Player* p : players)
+	{
+		std::cout << p->getName() << ": " << p->getMoney() << std::endl;
+		if(p->getMoney() < temp)
+		{
+			id = p->getId();
+		}
+	}
+	mutex.unlock();
+
+	return id;
 }

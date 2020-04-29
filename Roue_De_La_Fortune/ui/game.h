@@ -20,6 +20,8 @@ public:
     explicit Game(QWidget *parent = nullptr);
     ~Game();
 
+    void closeEvent(QCloseEvent *event) override;
+
 private slots:
     void addNewPlayer(QString);
     void addMessageToChat(QString);
@@ -35,6 +37,7 @@ private slots:
     void updateBank();
     void changeWheelButtonColor(bool);
     void removeLetter(char);  
+    void showMsgBox(QString);
 
     void on_pushButtonChat_clicked();
     void on_pushButton_clicked();
@@ -58,6 +61,7 @@ signals:
     void notifyWheelButtonAnimation(bool);
     void notifyRemoveLetter(char);
     void notifyUpdateBank();
+    void notifyMsgBox(QString);
 
 private:
     Ui::Game *ui;

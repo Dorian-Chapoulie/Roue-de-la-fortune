@@ -1,5 +1,6 @@
 #include "game.h"
 #include "ui_game.h"
+#include "ui/servernavigator.h"
 #include "event/eventmanager.h"
 #include "protocol/protocolhandler.h"
 #include "entity/localplayer.h"
@@ -30,6 +31,7 @@ Game::Game(QWidget *parent) :
     connect(this, SIGNAL(notifyWheelButtonAnimation(bool)), this, SLOT(changeWheelButtonColor(bool)));
     connect(this, SIGNAL(notifyRemoveLetter(char)), this, SLOT(removeLetter(char)));
     connect(this, SIGNAL(notifyUpdateBank()), this, SLOT(updateBank()));
+    connect(this, SIGNAL(notifyMsgBox(QString)), this, SLOT(showMsgBox(QString)));
 
     ui->lineEditChat->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,50}"), this));    
 
@@ -87,6 +89,23 @@ Game::~Game()
     delete scene;
     delete wheelScene;
     players.clear();
+}
+
+void Game::closeEvent(QCloseEvent *event)
+{
+    emit clearScene();
+    delete scene;
+    delete wheelScene;
+    players.clear();
+    cases.clear();
+    delete wheel;
+
+    LocalPlayer::getInstance()->disconnect();
+    LocalPlayer::getInstance()->connectToBaseServer();
+
+    ServerNavigator* serverNavigator = new ServerNavigator();
+    serverNavigator->show();
+    this->close();
 }
 
 void Game::setEvents() {
@@ -259,6 +278,20 @@ void Game::setEvents() {
         }
         emit notifyMoneyChanged();
         emit notifyUpdateBank();
+    });
+
+    EventManager::getInstance()->addListener(EventManager::EVENT::VICTORY, [&](void* data){
+        QString str = QString::fromStdString(*reinterpret_cast<std::string*>(data));
+        LocalPlayer::getInstance()->updateBank();
+        str += QString::number(LocalPlayer::getInstance()->getBank());
+        emit notifyMsgBox(str);
+    });
+
+    EventManager::getInstance()->addListener(EventManager::EVENT::LOOSE, [&](void* data){
+        QString str = QString::fromStdString(*reinterpret_cast<std::string*>(data));
+        LocalPlayer::getInstance()->updateBank();
+        str += QString::number(LocalPlayer::getInstance()->getBank());
+        emit notifyMsgBox(str);
     });
 }
 
@@ -560,6 +593,22 @@ void Game::removeLetter(char c)
             }
         }
     }
+}
+
+void Game::showMsgBox(QString msg)
+{
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Game");
+    msgBox.setText("Fin du jeu");
+    msgBox.setInformativeText(msg);
+    msgBox.setDefaultButton(QMessageBox::Ok);
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.exec();
+
+    LocalPlayer::getInstance()->disconnect();
+    LocalPlayer::getInstance()->connectToBaseServer();
+
+    this->close();
 }
 
 void Game::on_pushButtonVoyelle_clicked()

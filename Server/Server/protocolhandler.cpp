@@ -24,6 +24,8 @@ ProtocolHandler::ProtocolHandler(EventManager* eventManager)
     protocoles.insert_or_assign(PROTOCOL_NAME::ACTIVE_WHEEL, "A-");
     protocoles.insert_or_assign(PROTOCOL_NAME::SEND_MONEY, "E-");
     protocoles.insert_or_assign(PROTOCOL_NAME::NEW_ROUND, "Z-");
+    protocoles.insert_or_assign(PROTOCOL_NAME::VICTORY, "V");
+    protocoles.insert_or_assign(PROTOCOL_NAME::LOOSE, "X");
     this->eventManager = eventManager;
 }
 

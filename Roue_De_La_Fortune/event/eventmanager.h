@@ -29,6 +29,8 @@ public:
         ENABLE_WHEEL,
         PLAYER_MONEY,
         NEW_ROUND,
+        LOOSE,
+        VICTORY,
     };
 
     static EventManager* getInstance();

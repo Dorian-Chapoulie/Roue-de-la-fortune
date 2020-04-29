@@ -68,6 +68,13 @@ void ProtocolHandler::callEventFromProtocol(std::string msg)
     }else if(msg.at(0) == 'Z') { // new round
         std::string data = msg.substr(2);
         eventManager->triggerEvent(eventManager->NEW_ROUND, data);
+    }else if(msg.at(0) == 'V') { //Victoire
+        std::string data = "Bravo ! vous avez gagné: ";
+        eventManager->triggerEvent(eventManager->VICTORY, data);
+    }
+    else if(msg.at(0) == 'X') { //defait
+        std::string data = "Vous avez pedu :(\nScore: ";
+        eventManager->triggerEvent(eventManager->LOOSE, data);
     }
 
 }

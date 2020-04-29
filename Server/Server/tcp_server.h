@@ -33,7 +33,8 @@ public:
     ~TCPServer();
 
     void    sendMessage(std::string msg, SOCKET& client);
-    void    disconnect();   
+    void    disconnect();
+    void    disconnectClient(int socketFd);
     bool    isListening() const;
 
     std::string getIp() const;
