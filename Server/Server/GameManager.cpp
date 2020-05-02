@@ -50,7 +50,7 @@ void GameManager::setEventsHandler()
                 {
                     SOCKET tmp = p->getId();
                     game->getServer()->sendMessage(protocol_->getSendMoneyProtocol(player), tmp);
-                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
                 }
                 
                 winnerId = id;
@@ -60,16 +60,16 @@ void GameManager::setEventsHandler()
 		{
             player = reinterpret_cast<Player*>(*it);
             std::string toSend = player->getName() + " propose: " + response;
-            std::cout << currentSentence << ".\n" << response <<  "." <<std::endl;
+            //std::cout << currentSentence << ".\n" << response <<  "." <<std::endl;
             for (const auto* p : *players)
             {
                 SOCKET tmp = p->getId();
                 game->getServer()->sendMessage(protocol_->getServerChatProtocol(toSend), tmp);
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
             }
 
             SOCKET sock = id;
-            game->getServer()->sendMessage(protocol_->getProcotol(protocol_->BAD_RESPONSE), sock);
+            game->getServer()->sendMessage(protocol_->getBadResponseProtocol(), sock);
 		}
         mutex->unlock();
 	});
@@ -107,15 +107,15 @@ void GameManager::setEventsHandler()
             {
                 SOCKET tmp = p->getId();
                 game->getServer()->sendMessage(protocol_->getServerChatProtocol(toSend), tmp);
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
             }
             
         	
             SOCKET sock = id;
-            game->getServer()->sendMessage(protocol_->getProcotol(protocol_->BAD_RESPONSE), sock);
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            game->getServer()->sendMessage(protocol_->getBadResponseProtocol(), sock);
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
             game->getServer()->sendMessage(protocol_->getCanPlayProtocol(false), sock);
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
             restartWithNewPlayer = true;
             waitedTime = WAITING_TIME;
         }
@@ -129,7 +129,7 @@ void GameManager::setEventsHandler()
         {
             SOCKET tmp = p->getId();
             game->getServer()->sendMessage(protocol_->getSpinWheelProtocol(randomValue), tmp);
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
         mutex->unlock();
         isWheelStartedSpin = true;
@@ -220,18 +220,18 @@ int GameManager::quickRiddle()
     {
         SOCKET tmp = p->getId();
         game->getServer()->sendMessage(protocol_->getServerChatProtocol("epreuve rapide."), tmp);
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         game->getServer()->sendMessage(protocol_->getQuickRiddleProtocol(currentSentence), tmp);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));        
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));        
         game->getServer()->sendMessage(protocol_->getCanPlayProtocol(true), tmp);
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
     mutex->unlock();
 
 	
     std::vector<int> sentPosition;
     while(!isQuickRiddleFound) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
         mutex->lock();
         if (players->size() < 2)
@@ -264,7 +264,7 @@ int GameManager::quickRiddle()
         {
             SOCKET tmp = p->getId();
             game->getServer()->sendMessage(protocol_->getSendLetterProtocol(letterToSend, randomPosition), tmp);
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
         mutex->unlock();                
     }
@@ -275,9 +275,9 @@ int GameManager::quickRiddle()
     {
         SOCKET tmp = p->getId();
         game->getServer()->sendMessage(protocol_->getCanPlayProtocol(false), tmp);
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        game->getServer()->sendMessage(protocol_->getProcotol(protocol_->DISPLAY_RESPONSE), tmp);
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        game->getServer()->sendMessage(protocol_->getDisplayResponseProtocol(), tmp);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
     mutex->unlock();
 	
@@ -295,9 +295,9 @@ int GameManager::sentenceRiddle(int& currentPlayer)
     {
         SOCKET tmp = p->getId();
         game->getServer()->sendMessage(protocol_->getServerChatProtocol("epreuve normale."), tmp);
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         game->getServer()->sendMessage(protocol_->getSentenceRiddleProtocol(currentSentence), tmp);
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
     mutex->unlock();
 	
@@ -312,7 +312,7 @@ int GameManager::sentenceRiddle(int& currentPlayer)
         playerChoice = '_';
         wheelValue = 0;        
 
-        std::cout << "restart " << std::endl;
+        //std::cout << "restart " << std::endl;
 
         mutex->lock();
         for (const auto* p : *players)
@@ -321,17 +321,17 @@ int GameManager::sentenceRiddle(int& currentPlayer)
         	
             if (currentPlayer == p->getId()) {
                 game->getServer()->sendMessage(protocol_->getActivateWheelProtocol(true), tmp);
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
                 game->getServer()->sendMessage(protocol_->getServerChatProtocol("Vous avez 30 secondes pour tourner la roue."), tmp);
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
             }else
             {
                 game->getServer()->sendMessage(protocol_->getActivateWheelProtocol(false), tmp);
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
             }
 
             game->getServer()->sendMessage(protocol_->getCanPlayProtocol(false), tmp);
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
         mutex->unlock();
     	
@@ -362,7 +362,7 @@ int GameManager::sentenceRiddle(int& currentPlayer)
         		{                    
                     SOCKET tmp = static_cast<SOCKET>(currentPlayer);
                     game->getServer()->sendMessage(protocol_->getActivateWheelProtocol(false), tmp);
-                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
                     game->getServer()->sendMessage(protocol_->getCanPlayProtocol(false), tmp);
                     std::string newPlayerName;
         			for(const auto* p : *players)
@@ -378,9 +378,9 @@ int GameManager::sentenceRiddle(int& currentPlayer)
                     tmp = static_cast<SOCKET>(currentPlayer);
                    
 
-                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
                     game->getServer()->sendMessage(protocol_->getActivateWheelProtocol(true), tmp);
-                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
                     game->getServer()->sendMessage(protocol_->getServerChatProtocol("Vous avez 30 secondes pour tourner la roue."), tmp);
 
                     
@@ -389,7 +389,7 @@ int GameManager::sentenceRiddle(int& currentPlayer)
                     for (const auto* p : *players)
                     {
                         SOCKET tmp = p->getId();
-                        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                        std::this_thread::sleep_for(std::chrono::milliseconds(10));
                         game->getServer()->sendMessage(protocol_->getServerChatProtocol(newPlayerName + " prend la main !"), tmp);                        
                     }
                     
@@ -407,9 +407,9 @@ int GameManager::sentenceRiddle(int& currentPlayer)
         waitedTime = 0.0f;        
     	
     	SOCKET s = currentPlayer;
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         game->getServer()->sendMessage(protocol_->getCanPlayProtocol(true),  s);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
        
 	    while (!playerSentLetter && !isRiddleFound) { // and if players > 0
@@ -440,7 +440,7 @@ int GameManager::sentenceRiddle(int& currentPlayer)
 	            	
 	                SOCKET tmp = static_cast<SOCKET>(currentPlayer);
 	                game->getServer()->sendMessage(protocol_->getCanPlayProtocol(false), tmp);
-	                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	                std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	                std::string newPlayerName;
 	                for (const auto* p : *players)
 	                {
@@ -455,13 +455,13 @@ int GameManager::sentenceRiddle(int& currentPlayer)
 	                tmp = static_cast<SOCKET>(currentPlayer);
 	                
 
-	                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	                std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	                game->getServer()->sendMessage(protocol_->getServerChatProtocol("Vous avez 30 secondes pour proposer une lettre."), tmp);
 
 	                for (const auto* p : *players)
 	                {
 	                    SOCKET tmp = p->getId();
-	                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	                    game->getServer()->sendMessage(protocol_->getServerChatProtocol(newPlayerName + " prend la main !"), tmp);
 	                }
 	                mutex->unlock();
@@ -483,9 +483,9 @@ int GameManager::sentenceRiddle(int& currentPlayer)
         if (restartWithNewPlayer) continue;
 	    
 	    s = currentPlayer;
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	    game->getServer()->sendMessage(protocol_->getCanPlayProtocol(true), s);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 	    std::vector<std::string> foundLetters = getCharFromSentence(playerChoice);	    
 
@@ -500,16 +500,16 @@ int GameManager::sentenceRiddle(int& currentPlayer)
         {
             SOCKET tmp = p->getId();
             game->getServer()->sendMessage(protocol_->getServerChatProtocol(toSend), tmp);
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
         mutex->unlock();
     	
 	    if(foundLetters.size() <= 0) //si il a rien trouvé
 	    {
             game->getServer()->sendMessage(protocol_->getCanPlayProtocol(false), s);
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            game->getServer()->sendMessage(protocol_->getProcotol(protocol_->BAD_RESPONSE), s);
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            game->getServer()->sendMessage(protocol_->getBadResponseProtocol(), s);
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	    	
 	        currentPlayer = game->getNextPlayer();
             Player* player = game->getPlayerFromId(currentPlayer);
@@ -520,11 +520,9 @@ int GameManager::sentenceRiddle(int& currentPlayer)
 	    	
             for (Player* p : *players)
             {
-                SOCKET tmp = p->getId();
-                
-                std::cout << "send: " << toSend  << std::endl;
+                SOCKET tmp = p->getId();                
                 game->getServer()->sendMessage(toSend, tmp);
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
             }
 	    	
             mutex->lock();
@@ -532,7 +530,7 @@ int GameManager::sentenceRiddle(int& currentPlayer)
             {
                 SOCKET tmp = p->getId();            
                 game->getServer()->sendMessage(protocol_->getServerChatProtocol(player->getName() + " prend la main !"), tmp);
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
             }
             mutex->unlock();
 	    	
@@ -545,7 +543,7 @@ int GameManager::sentenceRiddle(int& currentPlayer)
                 {
                     SOCKET tmp = p->getId();
                     game->getServer()->sendMessage(s, tmp);
-                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
                 }
             }
             char choice = foundLetters.at(0).substr(2).at(0);
@@ -564,7 +562,7 @@ int GameManager::sentenceRiddle(int& currentPlayer)
             {
                 SOCKET tmp = p->getId();
                 game->getServer()->sendMessage(protocol_->getSendMoneyProtocol(player), tmp);
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
             }
             mutex->unlock();
            
@@ -579,9 +577,9 @@ int GameManager::sentenceRiddle(int& currentPlayer)
     {
         SOCKET tmp = p->getId();
         game->getServer()->sendMessage(protocol_->getCanPlayProtocol(false), tmp);
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        game->getServer()->sendMessage(protocol_->getProcotol(protocol_->DISPLAY_RESPONSE), tmp);
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        game->getServer()->sendMessage(protocol_->getDisplayResponseProtocol(), tmp);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
     mutex->unlock();
 	

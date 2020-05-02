@@ -44,6 +44,14 @@ public:
 
     void callEventFromProtocol(std::string msg, SOCKET* socket);
     std::string getProcotol(PROTOCOL_NAME name) const;
+    std::string getConnectionOKProtocol(std::string id);
+    std::string getAskPseudoProtocol();
+    std::string getNewPlayerProtocol(std::string pseudo, std::string id);
+    std::string getPlayerDisconnectedProtocol(std::string id);
+    std::string getVictoryProtocol();
+    std::string getLooseProtocol();
+	std::string getBadResponseProtocol();
+    std::string getDisplayResponseProtocol();
     std::string getQuickRiddleProtocol(std::string& sentence);
     std::string getSendLetterProtocol(char& letter, int position);
     std::string getWinnerIdProtocol(int id);

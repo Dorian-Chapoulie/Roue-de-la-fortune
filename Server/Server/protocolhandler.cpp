@@ -2,6 +2,7 @@
 #include "eventmanager.h"
 #include <fstream>
 #include <string>
+#include <thread>
 
 ProtocolHandler::ProtocolHandler(EventManager* eventManager)
 { 
@@ -32,6 +33,25 @@ ProtocolHandler::ProtocolHandler(EventManager* eventManager)
 #include <iostream>
 void ProtocolHandler::callEventFromProtocol(std::string msg, SOCKET* socket)
 {
+    if (msg.find(';') != std::string::npos)
+    {
+
+        do {
+            std::string m1 = msg.substr(0, msg.find(';'));
+            callEventFromProtocol(m1, socket);
+
+            if (msg.find(';') + 1 < msg.length())
+            {
+                msg = msg.substr(msg.find(';') + 1, msg.length() - msg.find(';'));
+            }
+            else
+            {
+                msg = m1;
+            }
+
+        } while (msg.find(";") != std::string::npos);
+        return;
+    }
 
     if (msg.at(0) == 'C') {
         std::string line;
@@ -154,52 +174,92 @@ std::string ProtocolHandler::getProcotol(ProtocolHandler::PROTOCOL_NAME name) co
     return this->protocoles.at(name);
 }
 
+std::string ProtocolHandler::getConnectionOKProtocol(std::string id)
+{
+    return this->protocoles.at(ProtocolHandler::PLAYER_CONNECT_OK) + id + ";";
+}
+
+std::string ProtocolHandler::getAskPseudoProtocol()
+{
+    return this->protocoles.at(ProtocolHandler::ASK_PSEUDO) + ";";
+}
+
+std::string ProtocolHandler::getNewPlayerProtocol(std::string pseudo, std::string id)
+{
+    return this->protocoles.at(ProtocolHandler::NOTIFY_NEW_PLAYER) + "-" + pseudo + "-" + id + ";";
+}
+
+std::string ProtocolHandler::getPlayerDisconnectedProtocol(std::string id)
+{
+    return this->protocoles.at(ProtocolHandler::PLAYER_DISCONNECTED) + id + ";";
+}
+
+std::string ProtocolHandler::getVictoryProtocol()
+{
+    return this->protocoles.at(ProtocolHandler::VICTORY) + ";";
+}
+
+std::string ProtocolHandler::getLooseProtocol()
+{
+    return this->protocoles.at(ProtocolHandler::LOOSE) + ";";
+}
+
+std::string ProtocolHandler::getBadResponseProtocol()
+{
+    return this->protocoles.at(ProtocolHandler::BAD_RESPONSE) + ";";
+}
+
+std::string ProtocolHandler::getDisplayResponseProtocol()
+{
+    return this->protocoles.at(ProtocolHandler::DISPLAY_RESPONSE) + ";";
+}
+
 std::string ProtocolHandler::getQuickRiddleProtocol(std::string& sentence)
 {
-    return this->protocoles.at(PROTOCOL_NAME::SEND_QUICK_RIDDLE) + sentence;
+    return this->protocoles.at(PROTOCOL_NAME::SEND_QUICK_RIDDLE) + sentence + ";";
 }
 
 std::string ProtocolHandler::getSendLetterProtocol(char& letter, int position)
 {
-    return this->protocoles.at(PROTOCOL_NAME::SEND_WORD) + letter + "-" + std::to_string(position);
+    return this->protocoles.at(PROTOCOL_NAME::SEND_WORD) + letter + "-" + std::to_string(position) + ";";
 }
 
 std::string ProtocolHandler::getWinnerIdProtocol(int id)
 {
-    return this->protocoles.at(PROTOCOL_NAME::SEND_WINNER_ID) + std::to_string(id);
+    return this->protocoles.at(PROTOCOL_NAME::SEND_WINNER_ID) + std::to_string(id) + ";";
 }
 
 std::string ProtocolHandler::getCanPlayProtocol(bool canPlay)
 {
-    return this->protocoles.at(PROTOCOL_NAME::BOOL_CAN_PLAY) + std::to_string(canPlay) +"\n";
+    return this->protocoles.at(PROTOCOL_NAME::BOOL_CAN_PLAY) + std::to_string(canPlay) + ";";
 }
 
 std::string ProtocolHandler::getServerChatProtocol(std::string msg)
 {
-    return this->protocoles.at(PROTOCOL_NAME::SERVER_CHAT) + msg;
+    return this->protocoles.at(PROTOCOL_NAME::SERVER_CHAT) + msg + ";";
 }
 
 std::string ProtocolHandler::getSpinWheelProtocol(int value)
 {    
-    return this->protocoles.at(PROTOCOL_NAME::SPIN_WHEEL) + std::to_string(value);
+    return this->protocoles.at(PROTOCOL_NAME::SPIN_WHEEL) + std::to_string(value) + ";";
 }
 
 std::string ProtocolHandler::getSentenceRiddleProtocol(std::string sentence)
 {
-    return this->protocoles.at(PROTOCOL_NAME::SEND_SENTENCE_RIDDLE) + sentence;
+    return this->protocoles.at(PROTOCOL_NAME::SEND_SENTENCE_RIDDLE) + sentence + ";";
 }
 
 std::string ProtocolHandler::getActivateWheelProtocol(bool isEnabled)
 {
-    return this->protocoles.at(PROTOCOL_NAME::ACTIVE_WHEEL) + std::to_string(isEnabled) + "\n";
+    return this->protocoles.at(PROTOCOL_NAME::ACTIVE_WHEEL) + std::to_string(isEnabled) + ";";
 }
 
 std::string ProtocolHandler::getSendMoneyProtocol(Player* p)
 {
-    return this->protocoles.at(PROTOCOL_NAME::SEND_MONEY) + std::to_string(p->getId()) + "-" + std::to_string(p->getMoney());
+    return this->protocoles.at(PROTOCOL_NAME::SEND_MONEY) + std::to_string(p->getId()) + "-" + std::to_string(p->getMoney()) + ";";
 }
 
 std::string ProtocolHandler::getNewRoundProtocol(int roundNumber)
 {
-    return this->protocoles.at(PROTOCOL_NAME::NEW_ROUND) + std::to_string(roundNumber);
+    return this->protocoles.at(PROTOCOL_NAME::NEW_ROUND) + std::to_string(roundNumber) + ";";
 }

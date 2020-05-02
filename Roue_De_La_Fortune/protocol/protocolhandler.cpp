@@ -1,6 +1,7 @@
 #include "protocol/protocolhandler.h"
 #include "event/eventmanager.h"
 #include <string>
+#include <thread>
 
 ProtocolHandler::ProtocolHandler()
 {
@@ -10,6 +11,25 @@ ProtocolHandler::ProtocolHandler()
 void ProtocolHandler::callEventFromProtocol(std::string msg)
 {
     EventManager* eventManager = EventManager::getInstance();
+
+    if (msg.find(';') != std::string::npos) {
+
+        do {
+            std::string m1 = msg.substr(0, msg.find(';'));
+            callEventFromProtocol(m1);
+
+            if (msg.find(';') + 1 < msg.length())
+            {
+                msg = msg.substr(msg.find(';') + 1, msg.length() - msg.find(';'));
+            }
+            else
+            {
+                msg = m1;
+            }
+
+        } while (msg.find(";") != std::string::npos);
+        return;
+    }
 
     if(msg.at(0) == 'C') {//Connection
         if(msg == "C-0") {
@@ -81,65 +101,65 @@ void ProtocolHandler::callEventFromProtocol(std::string msg)
 
 std::string ProtocolHandler::getLoginProtocol(std::string& pseudo, std::string& password) {
      protocoles.insert_or_assign(PROTOCOL_NAME::CONNEXION, "C-" + pseudo + "-" + password);
-     return protocoles.at(PROTOCOL_NAME::CONNEXION);
+     return protocoles.at(PROTOCOL_NAME::CONNEXION) + ";";
 }
 
 std::string ProtocolHandler::getInscriptionProtocol(std::string &pseudo, std::string &password)
 {
     protocoles.insert_or_assign(PROTOCOL_NAME::INSCRIPTION, "I-" + pseudo + "-" + password);
-    return protocoles.at(PROTOCOL_NAME::INSCRIPTION);
+    return protocoles.at(PROTOCOL_NAME::INSCRIPTION) + ";";
 }
 
 std::string ProtocolHandler::getCreateGameProtocol(std::string &gameName)
 {
     protocoles.insert_or_assign(PROTOCOL_NAME::CREATE_GAME, "P-" + gameName);
-    return protocoles[PROTOCOL_NAME::CREATE_GAME];
+    return protocoles[PROTOCOL_NAME::CREATE_GAME] + ";";
 }
 
 
 std::string ProtocolHandler::getPseudoProtocol(std::string &pseudo)
 {
     protocoles.insert_or_assign(PROTOCOL_NAME::ASK_PSEUDO, "N-" + pseudo);
-    return protocoles[PROTOCOL_NAME::ASK_PSEUDO];
+    return protocoles[PROTOCOL_NAME::ASK_PSEUDO] + ";";
 }
 
 std::string ProtocolHandler::getTchatProtocol(std::string& pseudo, std::string &message)
 {
     protocoles.insert_or_assign(PROTOCOL_NAME::TCHAT, "T-" + pseudo + "-" + message);
-    return protocoles[PROTOCOL_NAME::TCHAT];
+    return protocoles[PROTOCOL_NAME::TCHAT] + ";";
 }
 
 std::string ProtocolHandler::getAllGamesProtocol() const
 {
-    return protocoles.at(PROTOCOL_NAME::GET_ALL_GAMES);
+    return protocoles.at(PROTOCOL_NAME::GET_ALL_GAMES) + ";";
 }
 
 std::string ProtocolHandler::getQuickRiddlePropositon(std::string &sentence)
 {
     protocoles.insert_or_assign(PROTOCOL_NAME::SEND_QUICK_RIDDLE_PROPOSITION, "Q-" + sentence);
-    return protocoles.at(PROTOCOL_NAME::SEND_QUICK_RIDDLE_PROPOSITION);
+    return protocoles.at(PROTOCOL_NAME::SEND_QUICK_RIDDLE_PROPOSITION) + ";";
 }
 
 std::string ProtocolHandler::getSentenceRiddlePropositon(std::string &sentence)
 {
     protocoles.insert_or_assign(PROTOCOL_NAME::SEND_SENTENCE_RIDDLE_PROPOSITION, "R-" + sentence);
-    return protocoles.at(PROTOCOL_NAME::SEND_SENTENCE_RIDDLE_PROPOSITION);
+    return protocoles.at(PROTOCOL_NAME::SEND_SENTENCE_RIDDLE_PROPOSITION) + ";";
 }
 
 std::string ProtocolHandler::getSpinWheelProtocol()
 {
     protocoles.insert_or_assign(PROTOCOL_NAME::SPIN_WHEEL, "S");
-    return protocoles.at(PROTOCOL_NAME::SPIN_WHEEL);
+    return protocoles.at(PROTOCOL_NAME::SPIN_WHEEL) + ";";
 }
 
 std::string ProtocolHandler::getWheelSpinnedProtocol(std::string value)
 {
     protocoles.insert_or_assign(PROTOCOL_NAME::WHEEL_SPINNED, "S-1-");
-    return protocoles.at(PROTOCOL_NAME::WHEEL_SPINNED) + value;
+    return protocoles.at(PROTOCOL_NAME::WHEEL_SPINNED) + value + ";";
 }
 
 std::string ProtocolHandler::getSendLetterProtocol(char c)
 {
     protocoles.insert_or_assign(PROTOCOL_NAME::SEND_LETTER, "W-");
-    return protocoles.at(PROTOCOL_NAME::SEND_LETTER) + c;
+    return protocoles.at(PROTOCOL_NAME::SEND_LETTER) + c + ";";
 }
