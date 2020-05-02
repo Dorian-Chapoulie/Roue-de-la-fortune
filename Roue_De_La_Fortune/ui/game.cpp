@@ -213,14 +213,33 @@ void Game::setEvents() {
         }
 
         if(position != -1) {
-            for(Case* c : cases) {
-                if(c->getId() == position){
-                    c->displayLetter();
-                    break;
+            if(isQuickRiddle) {
+                for(Case* c : cases) {
+                    if(c->getId() == position){
+                        c->displayLetter();
+                        break;
+                    }
                 }
-            }
+                emit notifyUpdateScene();
+            }else {
+                for(Case* c : cases) {
+                    if(c->getId() == position){
+                        c->displayLetterAnimation();
+                        break;
+                    }
+                }
 
-            emit notifyUpdateScene();
+                emit notifyUpdateScene();
+                std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+                for(Case* c : cases) {
+                    if(c->getId() == position){
+                        c->displayLetter();
+                        break;
+                    }
+                }
+                emit notifyUpdateScene();
+            }
         }
 
     });

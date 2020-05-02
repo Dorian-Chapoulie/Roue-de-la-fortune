@@ -33,6 +33,7 @@ private:
 
     QGraphicsTextItem* text = nullptr;
     QGraphicsRectItem* rect = nullptr;
+    QGraphicsRectItem* rectAnimation = nullptr;
 };
 
 #endif // CASE_H
