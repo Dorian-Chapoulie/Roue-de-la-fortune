@@ -24,9 +24,14 @@ void Player::addMoney(int ammount)
 	this->money += ammount;
 }
 
-void Player::clearMoney()
+void Player::setMoneyInBank()
 {
 	bank += money;
+	money = 0;
+}
+
+void Player::clearMoney()
+{
 	money = 0;
 }
 
@@ -38,4 +43,9 @@ int Player::getMoney()
 int Player::getBank()
 {
 	return bank;
+}
+
+bool Player::operator==(Player p)
+{
+	return p.id == this->id;
 }

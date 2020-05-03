@@ -44,6 +44,7 @@ private:
 	bool isWheelStartedSpin = false;
 	bool playerSentLetter = false;
 	bool restartWithNewPlayer = false;
+	bool processedWheelValue = false;
 
 	float waitedTime = 0.0f;
 
@@ -51,6 +52,7 @@ private:
 	
 	int winnerId = -1;
 	int wheelValue = 0;
+	int* currentPlayer_ = nullptr;
 	
 	const int WAITING_TIME = 30;
 	const int QUICK_RIDDLE_MONNEY = 500;

@@ -96,7 +96,7 @@ Game::Game(std::string& name, int port)
 			mutex.lock();
 			for (Player* p : players) {
 				SOCKET tempId = p->getId(); //TODO: fix Lvalue and Rvalue by const cast				
-				server->sendMessage("0", tempId);				
+				server->sendMessage("0;", tempId);				
 				std::this_thread::sleep_for(std::chrono::milliseconds(200));
 			}
 			mutex.unlock();
@@ -264,7 +264,7 @@ void Game::startGame()
 		
 		for (Player* p : players)
 		{
-			p->clearMoney();
+			p->setMoneyInBank();
 		}
 		
 		if (players.size() <= 1)

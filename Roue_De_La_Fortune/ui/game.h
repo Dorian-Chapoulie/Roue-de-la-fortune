@@ -79,6 +79,7 @@ private:
     bool isQuickRiddle = true;
     bool isSceneCleared = false;
     bool isWheelButtonClicked = false;
+    bool isMyTurn = false;
     int rotationValueWheel = 0;
 
     Wheel* wheel = nullptr;

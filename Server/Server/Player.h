@@ -12,10 +12,13 @@ public:
 
 	void setName(std::string& name);
 	void addMoney(int ammount);
+	void setMoneyInBank();
 	void clearMoney();
 	int getMoney();
 	int getBank();
 
+	bool operator==(Player p);
+	
 private:
 	SOCKET id;
 	int money = 0;

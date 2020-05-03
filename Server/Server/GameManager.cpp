@@ -1,6 +1,8 @@
 #include "GameManager.h"
 
 #include <fstream>
+#include <iostream>
+
 
 #include "Config.h"
 
@@ -21,7 +23,7 @@ void GameManager::stopGame()
     isRiddleFound = true;
     isQuickRiddleFound = true;
 }
-#include <iostream>
+
 void GameManager::setEventsHandler()
 {
 	this->eventManager->addListener(eventManager->PLAYER_QUICK_RIDDLE, [&](void* data){
@@ -123,7 +125,17 @@ void GameManager::setEventsHandler()
         });
 
     this->eventManager->addListener(EventManager::EVENT::SPIN_WHEEL, [&](void*) {
-        int randomValue = rand() % 360;//TODO: real random
+        int r = rand() % 101;
+        int randomValue = 80;// rand() % 360;//TODO: real random
+    	if(r <= 50)
+    	{
+            randomValue = 80;
+    	}else
+    	{
+            randomValue = rand() % 360;
+    	}
+        
+
         mutex->lock();
         for (const auto* p : *players)
         {
@@ -284,11 +296,11 @@ int GameManager::quickRiddle()
     return winnerId;
 }
 
-#include <iostream>
 int GameManager::sentenceRiddle(int& currentPlayer)
 {
 	//TODO: refactor as function next block
-    this->setCurrentSentence(this->SENTENCE_RIDDLE);    
+    this->setCurrentSentence(this->SENTENCE_RIDDLE);
+    currentPlayer_ = &currentPlayer;
 	
     mutex->lock();
     for (const auto* p : *players)
@@ -404,13 +416,26 @@ int GameManager::sentenceRiddle(int& currentPlayer)
 
         isWheelSpinned = false;
         isWheelSpinned = false;
-        waitedTime = 0.0f;        
+        waitedTime = 0.0f;
+
+        mutex->lock();
+        int size = players->size();
+        mutex->unlock();
+    	do
+    	{
+            mutex->lock();
+            size = players->size();
+            mutex->unlock();
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        } while (!processedWheelValue && size >= 2);
+        processedWheelValue = false;
+
+        if (restartWithNewPlayer) continue;
     	
     	SOCKET s = currentPlayer;
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
         game->getServer()->sendMessage(protocol_->getCanPlayProtocol(true),  s);
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
        
 	    while (!playerSentLetter && !isRiddleFound) { // and if players > 0
 	        std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -448,6 +473,7 @@ int GameManager::sentenceRiddle(int& currentPlayer)
 	                    {
 	                        currentPlayer = p->getId();
 	                        newPlayerName = p->getName();
+                            std::cout << "new player: " << newPlayerName << " :" << std::endl;
 	                        break;
 	                    }
 	                }
@@ -477,7 +503,8 @@ int GameManager::sentenceRiddle(int& currentPlayer)
 
             mutex->unlock();
 	    }
-	    playerSentLetter = false;
+
+    	playerSentLetter = false;
 	    waitedTime = 0.0f;
 
         if (restartWithNewPlayer) continue;
@@ -590,20 +617,59 @@ void GameManager::handleWheelValue(std::string value)
 {
     if (value == "HoldUp")
     {
+        mutex->lock();
+        Player* player = game->getPlayerFromId(*currentPlayer_);
 
+    	for(Player* p : *players)
+    	{
+    		if(p != player)
+    		{
+                player->addMoney(p->getMoney());
+                p->clearMoney();
+    		}
+    	}
+
+        for (Player* p : *players)
+        {
+            SOCKET tmp = p->getId();
+            for (Player* pp : *players)
+            {                
+                game->getServer()->sendMessage(protocol_->getSendMoneyProtocol(pp), tmp);
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            }
+        }
+
+        mutex->unlock();
+        restartWithNewPlayer = true;
     }
     else if (value == "BankRoute")
     {
+        mutex->lock();
+        Player* player = game->getPlayerFromId(*currentPlayer_);
+        player->clearMoney();
 
+        for (const auto* p : *players)
+        {
+            SOCKET tmp = p->getId();
+            game->getServer()->sendMessage(protocol_->getSendMoneyProtocol(player), tmp);
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+
+        mutex->unlock();
+        restartWithNewPlayer = true;
+        waitedTime = WAITING_TIME;
     }
     else if (value == "Passe")
     {
-
+        waitedTime = WAITING_TIME;
+        restartWithNewPlayer = true;
     }
     else
     {
         wheelValue = std::stoi(value);
     }
+
+    processedWheelValue = true;
 }
 
 bool GameManager::isVoyelle(char c) const

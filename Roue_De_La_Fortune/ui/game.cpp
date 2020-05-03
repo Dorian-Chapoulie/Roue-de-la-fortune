@@ -163,7 +163,7 @@ void Game::setEvents() {
 
     EventManager::getInstance()->addListener(EventManager::CAN_PLAY, [&](void* canPlayValue){
         int canPlayint = std::stoi(*reinterpret_cast<std::string*>(canPlayValue));
-        bool canPlay = canPlayint > 0 ? true : false;
+        bool canPlay = canPlayint > 0 ? true : false;        
         emit notifyCanPlayValue(canPlay);
     });
 
@@ -171,16 +171,16 @@ void Game::setEvents() {
         int wheelEnabled = std::stoi(*reinterpret_cast<std::string*>(isWheelEnabled));
         bool value = wheelEnabled > 0 ? true : false;        
         isWheelButtonClicked = false;
-
+        isMyTurn = value;
         std::thread threadAnimation([&](){
             bool value = true;
-            while(!isWheelButtonClicked) {
+            while(!isWheelButtonClicked && isMyTurn) {
                 emit notifyWheelButtonAnimation(value);
                 value = !value;
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
             emit notifyWheelButtonAnimation(false);
-            isWheelButtonClicked = false;
+            isWheelButtonClicked = false;            
         });
         threadAnimation.detach();
 
@@ -258,8 +258,11 @@ void Game::setEvents() {
                 std::this_thread::sleep_for(std::chrono::milliseconds(5));
             }
 
-            ProtocolHandler protocol;
-            LocalPlayer::getInstance()->sendMessage(protocol.getWheelSpinnedProtocol(wheel->getCaseFromRotation()));
+            if(isMyTurn) {
+                ProtocolHandler protocol;
+                LocalPlayer::getInstance()->sendMessage(protocol.getWheelSpinnedProtocol(wheel->getCaseFromRotation()));
+                isMyTurn = false;
+            }
         });
         threadTemp.detach();
     });
@@ -277,7 +280,6 @@ void Game::setEvents() {
             p->setMoney(ammount);
             emit notifyMoneyChanged();
         }
-
     });
 
     EventManager::getInstance()->addListener(EventManager::EVENT::NEW_ROUND, [&](void* data){
@@ -390,15 +392,15 @@ void Game::addNewPlayer(QString data)
 
     switch(players.size()) {
         case 1:
-            this->ui->labelPlayer1->setText(QString::fromStdString(name));
+            this->ui->labelPlayer1->setText(QString::fromStdString(name + "_" + id));
         break;
 
         case 2:
-            this->ui->labelPlayer2->setText(QString::fromStdString(name));
+            this->ui->labelPlayer2->setText(QString::fromStdString(name + "_" + id));
         break;
 
         case 3:
-            this->ui->labelPlayer3->setText(QString::fromStdString(name));
+            this->ui->labelPlayer3->setText(QString::fromStdString(name + "_" + id));
         break;
     }
 
@@ -570,9 +572,10 @@ void Game::setEnableWheel(bool value)
 void Game::displayMoney()
 {
     for(Player* p : players) {
-        if(p->getName() == ui->labelPlayer1->text().toStdString()) {
+        std::string toFind = p->getName() + "_" + std::to_string(p->getId());
+        if(toFind == ui->labelPlayer1->text().toStdString()) {
             ui->labelMoneyP1->setText(QString::number(p->getMoney()));
-        }else if(p->getName() == ui->labelPlayer2->text().toStdString()) {
+        }else if(toFind == ui->labelPlayer2->text().toStdString()) {
             ui->labelMoneyP2->setText(QString::number(p->getMoney()));
         }else {
             ui->labelMoneyP3->setText(QString::number(p->getMoney()));
