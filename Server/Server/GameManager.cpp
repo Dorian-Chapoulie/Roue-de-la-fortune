@@ -125,16 +125,8 @@ void GameManager::setEventsHandler()
         });
 
     this->eventManager->addListener(EventManager::EVENT::SPIN_WHEEL, [&](void*) {
-        int r = rand() % 101;
+        srand(time(NULL));
         int randomValue = rand() % 360;//TODO: real random
-    	/*if(r <= 50)
-    	{
-            randomValue = 80;
-    	}else
-    	{
-            randomValue = rand() % 360;
-    	}*/
-        
 
         mutex->lock();
         for (const auto* p : *players)
