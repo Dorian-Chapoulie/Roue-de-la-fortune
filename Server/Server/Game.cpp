@@ -25,7 +25,7 @@ Game::Game(std::string& name, int port)
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		this->server->sendMessage(protocol->getAskPseudoProtocol(), *reinterpret_cast<SOCKET*>(sock));
 
-		if(size == 2)
+		if(size == 3)
 		{
 			std::thread threadGame([&]()
 			{
@@ -177,7 +177,7 @@ Player* Game::getPlayerFromId(int id)
 int Game::getNextPlayer()
 {
 	mutex.lock();
-	if(currentPlayer == players.at(players.size() - 1)->getId())
+	if(currentPlayer == players.back()->getId())
 	{
 		mutex.unlock();
 		return players.at(0)->getId();
@@ -277,9 +277,16 @@ void Game::startGame()
 		
 		std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 	}
+
+	int size = 0;
+	mutex.lock();
+	size = players.size();
+	mutex.unlock();
+
+	if(size >= 1)
+		gameManager->lastSpin(currentPlayer);
 	
 	mutex.lock();
-	
 	if(players.size() <= 0)
 	{
 		isGameDone = true;

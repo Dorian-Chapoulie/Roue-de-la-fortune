@@ -23,7 +23,7 @@ int main()
         
         for (SOCKET s : main_server.getClients()) {
             main_server.sendMessage("G-" + games.back()->getInfos(), s);
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
         mutex.unlock();
     });
@@ -34,7 +34,7 @@ int main()
             if (!g->isJoinable()) continue;
             std::string msg = "G-" + g->getInfos();            
             main_server.sendMessage(msg, *reinterpret_cast<SOCKET*>(sock));
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
         mutex.unlock();
     });

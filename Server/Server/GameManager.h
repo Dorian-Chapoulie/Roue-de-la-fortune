@@ -13,6 +13,7 @@ public:
 
 	int quickRiddle();
 	int sentenceRiddle(int& currentPlayer);
+	void lastSpin(int& currentPlayer);
 	void handleWheelValue(std::string value);
 
 	bool isVoyelle(char c) const;

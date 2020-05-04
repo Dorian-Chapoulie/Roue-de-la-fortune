@@ -126,14 +126,14 @@ void GameManager::setEventsHandler()
 
     this->eventManager->addListener(EventManager::EVENT::SPIN_WHEEL, [&](void*) {
         int r = rand() % 101;
-        int randomValue = 80;// rand() % 360;//TODO: real random
-    	if(r <= 50)
+        int randomValue = rand() % 360;//TODO: real random
+    	/*if(r <= 50)
     	{
             randomValue = 80;
     	}else
     	{
             randomValue = rand() % 360;
-    	}
+    	}*/
         
 
         mutex->lock();
@@ -377,15 +377,9 @@ int GameManager::sentenceRiddle(int& currentPlayer)
                     std::this_thread::sleep_for(std::chrono::milliseconds(10));
                     game->getServer()->sendMessage(protocol_->getCanPlayProtocol(false), tmp);
                     std::string newPlayerName;
-        			for(const auto* p : *players)
-        			{
-        				if(p->getId() != currentPlayer)
-        				{
-                            currentPlayer = p->getId();
-                            newPlayerName = p->getName();
-                            break;
-        				}
-        			}
+        			
+                    currentPlayer = game->getNextPlayer();
+                    newPlayerName = game->getPlayerFromId(currentPlayer)->getName();
         			
                     tmp = static_cast<SOCKET>(currentPlayer);
                    
@@ -612,6 +606,76 @@ int GameManager::sentenceRiddle(int& currentPlayer)
 	
     return winnerId;
 }
+
+void GameManager::lastSpin(int& currentPlayer)
+{
+    //TODO: refactor as function next block
+    currentPlayer_ = &currentPlayer;
+
+    mutex->lock();
+    for (const auto* p : *players)
+    {
+        SOCKET tmp = p->getId();
+        game->getServer()->sendMessage(protocol_->getServerChatProtocol("Manche du gagnant !"), tmp);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    mutex->unlock();
+
+    isWheelSpinned = false;
+    isWheelStartedSpin = false;
+    restartWithNewPlayer = false;
+    waitedTime = 0.0f;
+    wheelValue = 0;
+
+
+    mutex->lock();
+    for (const auto* p : *players)
+    {
+        SOCKET tmp = p->getId();
+
+        if (currentPlayer == p->getId()) {
+            game->getServer()->sendMessage(protocol_->getActivateWheelProtocol(true), tmp);
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            game->getServer()->sendMessage(protocol_->getServerChatProtocol("Vous avez 30 secondes pour tourner la roue."), tmp);
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+        game->getServer()->sendMessage(protocol_->getCanPlayProtocol(false), tmp);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    mutex->unlock();
+
+    while (!isWheelSpinned) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        if (!isWheelStartedSpin)
+            waitedTime += 0.1;
+
+        mutex->lock();
+        if (players->empty())
+        {
+            mutex->unlock();
+            stopGame();
+            break;
+        }else if(waitedTime >= WAITING_TIME)
+        {
+            mutex->unlock();
+            break;
+        }
+        mutex->unlock();
+    }
+
+    isWheelSpinned = false;
+    isWheelSpinned = false;
+    waitedTime = 0.0f;
+
+    Player* player = game->getPlayerFromId(currentPlayer);
+    if (player != nullptr) {
+        player->addMoney(wheelValue);
+        SOCKET playerSocket = player->getId();
+        game->getServer()->sendMessage(protocol_->getSendMoneyProtocol(player), playerSocket);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+}
+
 
 void GameManager::handleWheelValue(std::string value)
 {

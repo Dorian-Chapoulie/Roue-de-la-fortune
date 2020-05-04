@@ -33,6 +33,8 @@ Game::Game(QWidget *parent) :
     connect(this, SIGNAL(notifyUpdateBank()), this, SLOT(updateBank()));
     connect(this, SIGNAL(notifyMsgBox(QString)), this, SLOT(showMsgBox(QString)));
     connect(this, SIGNAL(notifySetComboBox()), this, SLOT(setComboBox()));
+    connect(this, SIGNAL(notifyCleanWheelScene()), this, SLOT(clearWheelScene()));
+    connect(this, SIGNAL(notifyUpdateWheelScene()), this, SLOT(updateWheelScene()));
 
     ui->lineEditChat->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,50}"), this));    
 
@@ -58,39 +60,26 @@ Game::Game(QWidget *parent) :
     this->ui->graphicsViewRoue->setScene(wheelScene);
 
     this->wheel = WheelFactory::getInstance()->getWheel(WheelFactory::WHEEL_ONE);
-    wheel->setPosition(350 / 2, 270 /2 + 15);
-    wheelScene->addItem(wheel->getItem());
 
-
-    QPen pen;
-    QBrush brush(Qt::red);
-    brush.setStyle(Qt::SolidPattern);
-    wheelScene->addRect(350/2 - 5, 0, 10, 10, pen, brush);
-
-    wheelScene->addLine(350/2, 10, 350/2, 30);
-    wheelScene->addLine(350/2, 30, 350/2 - 5, 20);
-    wheelScene->addLine(350/2, 30, 350/2 + 5, 20);   
-
+    updateWheelScene();
     drawScene();
 }
 
 Game::~Game()
 {
     delete ui;
-    delete wheel;
-    delete scene;
-    delete wheelScene;
     players.clear();
 }
 
 void Game::closeEvent(QCloseEvent *event)
 {
     emit clearScene();
+    emit notifyCleanWheelScene();
     delete scene;
     delete wheelScene;
+    delete wheel;
     players.clear();
     cases.clear();
-    delete wheel;
 
     LocalPlayer::getInstance()->disconnect();
     LocalPlayer::getInstance()->connectToBaseServer();
@@ -188,7 +177,14 @@ void Game::setEvents() {
             isWheelButtonClicked = true;
         }
 
-        emit notifySetEnableWheel(value);
+         std::thread threadWait([=](){
+            while(!isWheelFinishedSpin) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+            emit notifySetEnableWheel(value);
+         });
+         threadWait.detach();
+
     });
 
     EventManager::getInstance()->addListener(EventManager::BAD_RESPONSE, [&](void*){
@@ -247,7 +243,13 @@ void Game::setEvents() {
     EventManager::getInstance()->addListener(EventManager::SPIN_WHEEL, [&](void* value){
         rotationValueWheel = std::stoi(*static_cast<std::string*>(value));
         std::thread threadTemp([&](){
+            bool tempTurn = isMyTurn;
 
+            while(!isWheelFinishedSpin) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+
+            isWheelFinishedSpin = false;
             for(int i = 0; i < 360; i++) {
                 emit notifySpinWheel(1);
                 std::this_thread::sleep_for(std::chrono::milliseconds(5));
@@ -257,8 +259,9 @@ void Game::setEvents() {
                 emit notifySpinWheel(1);
                 std::this_thread::sleep_for(std::chrono::milliseconds(5));
             }
+            isWheelFinishedSpin = true;
 
-            if(isMyTurn) {
+            if(tempTurn) {
                 ProtocolHandler protocol;
                 LocalPlayer::getInstance()->sendMessage(protocol.getWheelSpinnedProtocol(wheel->getCaseFromRotation()));
                 isMyTurn = false;
@@ -285,6 +288,30 @@ void Game::setEvents() {
     EventManager::getInstance()->addListener(EventManager::EVENT::NEW_ROUND, [&](void* data){
         std::string roundNumber = *reinterpret_cast<std::string*>(data);
         emit notifyNewMessage(QString::fromStdString("[INFO]-Nouvelle manche:" + roundNumber));
+
+        delete wheel;
+
+        emit notifyCleanWheelScene();
+        while(!isWheelSceneCleared) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        }
+
+        switch(std::stoi(roundNumber)) {
+            case 1:
+                wheel = WheelFactory::getInstance()->getWheel(WheelFactory::WHEEl_TWO);
+                break;
+            case 2:
+                wheel = WheelFactory::getInstance()->getWheel(WheelFactory::WHEEL_THREE);
+                break;
+            case 3:
+                wheel = WheelFactory::getInstance()->getWheel(WheelFactory::WHEEL_FOUR);
+                break;
+            case 4:
+                wheel = WheelFactory::getInstance()->getWheel(WheelFactory::WHEEL_WINNER);
+                break;
+        }
+
+        emit notifyUpdateWheelScene();
 
         for(Player* p : players) {
             p->updateBank();
@@ -556,6 +583,27 @@ void Game::clearScene() {
     isSceneCleared = true;
 }
 
+void Game::clearWheelScene() {
+    wheelScene->clear();
+    isWheelSceneCleared = true;
+}
+
+void Game::updateWheelScene()
+{
+    wheel->setPosition(350 / 2, 270 /2 + 15);
+    wheelScene->addItem(wheel->getItem());
+
+
+    QPen pen;
+    QBrush brush(Qt::red);
+    brush.setStyle(Qt::SolidPattern);
+    wheelScene->addRect(350/2 - 5, 0, 10, 10, pen, brush);
+
+    wheelScene->addLine(350/2, 10, 350/2, 30);
+    wheelScene->addLine(350/2, 30, 350/2 - 5, 20);
+    wheelScene->addLine(350/2, 30, 350/2 + 5, 20);
+}
+
 void Game::on_buttonSpinWheel_clicked()
 {
     ProtocolHandler protocol;
@@ -573,10 +621,13 @@ void Game::displayMoney()
 {
     for(Player* p : players) {
         std::string toFind = p->getName() + "_" + std::to_string(p->getId());
+
         if(toFind == ui->labelPlayer1->text().toStdString()) {
             ui->labelMoneyP1->setText(QString::number(p->getMoney()));
+
         }else if(toFind == ui->labelPlayer2->text().toStdString()) {
             ui->labelMoneyP2->setText(QString::number(p->getMoney()));
+
         }else {
             ui->labelMoneyP3->setText(QString::number(p->getMoney()));
         }
@@ -586,10 +637,14 @@ void Game::displayMoney()
 void Game::updateBank()
 {
     for(Player* p : players) {
-        if(p->getName() == ui->labelPlayer1->text().toStdString()) {
+        std::string toFind = p->getName() + "_" + std::to_string(p->getId());
+
+        if(toFind == ui->labelPlayer1->text().toStdString()) {
             ui->labelbankP1->setText(QString::number(p->getBank()));
-        }else if(p->getName() == ui->labelPlayer2->text().toStdString()) {
+
+        }else if(toFind == ui->labelPlayer2->text().toStdString()) {
             ui->labelbankP2->setText(QString::number(p->getBank()));
+
         }else {
             ui->labelbankP3->setText(QString::number(p->getBank()));
         }

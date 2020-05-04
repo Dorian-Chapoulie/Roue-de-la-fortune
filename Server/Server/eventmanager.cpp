@@ -20,7 +20,7 @@ void EventManager::triggerEvent(EventManager::EVENT eventName)
         events[eventName](nullptr);
     }
     else {
-        std::cout << "Bad function call: " << eventName << std::endl;
+        //std::cout << "Bad function call: " << eventName << std::endl;
     }
 }
 
@@ -31,6 +31,6 @@ void EventManager::triggerEvent(EventManager::EVENT eventName, void* arg)
         events[eventName](arg);
     }
     else {
-        std::cout << "Bad function call: " << eventName << std::endl;
+        //std::cout << "Bad function call: " << eventName << std::endl;
     }
 }

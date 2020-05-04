@@ -32,6 +32,8 @@ private slots:
     void diaplayBadResponse();
     void drawWheelScene(int);
     void clearScene();
+    void clearWheelScene();
+    void updateWheelScene();
     void setEnableWheel(bool);
     void displayMoney();
     void updateBank();
@@ -52,11 +54,13 @@ signals:
     void notifyNewMessage(QString);
     void notifyPlayerDisconnected(int);
     void notifyUpdateScene();
+    void notifyUpdateWheelScene();
     void notifyCanPlayValue(bool);
     void notifyWinner(int);
     void notifyBadResponse();
     void notifySpinWheel(int);
     void notifyCleanScene();
+    void notifyCleanWheelScene();
     void notifySetEnableWheel(bool);
     void notifyMoneyChanged();
     void notifyWheelButtonAnimation(bool);
@@ -78,8 +82,10 @@ private:
 
     bool isQuickRiddle = true;
     bool isSceneCleared = false;
+    bool isWheelSceneCleared = false;
     bool isWheelButtonClicked = false;
     bool isMyTurn = false;
+    bool isWheelFinishedSpin = true;
     int rotationValueWheel = 0;
 
     Wheel* wheel = nullptr;
