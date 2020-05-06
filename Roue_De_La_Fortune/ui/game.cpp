@@ -11,6 +11,20 @@
 
 #include <iostream>
 
+#include <QtMultimedia/QSound>
+
+QSound bonChoix("BonChoix.wav");
+QSound mauvaisChoix("MauvaisChoix.wav");
+QSound click("click.wav");
+QSound bankrupt("bankrupt.wav");
+QSound victory("Victory.wav");
+QSound gameVictory("SambaVictory.wav");
+QSound loose("Loose.wav");
+QSound spin("spin.wav");
+
+
+
+
 Game::Game(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Game)
@@ -146,6 +160,13 @@ void Game::setEvents() {
             return p->getId() == static_cast<SOCKET>(t);
         });
         if(it != players.end()) {
+            Player *p = reinterpret_cast<Player*>(*it);
+            if(p == LocalPlayer::getInstance()){
+                victory.play();
+            }
+            else{
+                loose.play();
+            }
             emit notifyWinner(reinterpret_cast<Player*>(*it)->getId());
         }
     });
@@ -189,6 +210,7 @@ void Game::setEvents() {
 
     EventManager::getInstance()->addListener(EventManager::BAD_RESPONSE, [&](void*){
         emit notifyBadResponse();
+        mauvaisChoix.play();
     });
 
     EventManager::getInstance()->addListener(EventManager::DISPLAY_RESPONSE, [&](void*){
@@ -244,7 +266,7 @@ void Game::setEvents() {
         rotationValueWheel = std::stoi(*static_cast<std::string*>(value));
         std::thread threadTemp([&](){
             bool tempTurn = isMyTurn;
-
+            spin.play();
             while(!isWheelFinishedSpin) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
@@ -260,11 +282,16 @@ void Game::setEvents() {
                 std::this_thread::sleep_for(std::chrono::milliseconds(5));
             }
             isWheelFinishedSpin = true;
+            spin.stop();
 
             if(tempTurn) {
                 ProtocolHandler protocol;
                 LocalPlayer::getInstance()->sendMessage(protocol.getWheelSpinnedProtocol(wheel->getCaseFromRotation()));
                 isMyTurn = false;
+            }
+            ProtocolHandler protocol;
+            if(wheel->getCaseFromRotation() == "BankRoute"){
+                bankrupt.play();
             }
         });
         threadTemp.detach();
@@ -326,6 +353,8 @@ void Game::setEvents() {
         LocalPlayer::getInstance()->updateBank();
         str += QString::number(LocalPlayer::getInstance()->getBank());
         emit notifyMsgBox(str);
+        gameVictory.play();
+
     });
 
     EventManager::getInstance()->addListener(EventManager::EVENT::LOOSE, [&](void* data){
@@ -333,6 +362,7 @@ void Game::setEvents() {
         LocalPlayer::getInstance()->updateBank();
         str += QString::number(LocalPlayer::getInstance()->getBank());
         emit notifyMsgBox(str);
+        loose.play();
     });
 }
 
