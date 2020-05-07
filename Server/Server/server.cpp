@@ -23,7 +23,7 @@ int main()
         games.push_back(new Game(*static_cast<std::string*>(msg), lastUsedPort++ + 1));
         
         for (SOCKET s : main_server.getClients()) {
-            main_server.sendMessage("G-" + games.back()->getInfos(), s);
+            main_server.sendMessage("G-" + games.back()->getInfos() + ';', s);
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
         mutex.unlock();
