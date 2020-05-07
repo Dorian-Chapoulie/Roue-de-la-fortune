@@ -1,7 +1,7 @@
 #include "tcp_server.h"
 #include "Config.h"
 #include "protocolhandler.h"
-#include <iostream>
+
 
 TCPServer::TCPServer(ProtocolHandler* protocolHandler)
 {
@@ -28,24 +28,24 @@ TCPServer::~TCPServer()
     while (threadsRunning > 0) {
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
-    std::cout << "thread delete ok" << std::endl;
+    //std::cout << "thread delete ok" << std::endl;
     delete m_threadAccept;
     delete m_threadReceiver;    
 }
 
 void TCPServer::sendMessage(std::string msg, SOCKET& client)
 {
-    //std::cout << "Send: " << msg << std::endl;    
+    ////std::cout << "Send: " << msg << std::endl;    
     if (send(client, msg.c_str(), msg.length(), 0) < 0) {
 
         auto it = std::find(m_socketClients.begin(), m_socketClients.end(), client);
         if (it != m_socketClients.end()) {
             m_socketClients.erase(it);
-            std::cout << m_port << ": client disconnected: " << client <<  std::endl;
+            //std::cout << m_port << ": client disconnected: " << client <<  std::endl;
             protocolHandler->callEventFromProtocol("D-" + std::to_string(client), &client);
         }
         else {
-            std::cout << "Erreur lors de la supression du client" << std::endl;
+            //std::cout << "Erreur lors de la supression du client" << std::endl;
             //m_socketClients.clear();
         }
         //TODO erreur
@@ -93,7 +93,7 @@ void TCPServer::fn_threadReceiver(SOCKET* client)
     while (doListen) {
         bytesReceived = recv(*client, buffer, 255 - 1, 0);
         if (bytesReceived > 0 && doListen) {
-            //std::cout << "Client: " << std::string(buffer, bytesReceived) << std::endl;
+            ////std::cout << "Client: " << std::string(buffer, bytesReceived) << std::endl;
             mutex.lock();
             protocolHandler->callEventFromProtocol(std::string(buffer, bytesReceived), client);
             mutex.unlock();
@@ -103,7 +103,7 @@ void TCPServer::fn_threadReceiver(SOCKET* client)
             break;
         }
     }
-    std::cout << "Thread Receiver done" << std::endl;
+    //std::cout << "Thread Receiver done" << std::endl;
     threadsRunning--;
 }
 
@@ -123,18 +123,18 @@ void TCPServer::fn_threadAcceptNewClient()
             waitForPlayers = false;
 
         if (tempSocket < 0) {
-            printf("server acccept failed...\n");
+            //printf("server acccept failed...\n");
             exit(0);
         }
         else if (static_cast<unsigned int>(tempSocket) != -1) {
-            std::cout << "start receiver: " << m_port << std::endl;
+            //std::cout << "start receiver: " << m_port << std::endl;
             m_socketClients.push_back(tempSocket);
             m_threadReceiver = new std::thread(&TCPServer::fn_threadReceiver, this, &m_socketClients.back());
             m_threadReceiver->detach();     
             threadsRunning++;
         }
     }
-    std::cout << "Thread Accept closed" << std::endl;
+    //std::cout << "Thread Accept closed" << std::endl;
     threadsRunning--;
 }
 
@@ -164,8 +164,8 @@ void TCPServer::init()
     sin.sin_family = AF_INET;
 
     if ((bind(m_socketfd, (SOCKADDR*)&sin, sizeof(sin))) != 0) {
-        printf("socket bind failed...\n");
-        exit(0);
+        //printf("socket bind failed...\n");
+        return;
     }
 
     int yes = '1';
@@ -173,8 +173,8 @@ void TCPServer::init()
 
     int list = listen(m_socketfd, MAX_CLIENT);
     if (list != 0) {
-        printf("Listen failed...\n");
-        exit(0);
+        //printf("Listen failed...\n");
+        //exit(0);
     }
 
     m_threadAccept = new std::thread(&TCPServer::fn_threadAcceptNewClient, this);

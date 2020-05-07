@@ -30,7 +30,7 @@ ProtocolHandler::ProtocolHandler(EventManager* eventManager)
     this->eventManager = eventManager;
 }
 
-#include <iostream>
+
 void ProtocolHandler::callEventFromProtocol(std::string msg, SOCKET* socket)
 {
     if (msg.find(';') != std::string::npos)

@@ -3,7 +3,7 @@
 #include "eventmanager.h"
 #include "protocolhandler.h"
 #include "GameManager.h"
-#include <iostream>
+
 
 Game::Game(std::string& name, int port)
 {
@@ -12,7 +12,7 @@ Game::Game(std::string& name, int port)
 	this->protocol = new ProtocolHandler(&eventManager);		
 
 	server = new TCPServer(Config::getInstance()->baseIp, port, protocol);
-	//std::cout << "New server '" << name << "'\t " << Config::getInstance()->baseIp << ":" << port << std::endl;
+	////std::cout << "New server '" << name << "'\t " << Config::getInstance()->baseIp << ":" << port << std::endl;
 
 	eventManager.addListener(EventManager::EVENT::PLAYER_CONNECT_OK, [&](void* sock) {
 		mutex.lock();
@@ -25,7 +25,7 @@ Game::Game(std::string& name, int port)
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		this->server->sendMessage(protocol->getAskPseudoProtocol(), *reinterpret_cast<SOCKET*>(sock));
 
-		if(size == 3)
+		if(size == 2)
 		{
 			std::thread threadGame([&]()
 			{
@@ -79,7 +79,7 @@ Game::Game(std::string& name, int port)
 		});
 
 		if (it != players.end()) {
-			//std::cout << reinterpret_cast<Player*>(*it)->getName() << " s'est deconnecte" << std::endl;
+			////std::cout << reinterpret_cast<Player*>(*it)->getName() << " s'est deconnecte" << std::endl;
 			players.erase(it);
 		}
 
@@ -115,7 +115,7 @@ Game::~Game() {
 		std::this_thread::sleep_for(std::chrono::milliseconds(200));
 	}
 	while (!isThreadGameFinished && isGameStarted) {
-		//std::cout << "waiting for game to finish" << std::endl;
+		////std::cout << "waiting for game to finish" << std::endl;
 		std::this_thread::sleep_for(std::chrono::milliseconds(200));
 	}
 	delete server;
@@ -428,7 +428,7 @@ int Game::getLooser()
 	int id = players.at(0)->getId();
 	for(Player* p : players)
 	{
-		//std::cout << p->getName() << ": " << p->getMoney() << std::endl;
+		////std::cout << p->getName() << ": " << p->getMoney() << std::endl;
 		if(p->getMoney() < temp)
 		{
 			id = p->getId();

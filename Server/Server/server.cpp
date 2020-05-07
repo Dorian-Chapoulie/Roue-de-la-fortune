@@ -1,4 +1,4 @@
-#include <iostream>
+
 #include <vector>
 
 #include "tcp_server.h"
@@ -16,10 +16,12 @@ int main()
     EventManager event_manager;
     ProtocolHandler protocolHandler(&event_manager);
     TCPServer main_server(&protocolHandler);
+    int lastUsedPort = Config::getInstance()->basePort;
+	
 
     event_manager.addListener(EventManager::EVENT::CREATE_GAME, [&](void* msg) {
         mutex.lock();
-        games.push_back(new Game(*static_cast<std::string*>(msg), games.size() + Config::getInstance()->basePort + 1));
+        games.push_back(new Game(*static_cast<std::string*>(msg), lastUsedPort + 1));
         
         for (SOCKET s : main_server.getClients()) {
             main_server.sendMessage("G-" + games.back()->getInfos(), s);

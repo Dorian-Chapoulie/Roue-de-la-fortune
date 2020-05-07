@@ -1,7 +1,7 @@
 #include "GameManager.h"
 
 #include <fstream>
-#include <iostream>
+
 
 
 #include "Config.h"
@@ -62,7 +62,7 @@ void GameManager::setEventsHandler()
 		{
             player = reinterpret_cast<Player*>(*it);
             std::string toSend = player->getName() + " propose: " + response;
-            //std::cout << currentSentence << ".\n" << response <<  "." <<std::endl;
+            ////std::cout << currentSentence << ".\n" << response <<  "." <<std::endl;
             for (const auto* p : *players)
             {
                 SOCKET tmp = p->getId();
@@ -316,7 +316,7 @@ int GameManager::sentenceRiddle(int& currentPlayer)
         playerChoice = '_';
         wheelValue = 0;        
 
-        //std::cout << "restart " << std::endl;
+        ////std::cout << "restart " << std::endl;
 
         mutex->lock();
         for (const auto* p : *players)
@@ -459,7 +459,7 @@ int GameManager::sentenceRiddle(int& currentPlayer)
 	                    {
 	                        currentPlayer = p->getId();
 	                        newPlayerName = p->getName();
-                            std::cout << "new player: " << newPlayerName << " :" << std::endl;
+                            ////std::cout << "new player: " << newPlayerName << " :" << std::endl;
 	                        break;
 	                    }
 	                }
