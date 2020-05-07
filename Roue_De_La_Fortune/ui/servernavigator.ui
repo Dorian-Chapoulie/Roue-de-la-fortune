@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>navigateur de serveurs</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../ressources/Icons/logo.png</normaloff>../ressources/Icons/logo.png</iconset>
+  </property>
   <widget class="QTableWidget" name="tableWidget">
    <property name="geometry">
     <rect>

@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Connection</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../ressources/Icons/logo.png</normaloff>../ressources/Icons/logo.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QPushButton" name="connectionButton">
     <property name="geometry">

@@ -15,7 +15,7 @@ Game::Game(QWidget *parent) :
     ui(new Ui::Game)
 {
     ui->setupUi(this);
-
+    this->setFixedSize(this->size());
     qRegisterMetaType<SoundBank::SOUND>("SoundBank::SOUND");
 
     connect(this, SIGNAL(notifyNewPlayer(QString)), this, SLOT(addNewPlayer(QString)));

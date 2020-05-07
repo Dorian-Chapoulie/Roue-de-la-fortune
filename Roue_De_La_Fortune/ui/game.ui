@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Partie</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../ressources/Icons/logo.png</normaloff>../ressources/Icons/logo.png</iconset>
+  </property>
   <widget class="QGroupBox" name="groupBoxChat">
    <property name="geometry">
     <rect>

@@ -14,6 +14,7 @@ ServerNavigator::ServerNavigator(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setAttribute(Qt::WA_DeleteOnClose);
+    this->setFixedSize(this->size());
     ui->lineEdit->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,20}"), this));
 
     connect(this, SIGNAL(updateList(QString)), this, SLOT(addServerInList(QString)));

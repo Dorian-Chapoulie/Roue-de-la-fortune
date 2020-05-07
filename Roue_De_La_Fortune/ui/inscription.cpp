@@ -12,6 +12,7 @@ Inscription::Inscription(QWidget *parent) :
     ui(new Ui::Inscription)
 {
     ui->setupUi(this);
+    this->setFixedSize(this->size());
 
     EventManager::getInstance()->addListener(EventManager::INSCRIPTION_FAILURE, [&](void* msg){
         emit displayInscriptionError(QString::fromStdString(*static_cast<std::string*>(msg)));
