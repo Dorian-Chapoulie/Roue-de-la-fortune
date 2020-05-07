@@ -21,7 +21,7 @@ int main()
 
     event_manager.addListener(EventManager::EVENT::CREATE_GAME, [&](void* msg) {
         mutex.lock();
-        games.push_back(new Game(*static_cast<std::string*>(msg), lastUsedPort + 1));
+        games.push_back(new Game(*static_cast<std::string*>(msg), lastUsedPort++ + 1));
         
         for (SOCKET s : main_server.getClients()) {
             main_server.sendMessage("G-" + games.back()->getInfos(), s);
