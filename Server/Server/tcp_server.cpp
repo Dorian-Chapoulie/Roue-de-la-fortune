@@ -1,7 +1,7 @@
 #include "tcp_server.h"
 #include "Config.h"
 #include "protocolhandler.h"
-
+#include <algorithm>
 
 TCPServer::TCPServer(ProtocolHandler* protocolHandler)
 {
@@ -168,15 +168,15 @@ void TCPServer::init()
         return;
     }
 
-    int yes = '1';
-    setsockopt(m_socketfd,IPPROTO_TCP,TCP_NODELAY,(char*)&yes,sizeof(int));
+    //int yes = '1';
+    //setsockopt(m_socketfd,IPPROTO_TCP,TCP_NODELAY,(char*)&yes,sizeof(int));
 
     int list = listen(m_socketfd, MAX_CLIENT);
     if (list != 0) {
         //printf("Listen failed...\n");
         //exit(0);
     }
-
+    
     m_threadAccept = new std::thread(&TCPServer::fn_threadAcceptNewClient, this);
     m_threadAccept->detach();
     threadsRunning++;

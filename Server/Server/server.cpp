@@ -1,12 +1,11 @@
 
 #include <vector>
-
 #include "tcp_server.h"
 #include "Game.h"
 #include "eventmanager.h"
 #include "protocolhandler.h"
 #include "Config.h"
-
+#include <algorithm>
 #include <chrono>
 
 int main() 

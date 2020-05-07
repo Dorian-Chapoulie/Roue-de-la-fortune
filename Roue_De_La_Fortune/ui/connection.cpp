@@ -19,7 +19,7 @@ Connection::Connection(QWidget *parent)
         emit showServerNavigator();
     });
 
-    EventManager::getInstance()->addListener(EventManager::EVENT::CONNEXION_FAILURE, [&](void* msg){
+    EventManager::getInstance()->addListener(EventManager::EVENT::CONNEXION_FAILURE, [&](void* msg){        
         emit displayError(QString::fromStdString(*static_cast<std::string*>(msg)));
     });
 
@@ -33,6 +33,7 @@ Connection::Connection(QWidget *parent)
 Connection::~Connection()
 {    
     EventManager::getInstance()->unSubsribeEvent(EventManager::EVENT::CONNEXION_SUCCESS);    
+    EventManager::getInstance()->unSubsribeEvent(EventManager::EVENT::CONNEXION_FAILURE);
     delete ui;
 }
 

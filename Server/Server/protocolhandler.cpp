@@ -6,27 +6,27 @@
 
 ProtocolHandler::ProtocolHandler(EventManager* eventManager)
 { 
-    protocoles.insert_or_assign(PROTOCOL_NAME::PLAYER_CONNECT_OK, "C-1-");
-    protocoles.insert_or_assign(PROTOCOL_NAME::PLAYER_CONNECT_FAIL, "C-0");
-    protocoles.insert_or_assign(PROTOCOL_NAME::PLAYER_INSCRIPTION_OK, "I-1");
-    protocoles.insert_or_assign(PROTOCOL_NAME::PLAYER_INSCRIPTION_FAIL, "I-0");
-    protocoles.insert_or_assign(PROTOCOL_NAME::ASK_PSEUDO, "N");
-    protocoles.insert_or_assign(PROTOCOL_NAME::NOTIFY_NEW_PLAYER, "NJ");
-    protocoles.insert_or_assign(PROTOCOL_NAME::PLAYER_DISCONNECTED, "D-");
-    protocoles.insert_or_assign(PROTOCOL_NAME::SEND_QUICK_RIDDLE, "Q-");
-    protocoles.insert_or_assign(PROTOCOL_NAME::SEND_WORD, "W-");
-    protocoles.insert_or_assign(PROTOCOL_NAME::SEND_WINNER_ID, "J-");
-    protocoles.insert_or_assign(PROTOCOL_NAME::BOOL_CAN_PLAY, "B-");
-    protocoles.insert_or_assign(PROTOCOL_NAME::SERVER_CHAT, "T-[Serveur]-");
-    protocoles.insert_or_assign(PROTOCOL_NAME::BAD_RESPONSE, "M");
-    protocoles.insert_or_assign(PROTOCOL_NAME::DISPLAY_RESPONSE, "F");
-    protocoles.insert_or_assign(PROTOCOL_NAME::SPIN_WHEEL, "S-");
-    protocoles.insert_or_assign(PROTOCOL_NAME::SEND_SENTENCE_RIDDLE, "R-");
-    protocoles.insert_or_assign(PROTOCOL_NAME::ACTIVE_WHEEL, "A-");
-    protocoles.insert_or_assign(PROTOCOL_NAME::SEND_MONEY, "E-");
-    protocoles.insert_or_assign(PROTOCOL_NAME::NEW_ROUND, "Z-");
-    protocoles.insert_or_assign(PROTOCOL_NAME::VICTORY, "V");
-    protocoles.insert_or_assign(PROTOCOL_NAME::LOOSE, "X");
+    protocoles.insert(std::make_pair(PROTOCOL_NAME::PLAYER_CONNECT_OK, "C-1-"));
+    protocoles.insert(std::make_pair(PROTOCOL_NAME::PLAYER_CONNECT_FAIL, "C-0"));
+    protocoles.insert(std::make_pair(PROTOCOL_NAME::PLAYER_INSCRIPTION_OK, "I-1"));
+    protocoles.insert(std::make_pair(PROTOCOL_NAME::PLAYER_INSCRIPTION_FAIL, "I-0"));
+    protocoles.insert(std::make_pair(PROTOCOL_NAME::ASK_PSEUDO, "N"));
+    protocoles.insert(std::make_pair(PROTOCOL_NAME::NOTIFY_NEW_PLAYER, "NJ"));
+    protocoles.insert(std::make_pair(PROTOCOL_NAME::PLAYER_DISCONNECTED, "D-"));
+    protocoles.insert(std::make_pair(PROTOCOL_NAME::SEND_QUICK_RIDDLE, "Q-"));
+    protocoles.insert(std::make_pair(PROTOCOL_NAME::SEND_WORD, "W-"));
+    protocoles.insert(std::make_pair(PROTOCOL_NAME::SEND_WINNER_ID, "J-"));
+    protocoles.insert(std::make_pair(PROTOCOL_NAME::BOOL_CAN_PLAY, "B-"));
+    protocoles.insert(std::make_pair(PROTOCOL_NAME::SERVER_CHAT, "T-[Serveur]-"));
+    protocoles.insert(std::make_pair(PROTOCOL_NAME::BAD_RESPONSE, "M"));
+    protocoles.insert(std::make_pair(PROTOCOL_NAME::DISPLAY_RESPONSE, "F"));
+    protocoles.insert(std::make_pair(PROTOCOL_NAME::SPIN_WHEEL, "S-"));
+    protocoles.insert(std::make_pair(PROTOCOL_NAME::SEND_SENTENCE_RIDDLE, "R-"));
+    protocoles.insert(std::make_pair(PROTOCOL_NAME::ACTIVE_WHEEL, "A-"));
+    protocoles.insert(std::make_pair(PROTOCOL_NAME::SEND_MONEY, "E-"));
+    protocoles.insert(std::make_pair(PROTOCOL_NAME::NEW_ROUND, "Z-"));
+    protocoles.insert(std::make_pair(PROTOCOL_NAME::VICTORY, "V"));
+    protocoles.insert(std::make_pair(PROTOCOL_NAME::LOOSE, "X"));
     this->eventManager = eventManager;
 }
 
@@ -151,7 +151,7 @@ void ProtocolHandler::callEventFromProtocol(std::string msg, SOCKET* socket)
     else if (msg.at(0) == 'S') {
         if (msg.length() == 1) { //demande de tourner la roue
             eventManager->triggerEvent(eventManager->SPIN_WHEEL);
-        }else {//roue tournée
+        }else {//roue tournï¿½e
             std::string wheelValue = msg.substr(4);
             eventManager->triggerEvent(eventManager->WHEEL_VALUE, &wheelValue);
         }

@@ -1,6 +1,6 @@
 #ifndef PROTOCOLHANDLER_H
 #define PROTOCOLHANDLER_H
-#include <unordered_map>
+#include <map>
 #include "eventmanager.h"
 #include "Player.h"
 
@@ -64,7 +64,7 @@ public:
     std::string getNewRoundProtocol(int roundNumber);
 
 private:
-    std::unordered_map<PROTOCOL_NAME, std::string> protocoles;
+    std::map<PROTOCOL_NAME, std::string> protocoles;
     EventManager* eventManager;
 };
 

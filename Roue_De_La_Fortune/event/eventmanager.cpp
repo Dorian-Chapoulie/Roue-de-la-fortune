@@ -21,7 +21,12 @@ EventManager::~EventManager()
 
 void EventManager::addListener(EventManager::EVENT eventName, std::function<void(void*)>&& handler)
 {        
-    events.insert(std::make_pair(eventName, handler));
+    auto it = events.find(eventName);
+    if(it != events.end()) {
+        events[eventName] = handler;
+    }else {
+        events.insert(std::make_pair(eventName, handler));
+    }
 }
 
 void EventManager::triggerEvent(EventManager::EVENT eventName)

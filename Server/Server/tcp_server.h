@@ -9,7 +9,7 @@
 #ifdef _WIN32
     #include <winsock2.h>
     #pragma comment(lib, "Ws2_32.lib")
-#elif defined (linux)
+#else
     #include <sys/types.h>
     #include <sys/socket.h>
     #include <netinet/in.h>

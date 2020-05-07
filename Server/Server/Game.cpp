@@ -3,7 +3,7 @@
 #include "eventmanager.h"
 #include "protocolhandler.h"
 #include "GameManager.h"
-
+#include <algorithm>
 
 Game::Game(std::string& name, int port)
 {

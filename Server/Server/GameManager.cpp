@@ -1,9 +1,6 @@
 #include "GameManager.h"
-
+#include <algorithm>
 #include <fstream>
-
-
-
 #include "Config.h"
 
 GameManager::GameManager(std::recursive_mutex* mutex, std::vector<Player*>* players, ProtocolHandler* protocol,
@@ -246,7 +243,7 @@ int GameManager::quickRiddle()
         }
         mutex->unlock();
     	
-    	if(sentPosition.size() == currentSentence.length()) //personne n'a gagné
+    	if(sentPosition.size() == currentSentence.length()) //personne n'a gagnï¿½
     	{
             winnerId = -1;
             break;
@@ -517,7 +514,7 @@ int GameManager::sentenceRiddle(int& currentPlayer)
         }
         mutex->unlock();
     	
-	    if(foundLetters.size() <= 0) //si il a rien trouvé
+	    if(foundLetters.size() <= 0) //si il a rien trouvï¿½
 	    {
             game->getServer()->sendMessage(protocol_->getCanPlayProtocol(false), s);
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
