@@ -5,7 +5,6 @@
 #include "event/eventmanager.h"
 #include "ui/servernavigator.h"
 #include "ui/inscription.h"
-#include <iostream>
 
 Connection::Connection(QWidget *parent)
     : QMainWindow(parent)

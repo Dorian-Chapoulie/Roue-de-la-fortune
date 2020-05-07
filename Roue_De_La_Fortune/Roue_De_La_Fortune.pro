@@ -24,6 +24,7 @@ SOURCES += \
     event/eventmanager.cpp \
     graphics/wheel.cpp \
     graphics/wheelfactory.cpp \
+    sound/soundbank.cpp \
     ui/game.cpp \
     ui/inscription.cpp \
     ui/servernavigator.cpp \
@@ -40,6 +41,7 @@ HEADERS += \
     event/eventmanager.h \
     graphics/wheel.h \
     graphics/wheelfactory.h \
+    sound/soundbank.h \
     ui/game.h \
     ui/inscription.h \
     ui/servernavigator.h \

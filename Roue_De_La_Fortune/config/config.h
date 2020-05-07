@@ -9,6 +9,9 @@ public:
     static Config* getInstance();
     const unsigned int baseServerPort = 25565;
     const std::string baseServerIP = "localhost";
+    const std::string baseRessourcesPath = "ressources";
+    const std::string imageFolder = "images";
+    const std::string soundFolder = "sounds";
 
 private:
     Config();

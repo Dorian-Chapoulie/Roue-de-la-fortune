@@ -1,4 +1,5 @@
 #include "wheelfactory.h"
+#include "config/config.h"
 
 WheelFactory* WheelFactory::instance = nullptr;
 
@@ -146,23 +147,29 @@ WheelFactory::~WheelFactory()
     delete instance;
 }
 
-#include <iostream>
 Wheel* WheelFactory::getWheel(WheelType type) {
+    std::string basePath = Config::getInstance()->baseRessourcesPath
+            + "/"
+            + Config::getInstance()->imageFolder;
+
     switch (type) {
         case WHEEL_ONE:
-            return new Wheel("roue1.png", 24, wheelOneCases);
+            return new Wheel(basePath + "/roue1.png", 24, wheelOneCases);
         break;
         case WHEEl_TWO:
-            return new Wheel("roue2.png", 24, wheelTwoCases);
+            return new Wheel(basePath + "/roue2.png", 24, wheelTwoCases);
         break;
         case WHEEL_THREE:
-            return new Wheel("roue3.png", 24, wheelThreeCases);
+            return new Wheel(basePath + "/roue3.png", 24, wheelThreeCases);
         break;
         case WHEEL_FOUR:
-            return new Wheel("roue4.png", 24, wheelFourCases);
+            return new Wheel(basePath + "/roue4.png", 24, wheelFourCases);
         break;
         case WHEEL_WINNER:
-            return new Wheel("roue5.png", 24, wheelWinnerCases);
+            return new Wheel(basePath + "/roue5.png", 24, wheelWinnerCases);
+        break;
+        default:
+            return nullptr;
         break;
     };
 }

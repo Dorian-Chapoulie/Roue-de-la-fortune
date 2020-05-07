@@ -15,7 +15,7 @@ TCPClient::~TCPClient()
     delete m_threadReceiver;
     disconnect();
 }
-#include <iostream>
+
 void TCPClient::sendMessage(std::string msg)
 {
     //std::cout << "send: " << msg << std::endl;

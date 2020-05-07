@@ -7,6 +7,7 @@
 #include "graphics/case.h"
 #include "entity/player.h"
 #include "graphics/wheel.h"
+#include "sound/soundbank.h"
 
 namespace Ui {
 class Game;
@@ -41,6 +42,7 @@ private slots:
     void removeLetter(char);  
     void showMsgBox(QString);
     void setComboBox();
+    void playSound(SoundBank::SOUND sound);
 
     void on_pushButtonChat_clicked();
     void on_pushButton_clicked();
@@ -68,6 +70,7 @@ signals:
     void notifyUpdateBank();
     void notifyMsgBox(QString);
     void notifySetComboBox();
+    void notifyPlaySound(SoundBank::SOUND sound);
 
 private:
     Ui::Game *ui;

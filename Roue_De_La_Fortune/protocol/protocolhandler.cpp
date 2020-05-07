@@ -7,7 +7,7 @@ ProtocolHandler::ProtocolHandler()
 {
     protocoles.insert_or_assign(PROTOCOL_NAME::GET_ALL_GAMES, "G");
 }
-#include <iostream>
+
 void ProtocolHandler::callEventFromProtocol(std::string msg)
 {
     EventManager* eventManager = EventManager::getInstance();

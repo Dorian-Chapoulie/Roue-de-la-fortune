@@ -4,7 +4,6 @@
 int Case::width = 80;
 int Case::height = 80;
 
-#include <iostream>
 Case::Case(int x, int y, int id, bool isWaittingLetter) : x(x), y(y), id(id), isWaittingLetter(isWaittingLetter)
 {}
 

@@ -9,27 +9,14 @@
 #include <QThread>
 #include <QMessageBox>
 
-#include <iostream>
-
-#include <QtMultimedia/QSound>
-
-QSound bonChoix("BonChoix.wav");
-QSound mauvaisChoix("MauvaisChoix.wav");
-QSound click("click.wav");
-QSound bankrupt("bankrupt.wav");
-QSound victory("Victory.wav");
-QSound gameVictory("SambaVictory.wav");
-QSound loose("Loose.wav");
-QSound spin("spin.wav");
-
-
-
 
 Game::Game(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Game)
 {
     ui->setupUi(this);
+
+    qRegisterMetaType<SoundBank::SOUND>("SoundBank::SOUND");
 
     connect(this, SIGNAL(notifyNewPlayer(QString)), this, SLOT(addNewPlayer(QString)));
     connect(this, SIGNAL(notifyNewMessage(QString)), this, SLOT(addMessageToChat(QString)));
@@ -49,6 +36,7 @@ Game::Game(QWidget *parent) :
     connect(this, SIGNAL(notifySetComboBox()), this, SLOT(setComboBox()));
     connect(this, SIGNAL(notifyCleanWheelScene()), this, SLOT(clearWheelScene()));
     connect(this, SIGNAL(notifyUpdateWheelScene()), this, SLOT(updateWheelScene()));
+    connect(this, SIGNAL(notifyPlaySound(SoundBank::SOUND)), this, SLOT(playSound(SoundBank::SOUND)));
 
     ui->lineEditChat->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]{0,50}"), this));    
 
@@ -92,6 +80,7 @@ void Game::closeEvent(QCloseEvent *event)
     delete scene;
     delete wheelScene;
     delete wheel;
+    wheel = nullptr;
     players.clear();
     cases.clear();
 
@@ -162,10 +151,14 @@ void Game::setEvents() {
         if(it != players.end()) {
             Player *p = reinterpret_cast<Player*>(*it);
             if(p == LocalPlayer::getInstance()){
-                victory.play();
+                if(isQuickRiddle) {
+                    emit notifyPlaySound(SoundBank::QUICK_RIDDLE_VICTORY);
+                }else {
+                    emit notifyPlaySound(SoundBank::SENTENCE_RIDDLE_VICTORY);
+                }
             }
             else{
-                loose.play();
+                emit notifyPlaySound(SoundBank::LOOSE);
             }
             emit notifyWinner(reinterpret_cast<Player*>(*it)->getId());
         }
@@ -210,7 +203,7 @@ void Game::setEvents() {
 
     EventManager::getInstance()->addListener(EventManager::BAD_RESPONSE, [&](void*){
         emit notifyBadResponse();
-        mauvaisChoix.play();
+        emit notifyPlaySound(SoundBank::BAD_CHOICE);
     });
 
     EventManager::getInstance()->addListener(EventManager::DISPLAY_RESPONSE, [&](void*){
@@ -247,6 +240,7 @@ void Game::setEvents() {
                     }
                 }
 
+                emit notifyPlaySound(SoundBank::GOOD_CHOICE);
                 emit notifyUpdateScene();
                 std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
@@ -266,8 +260,9 @@ void Game::setEvents() {
         rotationValueWheel = std::stoi(*static_cast<std::string*>(value));
         std::thread threadTemp([&](){
             bool tempTurn = isMyTurn;
-            spin.play();
-            while(!isWheelFinishedSpin) {
+            emit notifyPlaySound(SoundBank::SPIN);
+
+            while(!isWheelFinishedSpin && wheel != nullptr) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
 
@@ -275,14 +270,16 @@ void Game::setEvents() {
             for(int i = 0; i < 360; i++) {
                 emit notifySpinWheel(1);
                 std::this_thread::sleep_for(std::chrono::milliseconds(5));
+                if(wheel == nullptr) break;
             }
 
-            while(wheel->getRotationStep() != rotationValueWheel) {
+            while(wheel != nullptr && wheel->getRotationStep() != rotationValueWheel) {
                 emit notifySpinWheel(1);
                 std::this_thread::sleep_for(std::chrono::milliseconds(5));
+                if(wheel == nullptr) break;
             }
-            isWheelFinishedSpin = true;
-            spin.stop();
+
+            SoundBank::getInstance()->stopSpinSound();
 
             if(tempTurn) {
                 ProtocolHandler protocol;
@@ -290,9 +287,17 @@ void Game::setEvents() {
                 isMyTurn = false;
             }
             ProtocolHandler protocol;
-            if(wheel->getCaseFromRotation() == "BankRoute"){
-                bankrupt.play();
+            if(wheel != nullptr) {
+                const std::string wheelCase = wheel->getCaseFromRotation();
+                if(wheelCase == "BankRoute"){
+                    emit notifyPlaySound(SoundBank::BANKRUPT);
+                }else if(wheelCase == "HoldUp") {
+                    emit notifyPlaySound(SoundBank::HOLDUP);
+                }else if(wheelCase == "Passe") {
+                    emit notifyPlaySound(SoundBank::PASSE);
+                }
             }
+            isWheelFinishedSpin = true;
         });
         threadTemp.detach();
     });
@@ -315,6 +320,10 @@ void Game::setEvents() {
     EventManager::getInstance()->addListener(EventManager::EVENT::NEW_ROUND, [&](void* data){
         std::string roundNumber = *reinterpret_cast<std::string*>(data);
         emit notifyNewMessage(QString::fromStdString("[INFO]-Nouvelle manche:" + roundNumber));
+
+        while(!isWheelFinishedSpin && wheel != nullptr) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
 
         delete wheel;
 
@@ -353,7 +362,7 @@ void Game::setEvents() {
         LocalPlayer::getInstance()->updateBank();
         str += QString::number(LocalPlayer::getInstance()->getBank());
         emit notifyMsgBox(str);
-        gameVictory.play();
+        emit notifyPlaySound(SoundBank::SAMBA_VICTORY);
 
     });
 
@@ -362,7 +371,7 @@ void Game::setEvents() {
         LocalPlayer::getInstance()->updateBank();
         str += QString::number(LocalPlayer::getInstance()->getBank());
         emit notifyMsgBox(str);
-        loose.play();
+        emit notifyPlaySound(SoundBank::LOOSE);
     });
 }
 
@@ -382,6 +391,11 @@ void Game::setComboBox()
         ui->comboBoxVoyelle->addItem(QChar(c));
     }
 
+}
+
+void Game::playSound(SoundBank::SOUND sound)
+{
+    SoundBank::getInstance()->playSound(sound);
 }
 
 void Game::prepareScene() {
@@ -425,7 +439,8 @@ void Game::drawScene()
 }
 
 void Game::drawWheelScene(int value) {
-    wheel->rotate(value);
+    if(wheel != nullptr)
+        wheel->rotate(value);
 }
 
 void Game::addNewPlayer(QString data)
@@ -556,6 +571,7 @@ void Game::on_pushButton_clicked()
     }
     ui->lineEditWord->clear();
 
+    emit playSound(SoundBank::CLICK);
     setCanPlay(false);
 }
 
@@ -640,6 +656,7 @@ void Game::on_buttonSpinWheel_clicked()
     LocalPlayer::getInstance()->sendMessage(protocol.getSpinWheelProtocol());
     ui->buttonSpinWheel->setEnabled(false);
     isWheelButtonClicked = true;
+    emit playSound(SoundBank::CLICK);
 }
 
 void Game::setEnableWheel(bool value)

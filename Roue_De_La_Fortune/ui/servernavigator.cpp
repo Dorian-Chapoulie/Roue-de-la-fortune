@@ -5,9 +5,8 @@
 #include "event/eventmanager.h"
 #include "protocol/protocolhandler.h"
 #include "ui/game.h"
-
 #include <QMessageBox>
-#include <iostream>
+
 
 ServerNavigator::ServerNavigator(QWidget *parent) :
     QWidget(parent),
