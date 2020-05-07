@@ -1,6 +1,11 @@
 #pragma once
 #include <string>
-typedef int SOCKET;
+
+#ifdef _WIN32
+	#include <winsock2.h>
+#else
+	typedef int SOCKET;
+#endif
 
 class Player
 {

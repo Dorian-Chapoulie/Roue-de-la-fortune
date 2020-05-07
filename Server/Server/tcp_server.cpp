@@ -3,6 +3,10 @@
 #include "protocolhandler.h"
 #include <algorithm>
 
+#ifdef _WIN32
+	#define MSG_NOSIGNAL 0
+#endif
+
 TCPServer::TCPServer(ProtocolHandler* protocolHandler)
 {
     m_ip = Config::getInstance()->baseIp;

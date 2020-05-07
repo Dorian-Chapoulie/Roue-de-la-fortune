@@ -1,7 +1,7 @@
 #ifndef PROTOCOLHANDLER_H
 #define PROTOCOLHANDLER_H
 #include <map>
-
+#include <string>
 class ProtocolHandler
 {
 public:

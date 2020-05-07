@@ -2,6 +2,7 @@
 #define EVENTMANAGER_H
 #include <functional>
 #include <map>
+#include <string>
 
 class EventManager
 {
