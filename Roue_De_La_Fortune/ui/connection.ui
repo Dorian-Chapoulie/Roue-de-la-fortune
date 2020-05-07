@@ -67,7 +67,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>a</string>
+     <string/>
     </property>
    </widget>
    <widget class="QLineEdit" name="linePsw">
@@ -80,7 +80,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>a</string>
+     <string/>
     </property>
     <property name="echoMode">
      <enum>QLineEdit::Password</enum>

@@ -310,7 +310,7 @@
      </font>
     </property>
     <property name="text">
-     <string>vendredi tout est permi</string>
+     <string/>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton">
