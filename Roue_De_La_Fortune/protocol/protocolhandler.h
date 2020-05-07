@@ -1,6 +1,6 @@
 #ifndef PROTOCOLHANDLER_H
 #define PROTOCOLHANDLER_H
-#include <unordered_map>
+#include <map>
 
 class ProtocolHandler
 {
@@ -37,7 +37,7 @@ public:
     void callEventFromProtocol(std::string msg);
 
 private:
-    std::unordered_map<PROTOCOL_NAME, std::string> protocoles;
+    std::map<PROTOCOL_NAME, std::string> protocoles;
 };
 
 #endif // PROTOCOLHANDLER_H

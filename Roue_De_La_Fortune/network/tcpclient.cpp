@@ -74,7 +74,7 @@ void TCPClient::fn_threadReceiver()
             //if(std::string(buffer, bytesReceived) != "0")
                 //EventManager::getInstance()->triggerEvent(EventManager::TCHAT, "[INFO]-" + std::string(buffer, bytesReceived));
             bytesReceived = 0;
-            memset(buffer, 0, 255);
+            //memset(buffer, 0, 255);
         }
     }
 }

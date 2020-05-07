@@ -1,7 +1,7 @@
 #ifndef EVENTMANAGER_H
 #define EVENTMANAGER_H
 #include <functional>
-#include <unordered_map>
+#include <map>
 
 class EventManager
 {
@@ -44,7 +44,7 @@ private:
     EventManager();
     ~EventManager();
 
-    std::unordered_map<EVENT, std::function<void(void*)> > events;
+    std::map<EVENT, std::function<void(void*)> > events;
 
     static EventManager* instance;
 
