@@ -36,7 +36,7 @@ TCPServer::~TCPServer()
 void TCPServer::sendMessage(std::string msg, SOCKET& client)
 {
     ////std::cout << "Send: " << msg << std::endl;    
-    if (send(client, msg.c_str(), msg.length(), 0) < 0) {
+    if (send(client, msg.c_str(), msg.length(), MSG_NOSIGNAL) < 0) {
 
         auto it = std::find(m_socketClients.begin(), m_socketClients.end(), client);
         if (it != m_socketClients.end()) {
