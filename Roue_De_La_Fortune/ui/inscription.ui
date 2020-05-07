@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Inscription</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../ressources/Icons/logo.png</normaloff>../ressources/Icons/logo.png</iconset>
+  </property>
   <widget class="QPushButton" name="buttonInscription">
    <property name="geometry">
     <rect>
