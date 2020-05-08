@@ -25,7 +25,7 @@ Game::Game(std::string& name, int port)
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		this->server->sendMessage(protocol->getAskPseudoProtocol(), *reinterpret_cast<SOCKET*>(sock));
 
-		if(size == 2)
+		if(size == 3)
 		{
 			std::thread threadGame([&]()
 			{
