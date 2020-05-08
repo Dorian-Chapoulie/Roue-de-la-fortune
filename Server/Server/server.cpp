@@ -33,7 +33,7 @@ int main()
         mutex.lock();
         for (const auto& g : games) {
             if (!g->isJoinable()) continue;
-            std::string msg = "G-" + g->getInfos();            
+            std::string msg = "G-" + g->getInfos() + ';';            
             main_server.sendMessage(msg, *reinterpret_cast<SOCKET*>(sock));
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
@@ -42,29 +42,23 @@ int main()
 
 
     event_manager.addListener(EventManager::EVENT::PLAYER_CONNECT_OK, [&](void* sock) {
-        std::string msg = protocolHandler.getProcotol(ProtocolHandler::PLAYER_CONNECT_OK) + std::to_string(*reinterpret_cast<SOCKET*>(sock));        
+        std::string msg = protocolHandler.getProcotol(ProtocolHandler::PLAYER_CONNECT_OK) + std::to_string(*reinterpret_cast<SOCKET*>(sock)) + ';';        
         main_server.sendMessage(msg, *reinterpret_cast<SOCKET*>(sock));
     });
 
     event_manager.addListener(EventManager::EVENT::PLAYER_CONNECT_FAIL, [&](void* sock) {
-        main_server.sendMessage(protocolHandler.getProcotol(ProtocolHandler::PLAYER_CONNECT_FAIL), *reinterpret_cast<SOCKET*>(sock));
+        main_server.sendMessage(protocolHandler.getProcotol(ProtocolHandler::PLAYER_CONNECT_FAIL) + ';', *reinterpret_cast<SOCKET*>(sock));
     });
 
     event_manager.addListener(EventManager::EVENT::PLAYER_INSCRIPTION_OK, [&](void* sock) {
-        main_server.sendMessage(protocolHandler.getProcotol(ProtocolHandler::PLAYER_INSCRIPTION_OK), *reinterpret_cast<SOCKET*>(sock));
+        main_server.sendMessage(protocolHandler.getProcotol(ProtocolHandler::PLAYER_INSCRIPTION_OK) + ';', *reinterpret_cast<SOCKET*>(sock));
     });
 
     event_manager.addListener(EventManager::EVENT::PLAYER_INSCRIPTION_FAIL, [&](void* sock) {
-        main_server.sendMessage(protocolHandler.getProcotol(ProtocolHandler::PLAYER_INSCRIPTION_FAIL), *reinterpret_cast<SOCKET*>(sock));
+        main_server.sendMessage(protocolHandler.getProcotol(ProtocolHandler::PLAYER_INSCRIPTION_FAIL) + ';', *reinterpret_cast<SOCKET*>(sock));
     });
 
-    event_manager.addListener(event_manager.PLAYER_DISCONNECTED, [&](void* socket) {
-       
-    });
-
-    //supprimer partie chez le client
-
-    while(true) { //replace by join
+    while(true) { 
         mutex.lock();
         if (games.size() > 0) {
             
