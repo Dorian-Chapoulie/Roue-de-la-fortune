@@ -5,6 +5,8 @@
 #include <string>
 #include "graphics/wheel.h"
 
+//Wheel factory that will give a certain instance of wheel
+//There is 1 different wheel for every round
 class WheelFactory
 {
 

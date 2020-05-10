@@ -8,7 +8,7 @@ WheelFactory* WheelFactory::getInstance() {
         instance = new WheelFactory();
     return instance;
 }
-
+//we create an unique list for every wheel
 WheelFactory::WheelFactory()
 {
     wheelOneCases.reserve(24);

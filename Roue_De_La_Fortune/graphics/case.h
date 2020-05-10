@@ -4,7 +4,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsTextItem>
 
-
+//The case that will contain a letter or not(padding)
 class Case
 {
 public:

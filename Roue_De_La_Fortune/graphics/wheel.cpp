@@ -6,8 +6,6 @@ Wheel::Wheel(std::string imagePath, int nombreCase, std::vector<std::string> cas
     tailleCase = 360 / nombreCase;
     this->cases = cases;
 
-    //rotationStep = nombreCase / 2;//???
-
     pixmap = new QPixmap(QString::fromStdString(imagePath));
     item = new QGraphicsPixmapItem(pixmap->scaled(SCALE_WIDTH, SCALE_HEIGHT));
     item->setTransformationMode(Qt::TransformationMode::SmoothTransformation);
@@ -15,9 +13,12 @@ Wheel::Wheel(std::string imagePath, int nombreCase, std::vector<std::string> cas
 
 Wheel::~Wheel() {
     delete pixmap;
-    //delete item;
 }
 
+//return the case from the wheel rotation
+//The wheel is 360°, there is X cases
+//to get the case: angle / (360 / nbCases)
+//the '+7' is because the wheel angle 0 is at the middle of a case
 std::string Wheel::getCaseFromRotation()
 {    
     int pos = (float)(rotationStep + 7) / (float)tailleCase;

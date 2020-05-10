@@ -8,7 +8,7 @@ SoundBank* SoundBank::getInstance() {
         instance = new SoundBank();
     return instance;
 }
-
+//inti some sounds
 SoundBank::SoundBank()
 {
     const std::string basePath = Config::getInstance()->baseRessourcesPath
@@ -34,7 +34,8 @@ SoundBank::~SoundBank() {
     delete instance;
     instance = nullptr;
 }
-
+//Play the sound
+//The spin sound is special, because we need to monitor it.
 void SoundBank::playSound(SoundBank::SOUND sound) {
     if(sound == SPIN) {
         spin->play();

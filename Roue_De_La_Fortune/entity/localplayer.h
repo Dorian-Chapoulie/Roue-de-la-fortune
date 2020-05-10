@@ -3,6 +3,7 @@
 #include "entity/player.h"
 #include "network/tcpclient.h"
 
+//Singleto
 class LocalPlayer : public Player, public TCPClient {
 
 public:

@@ -5,16 +5,18 @@
 #include <QPixmap>
 #include <QGraphicsTextItem>
 
+//The wheel
 class Wheel
 {
 public:
     Wheel(std::string imagePath, int nombreCase, std::vector<std::string> cases);
     ~Wheel();
 
+    //Returns the value of the case from the current wheel angle
     std::string getCaseFromRotation();
-
+    //This is the picture of the wheel
     QGraphicsPixmapItem* getItem();
-
+    //We can rotate the wheel
     void rotate(int value);
     void setPosition(int x, int y);
     int getRotationStep();

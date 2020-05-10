@@ -4,6 +4,7 @@
 #include <QtMultimedia/QSound>
 #include <map>
 
+//Soundbank that will allow to play sounds
 class SoundBank
 {
 

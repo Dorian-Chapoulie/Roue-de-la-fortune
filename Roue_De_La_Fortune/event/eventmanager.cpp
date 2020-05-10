@@ -18,7 +18,7 @@ EventManager::~EventManager()
 {    
 }
 
-
+//We register an event, we link a function to an event name
 void EventManager::addListener(EventManager::EVENT eventName, std::function<void(void*)>&& handler)
 {        
     auto it = events.find(eventName);
@@ -28,7 +28,7 @@ void EventManager::addListener(EventManager::EVENT eventName, std::function<void
         events.insert(std::make_pair(eventName, handler));
     }
 }
-
+//we trigger it
 void EventManager::triggerEvent(EventManager::EVENT eventName)
 {
     if(events[eventName] != nullptr)

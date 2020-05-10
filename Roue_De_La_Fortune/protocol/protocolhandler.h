@@ -5,7 +5,7 @@
 class ProtocolHandler
 {
 public:
-
+    //Every protocol that we can send to the server
     enum PROTOCOL_NAME {
         CONNEXION,
         INSCRIPTION,

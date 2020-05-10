@@ -8,6 +8,8 @@ ProtocolHandler::ProtocolHandler()
     protocoles.insert(std::make_pair(PROTOCOL_NAME::GET_ALL_GAMES, "G"));
 }
 
+//We cut the string with a delimiter ';'
+//then we process it to get the data and trigger the corresponding Event
 void ProtocolHandler::callEventFromProtocol(std::string msg)
 {
     EventManager* eventManager = EventManager::getInstance();

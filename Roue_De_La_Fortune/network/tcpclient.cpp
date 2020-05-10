@@ -96,7 +96,6 @@ bool TCPClient::init()
     if(m_socket == INVALID_SOCKET){
         perror("socket()");
         exit(errno);
-        //TODO errrur
         return false;
     }
 
@@ -107,8 +106,6 @@ bool TCPClient::init()
     hostinfo = gethostbyname(m_ip.c_str());
     if (hostinfo == NULL){
         fprintf (stderr, "Unknown host %s.\n", m_ip.c_str());
-        //exit(EXIT_FAILURE);
-        //TODO erreur
         return false;
     }
 
@@ -122,6 +119,7 @@ bool TCPClient::init()
     }else {        
         isConnected = true;
         listen = true;
+        //CONNEXION OK: we create a thread that will listen the server
         m_threadReceiver = new std::thread(&TCPClient::fn_threadReceiver, this);
         m_threadReceiver->detach();
     }

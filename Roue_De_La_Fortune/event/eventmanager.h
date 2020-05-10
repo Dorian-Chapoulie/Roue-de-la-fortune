@@ -8,7 +8,7 @@ class EventManager
 {
 
 public:
-
+    //Every events
     enum EVENT {        
         CONNEXION_SUCCESS,
         CONNEXION_FAILURE,
@@ -36,9 +36,13 @@ public:
 
     static EventManager* getInstance();
 
+    //Add a function to an event
     void addListener(EVENT eventName, std::function<void(void*)>&& handler);
+    //We can trigger an event with or withour a parameter
     void triggerEvent(EVENT eventName);
     void triggerEvent(EVENT eventName, std::string msg);
+    //We can unsubribe an event
+    //If an unsubscribed event is triggered, nothing happens
     void unSubsribeEvent(EVENT eventName);
 
 private:

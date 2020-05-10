@@ -58,6 +58,7 @@ void Connection::connection_error(QString msg)
     msgBox.exec();
 }
 
+//Connexion ok: we close this, and show the server navigator
 void Connection::connection_success()
 {
     ServerNavigator* serverNavigator = new ServerNavigator();
