@@ -107,7 +107,7 @@ bool TCPClient::init()
     hostinfo = gethostbyname(m_ip.c_str());
     if (hostinfo == NULL){
         fprintf (stderr, "Unknown host %s.\n", m_ip.c_str());
-        exit(EXIT_FAILURE);
+        //exit(EXIT_FAILURE);
         //TODO erreur
         return false;
     }

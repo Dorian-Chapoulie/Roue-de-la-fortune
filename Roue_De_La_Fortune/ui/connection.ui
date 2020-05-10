@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>230</width>
-    <height>191</height>
+    <width>258</width>
+    <height>182</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,7 +21,7 @@
    <widget class="QPushButton" name="connectionButton">
     <property name="geometry">
      <rect>
-      <x>140</x>
+      <x>170</x>
       <y>120</y>
       <width>81</width>
       <height>31</height>
@@ -62,7 +62,7 @@
      <rect>
       <x>100</x>
       <y>30</y>
-      <width>113</width>
+      <width>141</width>
       <height>20</height>
      </rect>
     </property>
@@ -75,7 +75,7 @@
      <rect>
       <x>100</x>
       <y>60</y>
-      <width>113</width>
+      <width>141</width>
       <height>21</height>
      </rect>
     </property>
@@ -97,6 +97,32 @@
     </property>
     <property name="text">
      <string>S'inscrire</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>90</y>
+      <width>81</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>IP du serveur</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineIp">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>90</y>
+      <width>141</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>vps-2fb45f3e.vps.ovh.net</string>
     </property>
    </widget>
   </widget>

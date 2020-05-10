@@ -5,6 +5,7 @@
 #include "event/eventmanager.h"
 #include "ui/servernavigator.h"
 #include "ui/inscription.h"
+#include "config/config.h"
 
 Connection::Connection(QWidget *parent)
     : QMainWindow(parent)
@@ -40,6 +41,7 @@ Connection::~Connection()
 
 void Connection::on_connectionButton_clicked()
 {
+    Config::getInstance()->baseServerIP = ui->lineIp->text().toStdString();
     LocalPlayer::setTempName(ui->lineEmail->text().toStdString());    
     LocalPlayer::getInstance()->setPassword(ui->linePsw->text().toStdString());
     LocalPlayer::getInstance()->login();

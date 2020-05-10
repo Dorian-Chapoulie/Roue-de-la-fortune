@@ -8,7 +8,7 @@ public:
 
     static Config* getInstance();
     const unsigned int baseServerPort = 25565;
-    const std::string baseServerIP = "51.83.70.16";
+    std::string baseServerIP = "51.83.70.16";
     const std::string baseRessourcesPath = "ressources";
     const std::string imageFolder = "images";
     const std::string soundFolder = "sounds";
