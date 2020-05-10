@@ -13,7 +13,7 @@ typedef int SOCKET;
 class ProtocolHandler
 {
 public:
-
+    //Every protocol that we will send to the client
     enum PROTOCOL_NAME {
         PLAYER_CONNECT_OK,
         PLAYER_CONNECT_FAIL,

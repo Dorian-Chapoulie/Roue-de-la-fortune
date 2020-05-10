@@ -17,11 +17,15 @@ int main()
     TCPServer main_server(&protocolHandler);
     int lastUsedPort = Config::getInstance()->basePort;
 	
-
+    //We link the lambda with the event 'CREATE_GAME'
+	//Everytime the event will be triggered, this function will be executed
     event_manager.addListener(EventManager::EVENT::CREATE_GAME, [&](void* msg) {
         mutex.lock();
+    	//we create a new game with a new port
+    	//TODO: refactor lastUsedPort++ +1 => ++lastUsedPort
         games.push_back(new Game(*static_cast<std::string*>(msg), lastUsedPort++ + 1));
-        
+
+    	//We notify every clients that a new game is created
         for (SOCKET s : main_server.getClients()) {
             main_server.sendMessage("G-" + games.back()->getInfos() + ';', s);
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -29,6 +33,7 @@ int main()
         mutex.unlock();
     });
 
+    //The client wants the list of disponible games. So we obey
     event_manager.addListener(EventManager::EVENT::GET_ALL_GAMES, [&](void* sock) {
         mutex.lock();
         for (const auto& g : games) {
@@ -40,12 +45,13 @@ int main()
         mutex.unlock();
     });
 
-
+    //The client's connection is fine, so we respond as written in our protocol sheet	
     event_manager.addListener(EventManager::EVENT::PLAYER_CONNECT_OK, [&](void* sock) {
         std::string msg = protocolHandler.getProcotol(ProtocolHandler::PLAYER_CONNECT_OK) + std::to_string(*reinterpret_cast<SOCKET*>(sock)) + ';';        
         main_server.sendMessage(msg, *reinterpret_cast<SOCKET*>(sock));
     });
 
+	//We notify that the client's connection have failed
     event_manager.addListener(EventManager::EVENT::PLAYER_CONNECT_FAIL, [&](void* sock) {
         main_server.sendMessage(protocolHandler.getProcotol(ProtocolHandler::PLAYER_CONNECT_FAIL) + ';', *reinterpret_cast<SOCKET*>(sock));
     });
@@ -58,6 +64,7 @@ int main()
         main_server.sendMessage(protocolHandler.getProcotol(ProtocolHandler::PLAYER_INSCRIPTION_FAIL) + ';', *reinterpret_cast<SOCKET*>(sock));
     });
 
+	//If a game is finished, we delete it
     while(true) { 
         mutex.lock();
         if (games.size() > 0) {

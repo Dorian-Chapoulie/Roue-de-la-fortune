@@ -17,11 +17,15 @@ public:
 
 	void setName(std::string& name);
 	void addMoney(int ammount);
+	
+	//put the money of the player in his bank, then set his money to 0
 	void setMoneyInBank();
+	
 	void clearMoney();
 	int getMoney();
 	int getBank();
 
+	//Override boolean operator
 	bool operator==(Player p);
 	
 private:

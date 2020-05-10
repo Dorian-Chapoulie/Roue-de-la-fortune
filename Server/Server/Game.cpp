@@ -12,19 +12,22 @@ Game::Game(std::string& name, int port)
 	this->protocol = new ProtocolHandler(&eventManager);		
 
 	server = new TCPServer(Config::getInstance()->baseIp, port, protocol);
-	////std::cout << "New server '" << name << "'\t " << Config::getInstance()->baseIp << ":" << port << std::endl;
 
+	//We set the events
 	eventManager.addListener(EventManager::EVENT::PLAYER_CONNECT_OK, [&](void* sock) {
+		//We add a new player
 		mutex.lock();
 		this->players.push_back(new Player(*reinterpret_cast<SOCKET*>(sock)));
 		int size = players.size();
 		mutex.unlock();
-		
+
+		//We notify that the connexion is ok
 		std::string msg = protocol->getConnectionOKProtocol(std::to_string(*reinterpret_cast<SOCKET*>(sock)));
 		this->server->sendMessage(msg, *reinterpret_cast<SOCKET*>(sock));
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		this->server->sendMessage(protocol->getAskPseudoProtocol(), *reinterpret_cast<SOCKET*>(sock));
 
+		//if the player number is 3, we playyyyy
 		if(size == 3)
 		{
 			std::thread threadGame([&]()
@@ -36,6 +39,7 @@ Game::Game(std::string& name, int port)
 		}
 	});
 
+	//Broadcast the message to all players
 	eventManager.addListener(EventManager::EVENT::TCHAT, [&](void* data) {
 		std::string msg = *reinterpret_cast<std::string*>(data);
 		mutex.lock();
@@ -47,6 +51,7 @@ Game::Game(std::string& name, int port)
 		mutex.unlock();
 	});
 
+	//When a player is connected to the server, we ask for his pseudo
 	eventManager.addListener(EventManager::EVENT::ASK_PSEUDO, [&](void* pseudoAndSocket) {
 		std::string msg = *reinterpret_cast<std::string*>(pseudoAndSocket);
 		std::string pseudo = msg.substr(0, msg.find('-'));
@@ -72,6 +77,7 @@ Game::Game(std::string& name, int port)
 		
 	});
 
+	//We handle a disconnection
 	eventManager.addListener(EventManager::EVENT::PLAYER_DISCONNECTED, [&](void* socket) {
 		mutex.lock();
 		auto it = std::find_if(players.begin(), players.end(), [&](Player* p) {
@@ -79,7 +85,7 @@ Game::Game(std::string& name, int port)
 		});
 
 		if (it != players.end()) {
-			////std::cout << reinterpret_cast<Player*>(*it)->getName() << " s'est deconnecte" << std::endl;
+			//std::cout << reinterpret_cast<Player*>(*it)->getName() << " s'est deconnecte" << std::endl;
 			players.erase(it);
 		}
 
@@ -90,7 +96,7 @@ Game::Game(std::string& name, int port)
 		mutex.unlock();
 	});
 	
-	
+	//We ping player severy seconds, to check is a player is disconnected or not
 	threadPingPlayers = new std::thread([&]() { 
 		while (pingPlayers){ //TODO bool is partie finished
 			mutex.lock();
@@ -115,7 +121,6 @@ Game::~Game() {
 		std::this_thread::sleep_for(std::chrono::milliseconds(200));
 	}
 	while (!isThreadGameFinished && isGameStarted) {
-		////std::cout << "waiting for game to finish" << std::endl;
 		std::this_thread::sleep_for(std::chrono::milliseconds(200));
 	}
 	delete server;
@@ -154,6 +159,7 @@ ProtocolHandler* Game::getProtocolHandler()
 	return protocol;
 }
 
+//Return a player pointer from an id
 Player* Game::getPlayerFromId(int id)
 {
 	mutex.lock();
@@ -174,8 +180,10 @@ Player* Game::getPlayerFromId(int id)
 	
 }
 
+//We get the nex player
 int Game::getNextPlayer()
 {
+	//If the current player is the last of our list, the next player will be the first of our list
 	mutex.lock();
 	if(currentPlayer == players.back()->getId())
 	{
@@ -185,6 +193,8 @@ int Game::getNextPlayer()
 
 	bool setNewPlayer = false;
 	int newPlayer = -1;
+	//If the current player is not the last of our list
+	//The next player will be the player just after the current player
 	for(Player* p : players)
 	{
 		if(p->getId() == currentPlayer)
@@ -199,7 +209,7 @@ int Game::getNextPlayer()
 			break;
 		}
 	}
-
+	//If we didnt found the next player, we return the first one
 	if(newPlayer == -1)
 	{
 		newPlayer = players.at(0)->getId();
@@ -240,11 +250,12 @@ void Game::startGame()
 	mutex.lock();
 	GameManager* gameManager = new GameManager(&mutex, &players, protocol, &eventManager, this);	
 	mutex.unlock();
-
+	//In a game we have 4 rounds, and the last if for the winner
 	for (int i = 1; i < 5; i++) {
-		int winnerId = gameManager->quickRiddle();
-		handleWinner(winnerId, gameManager->getCurrentSentence());
+		int winnerId = gameManager->quickRiddle(); //quick riddle
+		handleWinner(winnerId, gameManager->getCurrentSentence()); //we handle the winner
 
+		//If there is 1 or less player we stop
 		mutex.lock();
 		if(players.size() <= 1)
 		{
@@ -253,15 +264,19 @@ void Game::startGame()
 			break;
 		}
 		mutex.unlock();
-		
+
+		//3s pause
 		std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
+		//Sentence riddle
 		winnerId = gameManager->sentenceRiddle(currentPlayer);
+		//we handle the winner of the riddle
 		handleWinner(winnerId, gameManager->getCurrentSentence());
+		//we handle a new round
 		hanldeNewRound(i);		
 
+		//after a new round, we save the players money
 		mutex.lock();
-		
 		for (Player* p : players)
 		{
 			p->setMoneyInBank();
@@ -282,7 +297,7 @@ void Game::startGame()
 	mutex.lock();
 	size = players.size();
 	mutex.unlock();
-
+	//last spin for the winner
 	if(size >= 1)
 		gameManager->lastSpin(currentPlayer);
 	
@@ -293,7 +308,8 @@ void Game::startGame()
 		mutex.unlock();
 		return;
 	}
-	
+
+	//handle the money
 	Player* winner = players.at(0);
 	int temp = players.at(0)->getBank();
 	for(Player* p : players)
@@ -306,6 +322,7 @@ void Game::startGame()
 	}
 	mutex.unlock();
 
+	//Notify the winner
 	std::string toSend = "Le joueur: <font color=\"Red\"><b>" + winner->getName() + "</b><font color=\"Orange\"> a gagne !";
 	mutex.lock();
 	for (Player* p : players)
@@ -318,7 +335,7 @@ void Game::startGame()
 
 	
 	std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-
+	//Notify if the player p has won or loosed
 	mutex.lock();
 	for (Player* p : players)
 	{
@@ -326,15 +343,14 @@ void Game::startGame()
 		
 		if (p == winner) {
 			server->sendMessage(protocol->getVictoryProtocol(), socket);
-			//server->disconnectClient(players.at(0)->getId());
 		}else {
-			server->sendMessage(protocol->getLooseProtocol(), socket);
-			//server->disconnectClient(players.at(0)->getId());								
+			server->sendMessage(protocol->getLooseProtocol(), socket);							
 		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 	mutex.unlock();
 
+	//the game is done and ready to be deleted
 	isGameDone = true;
 }
 
@@ -343,7 +359,6 @@ void Game::handleWinner(int winnerId, std::string sentence)
 	mutex.lock();
 	int size = players.size();
 	
-	
 	if (winnerId != -1 && size > 0) {
 
 		auto it = std::find_if(players.begin(), players.end(), [&](Player* p)
@@ -351,7 +366,7 @@ void Game::handleWinner(int winnerId, std::string sentence)
 				return p->getId() == winnerId;
 			});
 		currentPlayer = winnerId;
-
+		//if the winner is correct
 		Player* p = nullptr;
 		if(it == players.end())
 		{
@@ -362,7 +377,7 @@ void Game::handleWinner(int winnerId, std::string sentence)
 			p = reinterpret_cast<Player*>(*it);
 		}
 
-		
+		//we notify the clients
 		for (Player* s : players)
 		{
 			SOCKET tmp = s->getId();
@@ -386,7 +401,7 @@ void Game::handleWinner(int winnerId, std::string sentence)
 			currentPlayer = -1;
 		}
 
-		
+		//no one has won
 		for (Player* s : players)
 		{
 			SOCKET tmp = s->getId();
@@ -402,6 +417,7 @@ void Game::handleWinner(int winnerId, std::string sentence)
 
 void Game::hanldeNewRound(int roundNumber)
 {
+	//we notify the new round
 	mutex.lock();
 	for (Player* s : players)
 	{
@@ -428,7 +444,6 @@ int Game::getLooser()
 	int id = players.at(0)->getId();
 	for(Player* p : players)
 	{
-		////std::cout << p->getName() << ": " << p->getMoney() << std::endl;
 		if(p->getMoney() < temp)
 		{
 			id = p->getId();

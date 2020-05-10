@@ -11,14 +11,18 @@ public:
 		EventManager* eventManager,
 		Game* game);	
 
+	//Enigme rapide
 	int quickRiddle();
+	//Enigme normale
 	int sentenceRiddle(int& currentPlayer);
+	//Last spin for the winner
 	void lastSpin(int& currentPlayer);
+	//Set the wheel value
 	void handleWheelValue(std::string value);
 
 	bool isVoyelle(char c) const;
 	void stopGame();
-	
+	// returns the mystery sentence
 	std::string getCurrentSentence();
 private:
 

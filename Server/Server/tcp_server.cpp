@@ -29,6 +29,7 @@ TCPServer::~TCPServer()
     //shutdown(m_socketFd, 0);
     //shutdown(m_socketFd, 1);
 
+	//wait for running thread to terminate
     while (threadsRunning > 0) {
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
@@ -39,20 +40,15 @@ TCPServer::~TCPServer()
 
 void TCPServer::sendMessage(std::string msg, SOCKET& client)
 {
-    ////std::cout << "Send: " << msg << std::endl;    
+  
     if (send(client, msg.c_str(), msg.length(), MSG_NOSIGNAL) < 0) {
 
         auto it = std::find(m_socketClients.begin(), m_socketClients.end(), client);
+    	//if the client is disconnected
         if (it != m_socketClients.end()) {
             m_socketClients.erase(it);
-            //std::cout << m_port << ": client disconnected: " << client <<  std::endl;
             protocolHandler->callEventFromProtocol("D-" + std::to_string(client), &client);
         }
-        else {
-            //std::cout << "Erreur lors de la supression du client" << std::endl;
-            //m_socketClients.clear();
-        }
-        //TODO erreur
     }
 }
 
@@ -90,6 +86,8 @@ std::vector<SOCKET> TCPServer::getClients()
     return m_socketClients;
 }
 
+//function that will be running in a separated thread
+//1 thread / client
 void TCPServer::fn_threadReceiver(SOCKET* client)
 {
     char buffer[255];
@@ -111,9 +109,10 @@ void TCPServer::fn_threadReceiver(SOCKET* client)
     threadsRunning--;
 }
 
+//thread for accepting client
 void TCPServer::fn_threadAcceptNewClient()
 {
-    SOCKADDR clientSockAddr; // list ?
+    SOCKADDR clientSockAddr;
     int size = sizeof(clientSockAddr);
     while (waitForPlayers && doListen) {     
         SOCKET tempSocket = 0;
@@ -131,7 +130,7 @@ void TCPServer::fn_threadAcceptNewClient()
             exit(0);
         }
         else if (static_cast<unsigned int>(tempSocket) != -1) {
-            //std::cout << "start receiver: " << m_port << std::endl;
+            //if the client is valid, we store the socket and create a new thread that will listen on this socket
             m_socketClients.push_back(tempSocket);
             m_threadReceiver = new std::thread(&TCPServer::fn_threadReceiver, this, &m_socketClients.back());
             m_threadReceiver->detach();     

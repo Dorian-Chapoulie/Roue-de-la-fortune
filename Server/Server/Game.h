@@ -8,6 +8,8 @@
 class Game {
 
 public:
+	//We need a name and a port
+	//Every game runs with a dedicated server
 	Game(std::string& name, int port);
 	~Game();
 

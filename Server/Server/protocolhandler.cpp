@@ -5,7 +5,8 @@
 #include <thread>
 
 ProtocolHandler::ProtocolHandler(EventManager* eventManager)
-{ 
+{
+	//Init some protocoles
     protocoles.insert(std::make_pair(PROTOCOL_NAME::PLAYER_CONNECT_OK, "C-1-"));
     protocoles.insert(std::make_pair(PROTOCOL_NAME::PLAYER_CONNECT_FAIL, "C-0"));
     protocoles.insert(std::make_pair(PROTOCOL_NAME::PLAYER_INSCRIPTION_OK, "I-1"));
@@ -30,7 +31,9 @@ ProtocolHandler::ProtocolHandler(EventManager* eventManager)
     this->eventManager = eventManager;
 }
 
-
+//This function will cut the string with a delimiter (';')
+//and will find what protocol its correspond to
+//The msg is basically the string sent from a client
 void ProtocolHandler::callEventFromProtocol(std::string msg, SOCKET* socket)
 {
     if (msg.find(';') != std::string::npos)

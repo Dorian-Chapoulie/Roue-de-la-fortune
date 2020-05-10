@@ -1,5 +1,8 @@
 #pragma once
 #include <string>
+/*
+ * Class that contains basic informations
+ */
 class Config {
 
 public:
