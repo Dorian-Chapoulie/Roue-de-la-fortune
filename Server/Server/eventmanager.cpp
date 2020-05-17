@@ -9,7 +9,7 @@ EventManager::~EventManager()
 {    
 }
 
-//We had the L-Value function 'handler' to our map, with 'eventName' as key
+//We add the L-Value function 'handler' to our map, with 'eventName' as key
 void EventManager::addListener(EventManager::EVENT eventName, std::function<void(void*)>&& handler)
 {
 	//If the event is already in our map, whe reafect his value
